@@ -307,7 +307,11 @@ pre:first-of-type {
   font-weight: 400;
 }
 
+/**首字母加粗
 .results blockquote:first-letter,
+ */
+
+
 .results cite {
   font-family: Didot, "Vidaloka", serif;
   font-weight: bold;
