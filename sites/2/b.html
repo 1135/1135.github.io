@@ -1,0 +1,10 @@
+<h2>console.log</h2>
+<body>
+<script>
+    // 注册 message 事件用来接收消息
+    window.onmessage = function(e) {
+        e = e || event; // 获取事件对象
+        console.log(e.data);
+    }
+</script>
+</body>
