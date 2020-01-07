@@ -1,0 +1,28 @@
+<body>
+    <p id="who"></p>
+    <script>
+        document.getElementById("who").innerText = "My document.location.href is " + document.location.href;
+    </script>
+
+    <hr>
+
+    <script>
+        function sendmsg(the_name_of_id, msg_content) {
+            var iframe = document.getElementById(the_name_of_id);
+            var win = iframe.contentWindow; // 某个iframe 的 window 对象
+            win.postMessage(msg_content, '*'); // 某个iframe 的 window 对象 向 所有域发送消息
+        }
+    </script>
+
+
+    <!-- 同域 -->
+    <h2>同域 iframe</h2>
+    <iframe src="https://1135.github.io/sites/2/b.html" id="myIframe1" onload="sendmsg('myIframe1','hello1111<img src onerror=alert(1)>') " width="50%" height="40%"></iframe>
+
+    <hr>
+
+    <!-- 跨域 -->
+    <h2>跨域 iframe</h2>
+    <iframe src="https://output.jsbin.com/halefoyaga" id="myIframe2" onload="sendmsg('myIframe2','1111<img src onerror=alert(2)>')" width="50%" height="40%"></iframe>
+
+</body>
