@@ -1,19 +1,27 @@
 <body>
+    <p id="who"></p>
+    <hr>
     <p id="received-message"></p>
-    <script>
-function displayMessage (evt) {
-	var message;
-	message = "I got : " + evt.data + "\n" + "from:" + evt.origin + "\n-----\n";
-	console.log(message); // 通过 data 属性得到发送来的消息
-	document.getElementById("received-message").innerHTML = message;
-}
 
-    if (window.addEventListener) {
-    // For standards-compliant web browsers
-	window.addEventListener("message", displayMessage, false);
-}
-else {
-	window.attachEvent("onmessage", displayMessage);
-}
+    <script>
+        document.getElementById("who").innerText = "My document.location.href is " + document.location.href;
+
+        function displayMessage(evt) {
+            var message;
+            message =
+                "I got a message:" +
+                "<br><strong>" + evt.data + "</strong><br>" +
+                "from:" +
+                "<br><strong>" + evt.origin + "</strong><br>" +
+                "<hr>";
+            document.getElementById("received-message").innerHTML = message;
+        }
+
+        if (window.addEventListener) {
+            // For standards-compliant web browsers
+            window.addEventListener("message", displayMessage, false);
+        } else {
+            window.attachEvent("onmessage", displayMessage);
+        }
     </script>
 </body>
