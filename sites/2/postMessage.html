@@ -1,0 +1,63 @@
+<body>
+    <p id="who"></p>
+    <script>
+        document.getElementById("who").innerText = "My document.location.href is " + document.location.href;
+    </script>
+
+
+    <form action="javascript:;" id="form1">
+  <label>发送信息到iframe1: <input id="input1" type="text" placeholder="message" value="111<img src onerror=confirm(document.location.href)>"></label>
+  <button type="submit">Submit</button>
+</form>
+
+
+    <form action="javascript:;" id="form2">
+  <label>发送信息到iframe2: <input id="input2" type="text" placeholder="message" value="222<img src onerror=confirm(document.location.href)>"></label>
+  <button type="submit">Submit</button>
+</form>
+
+
+    <script>
+function func1(event) {
+  sendmsg('myIframe1',document.getElementById('input1').value);
+  event.preventDefault();
+}
+
+const form1 = document.getElementById('form1');
+form1.addEventListener('submit', func1);
+
+
+function func2(event) {
+  sendmsg('myIframe2',document.getElementById('input2').value);
+  event.preventDefault();
+}
+
+const form2 = document.getElementById('form2');
+form2.addEventListener('submit', func2);
+
+    </script>
+
+    <p>注意以下2个iframe的document.location.href的值</p>
+
+    <hr>
+
+    <script>
+        function sendmsg(the_name_of_id, msg_content) {
+            var iframe = document.getElementById(the_name_of_id);
+            var win = iframe.contentWindow; // 某个iframe 的 window 对象
+            win.postMessage(msg_content, '*'); // 某个iframe 的 window 对象 向 所有域发送消息
+        }
+    </script>
+
+
+    <!-- 同域 -->
+    <h2>同域 iframe</h2>
+    <iframe src="https://1135.github.io/sites/2/b.html" id="myIframe1" width="50%" height="30%"></iframe>
+
+    <hr>
+
+    <!-- 跨域 -->
+    <h2>跨域 iframe</h2>
+    <iframe src="https://output.jsbin.com/yoramexexu" id="myIframe2" width="50%" height="30%"></iframe>
+
+</body>
