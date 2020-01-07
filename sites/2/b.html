@@ -4,7 +4,27 @@
     <p id="received-message"></p>
 
     <script>
-        document.getElementById("who").innerText = "My document.location.href is " + document.location.href;
+        /* 
+        //原写法
+        document.getElementById("who").innerText = 
+        "the iframe:" + "\n" +
+        "document.location.href is " + document.location.href + "\n" + 
+        "window.parent.location.href is " + window.parent.document.location.href;
+        */
+
+         //因为window.parent.location.href这条语句 可能因为无法跨域的原因 而抛出异常 所以写try-catch-finally
+        try {
+            var tempstr;
+            tempstr = "window.parent.location.href is" + window.parent.document.location.href;
+        } catch (e) {
+            tempstr = "window.parent.location.href is null";
+            console.log('捕获到异常：', e);
+        } finally {
+            document.getElementById("who").innerText =
+                "the iframe:" + "\n" +
+                "document.location.href is " + document.location.href + "\n" + tempstr;
+        }
+
 
         function displayMessage(evt) {
             var message;
