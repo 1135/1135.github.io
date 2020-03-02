@@ -1,0 +1,17 @@
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+
+<title>Read the clipboard text content</title>
+
+<body>
+<h1 id='textid'>每3秒读取一次剪切板</h1>
+<script type="text/javascript">
+	var int=self.setInterval("get_clip_content()",3000);
+	function get_clip_content()
+  {
+	outputElem = document.querySelectorAll("#textid")[0];
+	navigator.clipboard.readText().then(text => outputElem.innerText = text);
+  }
+</script>
+</body>
+</html>
