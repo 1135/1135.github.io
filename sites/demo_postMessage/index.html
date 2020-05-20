@@ -7,7 +7,7 @@
 
     <form action="javascript:;" id="form1">
         <label>发送信息到iframe1:
-            <input id="input1" type="text" placeholder="message" value="111<img src onerror=confirm(document.location.href)>">
+            <input id="input1" type="text" placeholder="message" style="width:350px" value="hello 1 <img src onerror=confirm(document.location.href)>">
         </label>
         <button type="submit">Submit</button>
     </form>
@@ -15,7 +15,7 @@
 
     <form action="javascript:;" id="form2">
         <label>发送信息到iframe2:
-            <input id="input2" type="text" placeholder="message" value="222<img src onerror=confirm(document.location.href)>">
+            <input id="input2" type="text" placeholder="message" style="width:350px" value="hello 2 <img src onerror=confirm(document.location.href)>">
         </label>
         <button type="submit">Submit</button>
     </form>
@@ -55,12 +55,12 @@
 
     <!-- 同域 -->
     <h2>同域 iframe</h2>
-    <iframe src="https://1135.github.io/sites/2/b.html" id="myIframe1" width="50%" height="30%"></iframe>
+    <iframe src="https://1135.github.io/sites/demo_postMessage/same_domain.html" id="myIframe1" width="60%" height="30%"></iframe>
 
     <hr>
 
     <!-- 跨域 -->
     <h2>跨域 iframe</h2>
-    <iframe src="https://output.jsbin.com/yoramexexu" id="myIframe2" width="50%" height="30%"></iframe>
+    <iframe src="https://output.jsbin.com/yoramexexu" id="myIframe2" width="60%" height="30%"></iframe>
 
 </body>
