@@ -12,7 +12,7 @@
         "window.parent.location.href is " + window.parent.document.location.href;
         */
 
-         //因为window.parent.location.href这条语句 可能因为无法跨域的原因 而抛出异常 所以写try-catch-finally
+         //因为window.parent.location.href这条语句 可能因为"无法跨域"而抛出异常 所以写try-catch-finally
         try {
             var tempstr;
             tempstr = "window.parent.location.href is" + window.parent.document.location.href;
