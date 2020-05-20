@@ -1,16 +1,16 @@
-<!DOCTYPE html>
 <html>
 
 <head>
 
 <meta charset="utf-8" />
 <title>1135</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 <link href="./Holmes_files/css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="./Holmes_files/style.css">
-<style>::selection {}</style>
+
 <style type="text/css">
-body
+html
 {
     background-image: url("./images/bg.png");
 }
@@ -26,9 +26,16 @@ body
 <a href="https://1135.github.io/">1135.github.io</a>
 </h1>
 </header>
- 
- <!--跳转到-->
- <script language="javascript">
+
+
+<a id="more"></a>
+<!--
+<span class="separator" data-category="Demo"></span>
+-->
+
+
+<!--跳转 -->
+<script language="javascript">
 var type=navigator.appName
 if (type=="Netscape"){
 var lang = navigator.language
@@ -37,49 +44,29 @@ else{
 var lang = navigator.userLanguage
 }
 var lang = lang.substr(0,2)
-if (lang == "en"){
+if (lang == "zh"){ //en
 window.location.href="https://github.com/1135/notes/blob/master/README.md"
 }
-else if (lang == "zh"){
+else if (lang == "en"){
 window.location.href="https://github.com/1135/notes/blob/master/README.md"
 }
 else{
 window.location.href="https://github.com/1135/notes/blob/master/README.md"
 }
 </script>
-  <!---->
 
-
-<!--
-<span class="separator" data-category="Search"></span>
-
-
-<a href="https://github.com/Haroenv/holmes/">search with holmes</a>
-
-<a href="https://haroen.me/holmes/doc/holmes.html" id="more">more options</a>
-
-<a href="https://haroen.me/holmes/doc/holmes.html">full documentation</a>
--->
 
 <div class="search">
 <input type="search" placeholder="search here" required="">
 <div class="controls">
-<!--
 <button class="visible" data-tooltip="Use of the .visible class"><span class="icon">visible</span></button>
 <button class="mark" data-tooltip="Mark / highlight mode"><span class="icon">highlight</span></button>
--->
-<button class="visible" data-tooltip="show all results"><span class="icon">visible</span></button>
-<button class="mark" data-tooltip="highlight keywords"><span class="icon">highlight</span></button>
 </div>
 </div>
 <div class="results">
 <blockquote class="visible">
 ‘My name is Sherlock Holmes. It is my business to know what other people don’t know.’
 <cite> — The Adventure of the Blue Carbuncle</cite>
-</blockquote>
-<blockquote class="visible">
-‘I am the last and highest court of appeal in detection.’
-<cite> — The Sign of Four Chapter 1: “The Science of Deduction”</cite>
 </blockquote>
 <blockquote class="visible">
 ‘There is nothing like first-hand evidence.’
@@ -90,23 +77,13 @@ window.location.href="https://github.com/1135/notes/blob/master/README.md"
 <cite> — The Hound of the Baskervilles Chapter 3: “The Problem”</cite>
 </blockquote>
 <blockquote class="visible">
-‘You see, but you do not observe. The distinction is clear.’
-<cite> — A Scandal in Bohemia</cite>
+‘Eliminate all other factors, and the one which remains must be the truth.’
+<cite> — The Sign of Four Chapter 1: “The Science of Deduction”</cite>
 </blockquote>
-<blockquote class="visible">
-‘It is a capital mistake to theorize before one has data. Insensibly one begins to twist facts to suit theories, instead of theories to suit facts.’
-<cite> — A Scandal in Bohemia</cite>
-</blockquote>
-<blockquote class="visible">
-‘I never guess. It is a shocking habit,—destructive to the logical faculty.’
-<cite> — The Sign of Four Chapter 2: “The Science of Deduction”</cite>
-</blockquote>
-<blockquote class="visible">
-‘You know my method. It is founded upon the observation of trifles.’
-<cite> — The Bascombe Valley Mystery</cite>
-</blockquote>
+
 <div id="holmes-placeholder" class="hidden" hidden="true"><h3>— No results. —</h3></div></div>
 <span class="separator"></span>
+
 <footer>
 
 <p>Design by 1135
@@ -115,8 +92,8 @@ window.location.href="https://github.com/1135/notes/blob/master/README.md"
 </span>
 </p>
 
-
 </footer>
+
 <script src="./Holmes_files/holmes.js"></script>
 <script src="./Holmes_files/microlight.js"></script>
 <script>
@@ -166,9 +143,6 @@ window.location.href="https://github.com/1135/notes/blob/master/README.md"
       }
     })
   }
-
-
-
 
   // toggle for showing hidden elements
   document.querySelector('.visible').addEventListener('click', function(e) {
