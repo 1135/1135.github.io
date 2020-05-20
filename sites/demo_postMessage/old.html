@@ -1,7 +1,7 @@
 <body>
     <p id="who"></p>
     <script>
-        document.getElementById("who").innerText = "My document.location.href is " + document.location.href;
+        document.getElementById("who").innerText = "This document.location.href is " + document.location.href;
     </script>
 
     <p>注意以下2个iframe的document.location.href的值</p>
@@ -19,12 +19,12 @@
 
     <!-- 同域 -->
     <h2>同域 iframe</h2>
-    <iframe src="https://1135.github.io/sites/2/b.html" id="myIframe1" onload="sendmsg('myIframe1','hello1111<img src onerror=alert(1)>') " width="50%" height="40%"></iframe>
+    <iframe src="https://1135.github.io/sites/demo_postMessage/same_domain.html" id="myIframe1" onload="sendmsg('myIframe1','1111<img src onerror=alert(1)>') " width="50%" height="40%"></iframe>
 
     <hr>
 
     <!-- 跨域 -->
     <h2>跨域 iframe</h2>
-    <iframe src="https://output.jsbin.com/yoramexexu" id="myIframe2" onload="sendmsg('myIframe2','1111<img src onerror=alert(2)>')" width="50%" height="40%"></iframe>
+    <iframe src="https://output.jsbin.com/yoramexexu" id="myIframe2" onload="sendmsg('myIframe2','2222<img src onerror=alert(2)>')" width="50%" height="40%"></iframe>
 
 </body>
