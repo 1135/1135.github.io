@@ -29,10 +29,9 @@
         function displayMessage(evt) {
             var message;
             message =
-                "I got a message:" +
-                "<br><strong>" + evt.data + "</strong><br>" +
-                "from:" +
-                "<br><strong>" + evt.origin + "</strong><br>" +
+                "I got a message" + "<strong>" + evt.data + "</strong>" + "from <strong>" + evt.origin + "</strong>" + "." + "<br>" +
+                "<br>evt.data :<strong>" + evt.data + "</strong><br>" +
+                "<br>evt.origin :<strong>" + evt.origin + "</strong><br>" +
                 "<hr>";
             document.getElementById("received-message").innerHTML = message;
         }
