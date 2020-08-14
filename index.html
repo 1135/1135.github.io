@@ -145,26 +145,14 @@ Redirecting...
 <!--跳转 -->
 <script language="javascript">
 
-setTimeout("jump()",100)
+setTimeout("jump_route()",100)
 
-function jump(){
-
-var type=navigator.appName
-if (type=="Netscape"){
-var lang = navigator.language
+function jump_route(){
+if (location.hash.slice(1) == "p"){ //en
+    window.location.href="https://github.com/1135/notes_private/blob/master/README.md"
 }
 else{
-var lang = navigator.userLanguage
-}
-var lang = lang.substr(0,2)
-if (lang == "zh"){ //en
-window.location.href="https://github.com/1135/notes/blob/master/README.md"
-}
-else if (lang == "en"){
-window.location.href="https://github.com/1135/notes/blob/master/README.md"
-}
-else{
-window.location.href="https://github.com/1135/notes/blob/master/README.md"
+    window.location.href="https://github.com/1135/notes/blob/master/README.md"
 }
 }
 
