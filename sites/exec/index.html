@@ -225,7 +225,7 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
             }
         );
 
-        return allstr.replace(/`echo -e""`/g, ""); // 去除无意义的字符
+        return allstr.replace(/`echo -e ""`/g, ""); // 去除无意义的字符
     }
 
     // 生成不带=的base64字符串
