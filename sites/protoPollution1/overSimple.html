@@ -1,0 +1,38 @@
+<html>
+<body>
+
+This page should create an alert window!<br>
+
+ View this page's source to see the oversimplified example from the main article at<br>
+ <a href='https://labs.withsecure.com/publications/prototype-pollution-primer-for-pentesters-and-programmers'>
+ https://labs.withsecure.com/publications/prototype-pollution-primer-for-pentesters-and-programmers</a>
+  
+<script>
+  // function that adds scripts to the document
+  function fetchScript(obj) {
+
+    // create the new script
+    var newScript = document.createElement('script');
+
+    // set the src attribute of the new script to the value from the object
+    newScript.src = obj.src;
+
+    // append the script to the body
+    document.body.appendChild(newScript);
+  }
+
+  // Let's set the object prototype so if for some reason
+  // we forget to set the script object's src directly
+  // it will default to this alert message
+  Object.prototype.src = "data:,alert(123)";
+
+  scriptObj = {};
+
+  //TODO - figure out how to set the script object's src directly
+
+  // execute the script adding function
+  fetchScript(scriptObj);
+
+</script>
+</body>
+</html>
