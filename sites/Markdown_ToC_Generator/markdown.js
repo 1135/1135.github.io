@@ -100,7 +100,7 @@ class MarkdownToc {
                 }
 
                 const link = title.toLocaleLowerCase()
-                    .replace(/\s/g, "-");
+                    .replace(/\s/g, "-").replace(".", "");
                     // 注释此处可支持中文 目前没发现问题. 存在这种可能性 当标题里有特殊字符时候 可能会出现bug: 链接link 无法跳转到对应部分.
                     //.replace(/[^A-Za-z0-9-_]/g, "");
                 const menu = `${"  ".repeat(level - topLevel)}- [${title}](#${link})`;
