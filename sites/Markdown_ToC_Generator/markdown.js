@@ -36,8 +36,8 @@ class MarkdownToc {
         
 function strTomarkdownTitle(str) {
   // 本函数 把任意字符串(可支持中文) 变为 markdown的标题.
-  // 使用正则表达式 把 非这些字符（数字、字母、汉字、连字符和空格） 的字符替换为空
-  let filteredStr = str.replace(/[^\u4E00-\u9FA50-9a-zA-Z\- ]/g, '');
+  // 使用正则表达式 把 非这些字符（数字、字母、汉字、连字符和空格 _ ） 的字符替换为空
+  let filteredStr = str.replace(/[^\u4E00-\u9FA50-9a-zA-Z\-\ \_]/g, '');
   // 将连续的空格、单引号、双引号替换成单个连字符。 连字符不变。
   filteredStr = filteredStr.replace(/[\s'"]+/g, '-');
   return filteredStr;
