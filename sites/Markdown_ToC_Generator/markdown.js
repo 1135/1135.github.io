@@ -8,7 +8,7 @@ class MarkdownToc {
         this.levelDownButton = document.getElementById("level-down");
         this.levelDownButton.addEventListener("click", this.changeLevel.bind(this, -1));
         this.levelsToShowElement = document.getElementById("levels-to-show");
-        this.levelsToShow = 2;
+        this.levelsToShow = 9; // ToC levels
 
         this.inputArea.addEventListener("input", this.process.bind(this));
         this.process();
