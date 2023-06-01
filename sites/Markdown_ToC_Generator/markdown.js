@@ -36,12 +36,14 @@ class MarkdownToc {
         
 function strTomarkdownTitle(str) {
   // 本函数 把任意字符串(可支持中文) 变为 markdown的标题.
-  let filteredStr = filteredStr.replace(/[\&\s'"]+/g, '-'); // 将连续的空格、单引号、双引号替换成 单个连字符-。 连字符不变。
-  filteredStr = str.replace(/[^\u4E00-\u9FA50-9a-zA-Z\-\ \_\&]/g, ''); // 使用正则表达式 把 非这些字符（汉字 数字 字母 连字符- 空格  下划线_ ） 的字符替换为空
+  // 实测 生成的toc 完全兼容了 github markdown web.
+  let filteredStr = str.replace('[\t|\&]',''); // 把每一个\t替换为空
+  filteredStr = filteredStr.replace(/ /g, '-'); // 将 每一个空格符号、每一个&符号 都替换成 单个连字符-。
+  filteredStr = filteredStr.replace(/['"]+/g, '-'); // 将 连续的 单引号、双引号 替换成 单个连字符-。  连字符本身不做任何变化.
+  filteredStr = filteredStr.replace(/[^\u4E00-\u9FA50-9a-zA-Z\-\ \_]/g, ''); // 使用正则表达式 把 非这些字符（汉字 数字 字母 连字符- 空格 下划线_ ） 的字符替换为空
   filteredStr = filteredStr.toLowerCase();
   return filteredStr;
 }
-
 
         for (let line of input.split("\n")) {
 
