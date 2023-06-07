@@ -39,7 +39,7 @@ function strTomarkdownTitle(str) {
   // 实测 生成的toc 完全兼容了 github markdown web.
   let filteredStr = str.replace('[\t|\&]',''); // 把每一个\t替换为空
   filteredStr = filteredStr.replace(/ /g, '-'); // 将 每一个空格符号、每一个&符号 都替换成 单个连字符-。
-  filteredStr = filteredStr.replace(/['"]+/g, '-'); // 将 连续的 单引号、双引号 替换成 单个连字符-。  连字符本身不做任何变化.
+  filteredStr = filteredStr.replace(/['"]+/g, ''); // 将 连续的 单引号、双引号 替换成 空。
   filteredStr = filteredStr.replace(/[^\u4E00-\u9FA50-9a-zA-Z\-\ \_]/g, ''); // 使用正则表达式 把 非这些字符（汉字 数字 字母 连字符- 空格 下划线_ ） 的字符替换为空
   filteredStr = filteredStr.toLowerCase();
   return filteredStr;
