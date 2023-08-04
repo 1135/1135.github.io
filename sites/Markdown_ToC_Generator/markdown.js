@@ -1,6 +1,6 @@
 class MarkdownToc {
 
-    constructor () {
+    constructor() {
         this.inputArea = document.getElementById("input-area");
         this.outputArea = document.getElementById("output-area");
         this.levelUpButton = document.getElementById("level-up");
@@ -28,27 +28,51 @@ class MarkdownToc {
     }
 
     process() {
-        const input = this.inputArea.value;
+        let input = this.inputArea.value;
         const menus = ["# Table of contents", ""];
         let isCodeBlock = false;
         let topLevel = NaN;
         let previous = null;
-        
-function strTomarkdownTitle(str) {
-  // 本函数 把任意字符串(可支持中文) 变为 markdown的标题.
-  // 实测 生成的toc 完全兼容了 github markdown web.
-  let filteredStr = str.replace('[\t|\&]',''); // 把每一个\t替换为空
-  filteredStr = filteredStr.replace(/ /g, '-'); // 将 每一个空格符号、每一个&符号 都替换成 单个连字符-。
-  filteredStr = filteredStr.replace(/['"]+/g, ''); // 将 连续的 单引号、双引号 替换成 空。
-  filteredStr = filteredStr.replace(/[^\u4E00-\u9FA50-9a-zA-Z\-\ \_]/g, ''); // 使用正则表达式 把 非这些字符（汉字 数字 字母 连字符- 空格 下划线_ ） 的字符替换为空
-  filteredStr = filteredStr.toLowerCase();
-  return filteredStr;
-}
+
+        function strTomarkdownTitle(str) {
+            // 本函数 把任意字符串(可支持中文) 变为 markdown的标题.
+            // 实测 生成的toc 完全兼容了 github markdown web.
+            let filteredStr = str.replace('[\t|\&]', ''); // 把每一个\t替换为空
+            filteredStr = filteredStr.replace(/ /g, '-'); // 将 每一个空格符号、每一个&符号 都替换成 单个连字符-。
+            filteredStr = filteredStr.replace(/['"]+/g, ''); // 将 连续的 单引号、双引号 替换成 空。
+            filteredStr = filteredStr.replace(/[^\u4E00-\u9FA50-9a-zA-Z\-\ \_]/g, ''); // 使用正则表达式 把 非这些字符（汉字 数字 字母 连字符- 空格 下划线_ ） 的字符替换为空
+            filteredStr = filteredStr.toLowerCase();
+            return filteredStr;
+        }
+
+
+        // 检测并删除 空的markdown标题 如
+        // ### 
+        // #
+        // 等
+        const regex = /#+\s*\n/g;
+        const matches = input.match(regex);
+
+        if (matches && matches.length > 0) {
+            const confirmMessage = `找到了 ${matches.length} 个匹配项，如下所示：\n\n${matches.join("\n")}\n很明显，它们是空标题，不应该出现在textarea中，建议手动删除它们。\n继续生成ToC？\n选择【yes】会在js里删除这些空标题,这样就可以正确生成ToC了。不修改textarea的内容。`;
+            const userConfirmation = confirm(confirmMessage);
+
+            if (userConfirmation) {
+                const newText = input.replace(regex, "");
+                console.log("删除后的文本：", newText);
+                input = newText; // 替换变量 即在js里 删除了 所有的 空标题 // 而不会改变textarea的内容
+            } else {
+                console.log("用户选择不删除。");
+            }
+        } else {
+            console.log("没有找到匹配项。");
+        }
+
 
         for (let line of input.split("\n")) {
 
             const trimmed = line.trim();
-    
+
             if (trimmed.startsWith("```")) {
                 isCodeBlock = !isCodeBlock;
             }
@@ -110,7 +134,7 @@ function strTomarkdownTitle(str) {
                     continue;
                 }
 
-                
+
                 const link = strTomarkdownTitle(title);
                 const menu = `${"  ".repeat(level - topLevel)}- [${title}](#${link})`;
                 menus.push(menu);
