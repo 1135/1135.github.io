@@ -34,7 +34,7 @@ class MarkdownToc {
         let topLevel = NaN;
         let previous = null;
 
-        function strTomarkdownTitle(str) {
+        function str_To_markdown_Title(str) {
             // 本函数 把任意字符串(可支持中文) 变为 markdown的标题.
             // 实测 生成的toc 完全兼容了 github markdown web.
             let filteredStr = str.replace('[\t|\&]', ''); // 把每一个\t替换为空
@@ -46,27 +46,7 @@ class MarkdownToc {
         }
 
 
-        // 检测并删除 空的markdown标题 如
-        // ### 
-        // #
-        // 等
-        const regex = /#+\s*\n/g;
-        const matches = input.match(regex);
 
-        if (matches && matches.length > 0) {
-            const confirmMessage = `找到了 ${matches.length} 个匹配项，如下所示：\n\n${matches.join("\n")}\n很明显，它们是空标题，不应该出现在textarea中，建议手动删除它们。\n继续生成ToC？\n选择【yes】会在js里删除这些空标题,这样就可以正确生成ToC了。不修改textarea的内容。`;
-            const userConfirmation = confirm(confirmMessage);
-
-            if (userConfirmation) {
-                const newText = input.replace(regex, "");
-                console.log("删除后的文本：", newText);
-                input = newText; // 替换变量 即在js里 删除了 所有的 空标题 // 而不会改变textarea的内容
-            } else {
-                console.log("用户选择不删除。");
-            }
-        } else {
-            console.log("没有找到匹配项。");
-        }
 
 
         for (let line of input.split("\n")) {
@@ -134,12 +114,20 @@ class MarkdownToc {
                     continue;
                 }
 
-
-                const link = strTomarkdownTitle(title);
-                const menu = `${"  ".repeat(level - topLevel)}- [${title}](#${link})`;
+                
+                // 某一条title的值非空,则可生产1条目录.
+                if (title != ""){
+                console.log("非空标题:"+title);
+                const link = str_To_markdown_Title(title);
+                const menu = `${"  ".repeat(level - topLevel)}- [${title}](#${link})`; // 生成1条目录.
                 menus.push(menu);
 
                 previous = null;
+                }else
+                {
+                console.log("空标题:"+title+"这是1条空标题,所以无法生成1条目录.已经自动跳过这一空标题.");
+                }
+
             } else {
                 previous = trimmed;
             }
