@@ -29,7 +29,7 @@ class MarkdownToc {
 
     process() {
         let input = this.inputArea.value;
-        const menus = ["# Table of contents", ""];
+        const menus = ["目录(Table of contents)", ""];
         let isCodeBlock = false;
         let topLevel = NaN;
         let previous = null;
