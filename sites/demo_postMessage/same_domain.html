@@ -1,46 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Same Domain Receiver</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        body {
+            background: #fff;
+            /* Keep white for iframe visibility context */
+            color: #333;
+            padding: 20px;
+            font-family: var(--font-mono);
+        }
+
+        #who {
+            background: #f8f9fa;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        #received-message {
+            background: #e8f4f8;
+            padding: 15px;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+        }
+
+        strong {
+            color: #d63384;
+        }
+    </style>
+</head>
+
 <body>
-    <p id="who"></p>
-    <hr>
-    <p id="received-message"></p>
+    <div id="who"></div>
+    <div id="received-message">Waiting for message...</div>
 
     <script>
-        /* 
-        //原写法
-        document.getElementById("who").innerText = 
-        "the iframe:" + "\n" +
-        "document.location.href is " + document.location.href + "\n" + 
-        "window.parent.location.href is " + window.parent.document.location.href;
-        */
-
-         //因为window.parent.location.href这条语句 可能因为"无法跨域"而抛出异常 所以写try-catch-finally
         try {
             var tempstr;
-            tempstr = "window.parent.location.href is" + window.parent.document.location.href;
+            tempstr = "window.parent.location.href is " + window.parent.document.location.href;
         } catch (e) {
-            tempstr = "window.parent.location.href is null";
-            console.log('捕获到异常：', e);
+            tempstr = "window.parent.location.href is [BLOCKED]";
+            console.log('Exception:', e);
         } finally {
             document.getElementById("who").innerText =
-                "the iframe:" + "\n" +
+                "IFRAME CONTEXT:\n" +
                 "document.location.href is " + document.location.href + "\n" + tempstr;
         }
 
-
         function displayMessage(evt) {
-            var message;
-            message =
-                "I got a message " + "<strong>" + evt.data + "</strong>" + "from <strong>" + evt.origin + "</strong>" + "<hr>" +
-                "evt.data is <strong>" + evt.data + "</strong><br>" +
-                "evt.origin is <strong>" + evt.origin + "</strong><br>" +
-                "<hr>";
+            var message =
+                "Received Message:<br>" +
+                "Data: <strong>" + evt.data + "</strong><br>" +
+                "Origin: <strong>" + evt.origin + "</strong>";
             document.getElementById("received-message").innerHTML = message;
         }
 
         if (window.addEventListener) {
-            // For standards-compliant web browsers
             window.addEventListener("message", displayMessage, false);
         } else {
             window.attachEvent("onmessage", displayMessage);
         }
     </script>
 </body>
+
+</html>

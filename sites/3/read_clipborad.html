@@ -1,17 +1,137 @@
-<html>
-<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+<!DOCTYPE html>
+<html lang="zh-CN">
 
-<title>Read the clipboard text content</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clipboard Reader - 1135</title>
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .main-content {
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .clipboard-box {
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-glow);
+      margin-top: 20px;
+    }
+
+    #textid {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: break-all;
+    }
+
+    .status-indicator {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      display: inline-block;
+      padding: 5px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+    }
+
+    .pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: #2ecc71;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
 
 <body>
-<h1 id='textid'>每3秒读取一次剪切板</h1>
-<script type="text/javascript">
-	var int=self.setInterval("get_clip_content()",3000);
-	function get_clip_content()
-  {
-	outputElem = document.querySelectorAll("#textid")[0];
-	navigator.clipboard.readText().then(text => outputElem.innerText = text);
-  }
-</script>
+  <!-- 导航栏 -->
+  <div id="navigation-container"></div>
+
+  <div class="main-content">
+    <h1>Clipboard Monitor</h1>
+    <div class="clipboard-box">
+      <div class="status-indicator">
+        <span class="pulse"></span>
+        Reading clipboard every 3 seconds...
+      </div>
+      <div id="textid">Waiting for content...</div>
+    </div>
+  </div>
+
+  <!-- 加载统一导航栏 -->
+  <script src="../../js/main.js"></script>
+  <script>
+    // 加载导航栏
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '../../navigation.html', true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        document.getElementById('navigation-container').innerHTML = xhr.responseText;
+      }
+    };
+    xhr.send();
+
+    // Clipboard logic
+    function get_clip_content() {
+      const outputElem = document.getElementById("textid");
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText()
+          .then(text => {
+            if (text) {
+              outputElem.innerText = text;
+              outputElem.style.color = 'var(--primary-color)';
+            } else {
+              outputElem.innerText = "[Clipboard is empty]";
+              outputElem.style.color = 'var(--text-secondary)';
+            }
+          })
+          .catch(err => {
+            outputElem.innerText = "[Permission denied or error reading clipboard]";
+            outputElem.style.color = '#e74c3c';
+            console.error('Failed to read clipboard contents: ', err);
+          });
+      } else {
+        outputElem.innerText = "[Clipboard API not supported in this browser context]";
+        outputElem.style.color = '#e74c3c';
+      }
+    }
+
+    // Initial read
+    get_clip_content();
+    // Interval read
+    setInterval(get_clip_content, 3000);
+  </script>
 </body>
+
 </html>

