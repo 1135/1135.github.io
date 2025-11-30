@@ -1,27 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>postMessage Demo - 1135</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .main-content {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .demo-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px;
+            font-family: var(--font-mono);
+            border-radius: 4px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            /* Keep white for contrast as it loads external content */
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .info-text {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        #who {
+            background: #000;
+            padding: 10px;
+            border: 1px dashed var(--border-color);
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+    </style>
+</head>
+
 <body>
-    <p id="who"></p>
+    <!-- 导航栏 -->
+    <div id="navigation-container"></div>
+
+    <div class="main-content">
+        <h1 style="text-align: center; margin-bottom: 40px;">postMessage Vulnerability Demo</h1>
+
+        <div id="who"></div>
+
+        <div class="demo-card">
+            <h2>Same Domain Iframe</h2>
+            <p class="info-text">Target: https://1135.github.io/sites/demo_postMessage/same_domain.html</p>
+            <form action="javascript:;" id="form1">
+                <div class="input-group">
+                    <input id="input1" type="text" placeholder="message"
+                        value="hello 1 <img src onerror=confirm(document.location.href)>">
+                    <button type="submit" class="btn">Send Message</button>
+                </div>
+            </form>
+            <iframe src="https://1135.github.io/sites/demo_postMessage/same_domain.html" id="myIframe1"></iframe>
+        </div>
+
+        <div class="demo-card">
+            <h2>Cross Domain Iframe</h2>
+            <p class="info-text">Target: https://1005.gitlab.io/other_domain.html</p>
+            <form action="javascript:;" id="form2">
+                <div class="input-group">
+                    <input id="input2" type="text" placeholder="message"
+                        value="hello 2 <img src onerror=confirm(document.location.href)>">
+                    <button type="submit" class="btn">Send Message</button>
+                </div>
+            </form>
+            <iframe src="https://1005.gitlab.io/other_domain.html" id="myIframe2"></iframe>
+        </div>
+    </div>
+
     <script>
-        document.getElementById("who").innerText = "My document.location.href is " + document.location.href;
-    </script>
+        // 加载导航栏
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '../../navigation.html', true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById('navigation-container').innerHTML = xhr.responseText;
+            }
+        };
+        xhr.send();
 
+        document.getElementById("who").innerText = "Current Page Location: " + document.location.href;
 
-    <form action="javascript:;" id="form1">
-        <label>发送信息到iframe1:
-            <input id="input1" type="text" placeholder="message" style="width:350px" value="hello 1 <img src onerror=confirm(document.location.href)>">
-        </label>
-        <button type="submit">Submit</button>
-    </form>
+        function sendmsg(the_name_of_id, msg_content) {
+            var iframe = document.getElementById(the_name_of_id);
+            var win = iframe.contentWindow;
+            win.postMessage(msg_content, '*');
+        }
 
-
-    <form action="javascript:;" id="form2">
-        <label>发送信息到iframe2:
-            <input id="input2" type="text" placeholder="message" style="width:350px" value="hello 2 <img src onerror=confirm(document.location.href)>">
-        </label>
-        <button type="submit">Submit</button>
-    </form>
-
-
-    <script>
         function func1(event) {
             sendmsg('myIframe1', document.getElementById('input1').value);
             event.preventDefault();
@@ -29,7 +132,6 @@
 
         const form1 = document.getElementById('form1');
         form1.addEventListener('submit', func1);
-
 
         function func2(event) {
             sendmsg('myIframe2', document.getElementById('input2').value);
@@ -39,28 +141,6 @@
         const form2 = document.getElementById('form2');
         form2.addEventListener('submit', func2);
     </script>
-
-    <p>注意以下2个iframe的document.location.href的值</p>
-
-    <hr>
-
-    <script>
-        function sendmsg(the_name_of_id, msg_content) {
-            var iframe = document.getElementById(the_name_of_id);
-            var win = iframe.contentWindow; // 某个iframe 的 window 对象
-            win.postMessage(msg_content, '*'); // 某个iframe 的 window 对象 向 所有域发送消息
-        }
-    </script>
-
-
-    <!-- 同域 -->
-    <h2>同域 iframe</h2>
-    <iframe src="https://1135.github.io/sites/demo_postMessage/same_domain.html" id="myIframe1" width="60%" height="30%"></iframe>
-
-    <hr>
-
-    <!-- 跨域 -->
-    <h2>跨域 iframe</h2>
-    <iframe src="https://1005.gitlab.io/other_domain.html" id="myIframe2" width="60%" height="30%"></iframe>
-
 </body>
+
+</html>

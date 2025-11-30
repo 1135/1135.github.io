@@ -1,38 +1,88 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Proto Pollution - 1135</title>
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .main-content {
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .demo-box {
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-glow);
+      margin-top: 20px;
+    }
+
+    code {
+      background: #000;
+      color: #3498db;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      display: block;
+      margin: 20px 0;
+      text-align: left;
+    }
+  </style>
+</head>
+
 <body>
+  <!-- 导航栏 -->
+  <div id="navigation-container"></div>
 
-This page should create an alert window!<br>
+  <div class="main-content">
+    <h1>Oversimplified Prototype Pollution</h1>
 
- View this page's source to see the oversimplified example from the main article at<br>
- <a href='https://labs.withsecure.com/publications/prototype-pollution-primer-for-pentesters-and-programmers'>
- https://labs.withsecure.com/publications/prototype-pollution-primer-for-pentesters-and-programmers</a>
-  
-<script>
-  // function that adds scripts to the document
-  function fetchScript(obj) {
+    <div class="demo-box">
+      <p>This page demonstrates a basic prototype pollution scenario.</p>
+      <p>An alert box <code>alert(123)</code> should appear automatically.</p>
 
-    // create the new script
-    var newScript = document.createElement('script');
+      <code>
+// Vulnerable Logic:<br>
+Object.prototype.src = "data:,alert(123)";<br>
+scriptObj = {};<br>
+fetchScript(scriptObj); // Uses polluted prototype src
+            </code>
+    </div>
+  </div>
 
-    // set the src attribute of the new script to the value from the object
-    newScript.src = obj.src;
+  <script>
+    // 加载导航栏
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '../../navigation.html', true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        document.getElementById('navigation-container').innerHTML = xhr.responseText;
+      }
+    };
+    xhr.send();
 
-    // append the script to the body
-    document.body.appendChild(newScript);
-  }
+    // Vulnerable Logic
+    function fetchScript(obj) {
+      var newScript = document.createElement('script');
+      newScript.src = obj.src; // Vulnerable sink
+      document.body.appendChild(newScript);
+    }
 
-  // Let's set the object prototype so if for some reason
-  // we forget to set the script object's src directly
-  // it will default to this alert message
-  Object.prototype.src = "data:,alert(123)";
+    // Pollution
+    Object.prototype.src = "data:,alert(123)";
 
-  scriptObj = {};
+    scriptObj = {};
 
-  //TODO - figure out how to set the script object's src directly
-
-  // execute the script adding function
-  fetchScript(scriptObj);
-
-</script>
+    // Trigger
+    fetchScript(scriptObj);
+  </script>
 </body>
+
 </html>

@@ -1,0 +1,792 @@
+/**
+ * 1135 Tools - Main Logic
+ * Handles Theme Switching and Internationalization (i18n)
+ */
+
+const translations = {
+    'zh': {
+        'title': '1135 工具集合',
+        'nav_tools': '工具集合',
+        'nav_web_security': 'Web攻防工具',
+        'nav_general': '通用工具',
+        'nav_notes_public': '公开笔记',
+        'nav_notes_private': '私有笔记 🔒',
+        'welcome_title': '欢迎来到 1135 工具集合',
+        'welcome_desc': '这里收集了各种实用的在线工具，帮助您提高工作效率。所有工具都经过精心设计，确保良好的用户体验。',
+        'cat_web_security': 'Web攻防工具',
+        'cat_general': '通用工具',
+        'tool_exec_title': '命令变形工具',
+        'tool_exec_desc': '提供代码执行和测试功能，支持多种编程语言的在线运行环境。',
+        'tool_xss_title': 'XSS武器化',
+        'tool_xss_desc': 'XSS攻击测试和防护工具，帮助开发者了解和防范跨站脚本攻击。',
+        'tool_xss_payloads_title': 'XSS Payload库',
+        'tool_xss_payloads_desc': 'XSS Payload 库，包含各种 XSS 攻击载荷和测试用例。',
+        'tool_diff_title': 'Diff工具',
+        'tool_diff_desc': '文本差异对比工具，支持文件、代码、文本的差异比较和合并。',
+        'diff_added_lines': '新增行数',
+        'diff_removed_lines': '删除行数',
+        'diff_unchanged_lines': '未变更行数',
+        'diff_line_similarity': '行相似度',
+        'third_party': '(第三方)',
+        'tool_phishing_title': '钓鱼页面演示demo',
+        'tool_phishing_desc': '钓鱼页面演示和测试工具，用于安全教育和防护测试。',
+        'tool_download_title': '下载工具 (Download)',
+        'tool_download_desc': '提供各种文件下载功能，支持多种格式和下载方式。',
+        'tool_clipboard_title': '剪贴板读取 (Clipboard)',
+        'tool_clipboard_desc': '安全的剪贴板内容读取工具，支持多种数据格式。',
+        'tool_localfile_title': '本地文件读取 (Local File)',
+        'tool_localfile_desc': '安全的本地文件读取工具，支持多种文件格式的预览和处理。',
+        'tool_md2pdf_title': 'Markdown to PDF',
+        'tool_md2pdf_desc': '在线将Markdown转换为PDF，支持多种风格（黑客、学术、商务）和中文输出。',
+        'tool_toc_title': 'Markdown ToC Generator',
+        'tool_toc_desc': '自动为Markdown文档生成目录结构，提高文档的可读性和导航性。',
+        'tool_cyberchef_title': 'CyberChef',
+        'tool_cyberchef_desc': 'The Cyber Swiss Army Knife - a web app for encryption, encoding, compression and data analysis.',
+        'tool_hemmelig_title': 'Hemmelig',
+        'tool_hemmelig_desc': 'Secure secret sharing service for sharing sensitive information.',
+        'tool_dedup_title': '去重工具',
+        'tool_dedup_desc': '文本列表去重工具，支持保持顺序、正序或倒序排列，并提供统计信息。',
+        'tool_ip_title': 'IP工具箱',
+        'tool_ip_desc': 'IP地址计算器，支持CIDR掩码计算、公网/内网判断、进制转换等功能。包含SSRF Payload生成器。',
+        'tool_editor_title': '通用编辑器',
+        'tool_editor_desc': '功能强大的在线文本编辑器，支持多种文件格式、语法高亮、代码折叠等功能。',
+        'theme_toggle_title': '切换主题',
+        'lang_toggle_title': '切换语言',
+        'dedup_mode': '模式:',
+        'dedup_keep_order': '保持原序',
+        'dedup_sort_asc': '升序排列',
+        'dedup_sort_desc': '降序排列',
+        'dedup_process': '执行去重',
+        'dedup_copy': '复制结果',
+        'dedup_input': '输入列表',
+        'dedup_output': '去重结果',
+        'dedup_clear': '清空',
+        'ip_network_info': '网络详情',
+        'ip_range_info': '地址范围',
+        'ip_formats': '格式转换',
+        'export_button': '导出',
+        'toc_button': '生成目录',
+        'toc_modal_title': '生成目录设置',
+        'toc_confirm_button': '生成目录',
+        'toc_title_in_doc': '生成目录',
+        'toc_insert_label': '插入目录',
+        'toc_copy_button': '复制到剪贴板',
+        'code_block_space_error': '代码块标记（如 ```mermaid）前有空格，必须从行首开始（无缩进）',
+        'code_block_trailing_space': '代码块标记后有空格，建议移除',
+        'unclosed_code_block': '代码块未闭合，请添加结束标记 ```',
+        'unmatched_code_blocks': '代码块标记数量为奇数，可能有未闭合的代码块',
+        'visibility_title': '显示',
+        'show_input': '输入区域',
+        'show_preview': '预览区域',
+        'sync_scroll': '同步滚动',
+        'panel_input_title': 'Markdown 输入',
+        'panel_preview_title': '预览',
+        'toc_level_label': '级别',
+        'style_academic': '学术',
+        'style_business': '商务',
+        'style_hacker': '黑客',
+        'font_yahei': '雅黑',
+        'font_simsun': '宋体',
+        'font_kaiti': '楷体',
+        'font_pingfang': '苹方',
+        'font_noto': '思源黑体',
+        'font_source_han': '思源黑体 (Source Han)',
+        'font_wenquanyi': '文泉驿微米黑',
+        'font_stheiti': '华文黑体',
+        'font_stsong': '华文宋体',
+        'font_fangsong': '仿宋',
+        'font_stkaiti': '华文楷体',
+        'font_jhenghei': '微软正黑体',
+        'font_simhei': '黑体',
+        'input_placeholder': '在此输入 Markdown 内容...',
+        'notes_button_title': '笔记',
+        'about_site_title': '关于本站',
+        'localfile_title': '本地文件读取工具',
+        'localfile_desc': '尝试通过 <code>file:///</code> 协议读取敏感本地文件（需要存在漏洞的上下文）并发送到服务器。',
+        'localfile_section1_title': '单文件测试 - 对比所有5种方法',
+        'localfile_section1_desc': '选择一个文件，使用所有5种方法进行读取测试，对比各方法的成功率和性能表现。适合验证不同方法在当前环境下的可用性。',
+        'localfile_section1_info': '提示：默认测试 /etc/hosts 文件。此测试不会发送数据到服务器，仅用于验证方法可用性。',
+        'localfile_test_file_label': '测试文件路径：',
+        'localfile_test_file_placeholder': '/etc/passwd',
+        'localfile_test_button': '开始测试所有方法',
+        'localfile_test_button_processing': '测试中...',
+        'localfile_test_results_title': '测试结果',
+        'localfile_test_file_label_result': '测试文件：',
+        'localfile_test_table_method': '方法',
+        'localfile_test_table_status': '状态',
+        'localfile_test_table_length': '数据长度',
+        'localfile_test_table_time': '耗时 (ms)',
+        'localfile_test_table_note': '错误/备注',
+        'localfile_test_status_success': '[成功]',
+        'localfile_test_status_error': '[失败]',
+        'localfile_test_status_pending': '[等待中]',
+        'localfile_test_bytes': ' 字节',
+        'localfile_test_summary_title': '测试摘要',
+        'localfile_test_summary_success': '成功：',
+        'localfile_test_summary_failed': '失败：',
+        'localfile_test_recommended': '推荐方法：',
+        'localfile_test_consistency': '数据一致性：',
+        'localfile_test_consistency_same': '[一致] 所有成功方法返回相同数据',
+        'localfile_test_consistency_diff': '[不一致] 方法返回的数据不一致',
+        'localfile_section2_title': '批量处理 - 读取所有文件并发送到服务器',
+        'localfile_section2_desc': '使用选定的方法批量读取所有文件列表，并将读取到的内容发送到指定的服务器。适合实际的数据提取场景。',
+        'localfile_section2_warning': '注意：此操作会尝试读取所有文件并发送到服务器。请确保服务器地址正确，且已获得授权。',
+        'localfile_server_label': '接收服务器地址：',
+        'localfile_server_placeholder': 'http://your-server.com/recv',
+        'localfile_method_label': '选择读取方法：',
+        'localfile_method_xhr': '1. XHR + FileReader (推荐)',
+        'localfile_method_fetch': '2. Fetch API + Blob',
+        'localfile_method_iframe': '3. iframe + contentWindow (仅文本)',
+        'localfile_method_text': '4. FileReader.readAsText() (仅文本)',
+        'localfile_method_arraybuffer': '5. FileReader.readAsArrayBuffer()',
+        'localfile_batch_button': '开始批量处理',
+        'localfile_batch_button_processing': '处理中...',
+        'localfile_file_count': '文件列表：',
+        'localfile_file_count_pending': '共 {count} 个文件待处理',
+        'localfile_test_processing': '测试进行中，请稍候...',
+        'localfile_test_empty_file': '请输入要测试的文件路径'
+    },
+    'en': {
+        'title': '1135 Tool Collection',
+        'nav_tools': 'Tools',
+        'nav_web_security': 'Web Security',
+        'nav_general': 'General Tools',
+        'nav_notes_public': 'Public Notes',
+        'nav_notes_private': 'Private Notes 🔒',
+        'welcome_title': 'Welcome to 1135 Tool Collection',
+        'welcome_desc': 'A collection of practical online tools to improve your efficiency. All tools are designed for a great user experience.',
+        'cat_web_security': 'Web Security',
+        'cat_general': 'General Tools',
+        'tool_exec_title': 'Command Obfuscator',
+        'tool_exec_desc': 'Code execution and testing environment supporting multiple programming languages.',
+        'tool_xss_title': 'XSS Weaponizer',
+        'tool_xss_desc': 'XSS testing and protection tool to help developers understand and prevent Cross-Site Scripting.',
+        'tool_xss_payloads_title': 'XSS Payload Library',
+        'tool_xss_payloads_desc': 'XSS Payload library containing various XSS attack payloads and test cases.',
+        'tool_diff_title': 'Diff Tool',
+        'tool_diff_desc': 'Text diff tool for comparing and merging differences in files, code, and text.',
+        'diff_added_lines': 'Added Lines',
+        'diff_removed_lines': 'Removed Lines',
+        'diff_unchanged_lines': 'Unchanged Lines',
+        'diff_line_similarity': 'Line Similarity',
+        'third_party': '(Third Party)',
+        'tool_phishing_title': 'Phishing Demo',
+        'tool_phishing_desc': 'Phishing page demo and testing tool for security education.',
+        'tool_download_title': 'Download Tools',
+        'tool_download_desc': 'File download utilities supporting various formats.',
+        'tool_clipboard_title': 'Clipboard Reader',
+        'tool_clipboard_desc': 'Safe clipboard content reader supporting multiple data formats.',
+        'tool_localfile_title': 'Local File Reader',
+        'tool_localfile_desc': 'Safe local file reader for previewing and processing files.',
+        'tool_md2pdf_title': 'Markdown to PDF',
+        'tool_md2pdf_desc': 'Convert Markdown to PDF online with multiple styles (Hacker, Academic, Business).',
+        'tool_toc_title': 'Markdown ToC Generator',
+        'tool_toc_desc': 'Automatically generate Table of Contents for Markdown documents.',
+        'tool_cyberchef_title': 'CyberChef',
+        'tool_cyberchef_desc': 'The Cyber Swiss Army Knife - a web app for encryption, encoding, compression and data analysis.',
+        'tool_hemmelig_title': 'Hemmelig',
+        'tool_hemmelig_desc': 'Secure secret sharing service for sharing sensitive information.',
+        'tool_dedup_title': 'Remove Duplicates',
+        'tool_dedup_desc': 'Remove duplicates from text lists, with options for sorting and statistics.',
+        'tool_ip_title': 'IP Tool',
+        'tool_ip_desc': 'IP address calculator, supporting CIDR, public/private detection, and format conversion. Includes SSRF Payload Generator.',
+        'tool_editor_title': 'Universal Editor',
+        'tool_editor_desc': 'Powerful online text editor with syntax highlighting, code folding, and support for multiple file formats.',
+        'theme_toggle_title': 'Switch Theme',
+        'lang_toggle_title': '切换语言',
+        'dedup_mode': 'Mode:',
+        'dedup_keep_order': 'Keep Order',
+        'dedup_sort_asc': 'Sort Ascending',
+        'dedup_sort_desc': 'Sort Descending',
+        'dedup_process': 'Process',
+        'dedup_copy': 'Copy Result',
+        'dedup_input': 'Input',
+        'dedup_output': 'Output',
+        'dedup_clear': 'Clear',
+        'ip_network_info': 'Network Details',
+        'ip_range_info': 'Address Range',
+        'ip_formats': 'Formats',
+        'lang_toggle_title': 'Switch Language',
+        'theme_toggle_title': 'Switch Theme',
+        'export_button': 'Export',
+        'toc_button': 'Generate ToC',
+        'toc_modal_title': 'Generate Table of Contents',
+        'toc_confirm_button': 'Generate ToC',
+        'toc_title_in_doc': 'Table of Contents',
+        'toc_insert_label': 'Insert ToC',
+        'toc_copy_button': 'Copy to Clipboard',
+        'code_block_space_error': 'Code block marker (e.g., ```mermaid) has leading spaces, must start at line beginning (no indentation)',
+        'code_block_trailing_space': 'Code block marker has trailing spaces, should be removed',
+        'unclosed_code_block': 'Code block not closed, please add closing marker ```',
+        'unmatched_code_blocks': 'Odd number of code block markers, may have unclosed code block',
+        'visibility_title': 'Visibility',
+        'show_input': 'Input Area',
+        'show_preview': 'Preview Area',
+        'sync_scroll': 'Sync Scroll',
+        'panel_input_title': 'Markdown Input',
+        'panel_preview_title': 'Preview',
+        'toc_level_label': 'Level',
+        'style_academic': 'Academic',
+        'style_business': 'Business',
+        'style_hacker': 'Hacker',
+        'font_yahei': 'YaHei',
+        'font_simsun': 'SimSun',
+        'font_kaiti': 'KaiTi',
+        'font_pingfang': 'PingFang',
+        'font_noto': 'Noto Sans SC',
+        'font_source_han': 'Source Han Sans SC',
+        'font_wenquanyi': 'WenQuanYi Micro Hei',
+        'font_stheiti': 'STHeiti',
+        'font_stsong': 'STSong',
+        'font_fangsong': 'FangSong',
+        'font_stkaiti': 'STKaiti',
+        'font_jhenghei': 'Microsoft JhengHei',
+        'font_simhei': 'SimHei',
+        'input_placeholder': 'Type your markdown here...',
+        'notes_button_title': 'Notes',
+        'about_site_title': 'About This Site',
+        'localfile_title': 'Local File Exfiltration Tool',
+        'localfile_desc': 'Attempts to read sensitive local files via <code>file:///</code> protocol (requires vulnerable context) and exfiltrate them to a server.',
+        'localfile_section1_title': 'Single File Test - Compare All 5 Methods',
+        'localfile_section1_desc': 'Select a file and test all 5 methods to compare their success rate and performance. Suitable for verifying method availability in the current environment.',
+        'localfile_section1_info': 'Tip: Default test file is /etc/hosts. This test does not send data to server, only for verifying method availability.',
+        'localfile_test_file_label': 'Test File Path:',
+        'localfile_test_file_placeholder': '/etc/passwd',
+        'localfile_test_button': 'Test All Methods',
+        'localfile_test_button_processing': 'Testing...',
+        'localfile_test_results_title': 'Test Results',
+        'localfile_test_file_label_result': 'Test File:',
+        'localfile_test_table_method': 'Method',
+        'localfile_test_table_status': 'Status',
+        'localfile_test_table_length': 'Data Length',
+        'localfile_test_table_time': 'Time (ms)',
+        'localfile_test_table_note': 'Error/Note',
+        'localfile_test_status_success': '[Success]',
+        'localfile_test_status_error': '[Failed]',
+        'localfile_test_status_pending': '[Pending]',
+        'localfile_test_bytes': ' bytes',
+        'localfile_test_summary_title': 'Test Summary',
+        'localfile_test_summary_success': 'Success:',
+        'localfile_test_summary_failed': 'Failed:',
+        'localfile_test_recommended': 'Recommended Methods:',
+        'localfile_test_consistency': 'Data Consistency:',
+        'localfile_test_consistency_same': '[Consistent] All successful methods return identical data',
+        'localfile_test_consistency_diff': '[Inconsistent] Methods return different data',
+        'localfile_section2_title': 'Batch Processing - Read All Files and Send to Server',
+        'localfile_section2_desc': 'Use the selected method to batch read all files in the list and send the content to the specified server. Suitable for actual data extraction scenarios.',
+        'localfile_section2_warning': 'Warning: This operation will attempt to read all files and send them to the server. Please ensure the server address is correct and you have authorization.',
+        'localfile_server_label': 'Exfiltration Server:',
+        'localfile_server_placeholder': 'http://your-server.com/recv',
+        'localfile_method_label': 'Select Method:',
+        'localfile_method_xhr': '1. XHR + FileReader (Recommended)',
+        'localfile_method_fetch': '2. Fetch API + Blob',
+        'localfile_method_iframe': '3. iframe + contentWindow (Text Only)',
+        'localfile_method_text': '4. FileReader.readAsText() (Text Only)',
+        'localfile_method_arraybuffer': '5. FileReader.readAsArrayBuffer()',
+        'localfile_batch_button': 'Start Batch Processing',
+        'localfile_batch_button_processing': 'Processing...',
+        'localfile_file_count': 'File List:',
+        'localfile_file_count_pending': '{count} files pending',
+        'localfile_test_processing': 'Testing in progress, please wait...',
+        'localfile_test_empty_file': 'Please enter a file path to test'
+    }
+};
+
+// State
+let currentTheme = localStorage.getItem('theme') || 'dark';
+let currentLang = localStorage.getItem('lang') || 'zh';
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme(currentTheme);
+    applyLanguage(currentLang);
+
+    // Event Delegation for dynamically loaded nav
+    document.body.addEventListener('click', (e) => {
+        // Theme Toggle
+        if (e.target.closest('.theme-toggle-btn')) {
+            toggleTheme();
+        }
+        // Language Toggle
+        if (e.target.closest('.lang-toggle-btn')) {
+            toggleLanguage();
+        }
+
+        // Navigation Dropdowns (Delegation for dynamically loaded nav)
+        const dropdownBtn = e.target.closest('.nav-dropdown-btn');
+        if (dropdownBtn) {
+            e.stopPropagation();
+            const dropdown = dropdownBtn.nextElementSibling; // .nav-dropdown-content
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+                // Close other dropdowns
+                const notesDropdown = document.querySelector('.notes-dropdown-content');
+                if (notesDropdown) notesDropdown.classList.remove('show');
+            }
+        }
+
+        const notesBtn = e.target.closest('.notes-toggle-btn');
+        if (notesBtn) {
+            e.stopPropagation();
+            const notesContent = notesBtn.nextElementSibling; // .notes-dropdown-content
+            if (notesContent) {
+                notesContent.classList.toggle('show');
+                // Close tools dropdown
+                const toolsDropdown = document.querySelector('.nav-dropdown-content');
+                if (toolsDropdown) toolsDropdown.classList.remove('show');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        if (!e.target.closest('.nav-dropdown') && !e.target.closest('.notes-dropdown')) {
+            const dropdowns = document.querySelectorAll('.nav-dropdown-content, .notes-dropdown-content');
+            dropdowns.forEach(d => d.classList.remove('show'));
+        }
+    });
+});
+
+
+// Theme Logic
+function toggleTheme() {
+    currentTheme = currentTheme === 'gray' ? 'dark' : 'gray';
+    localStorage.setItem('theme', currentTheme);
+    applyTheme(currentTheme);
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcon(theme);
+}
+
+function updateThemeIcon(theme) {
+    const icons = document.querySelectorAll('.theme-icon'); // Class for multiple icons (nav, etc)
+    icons.forEach(icon => {
+        icon.textContent = theme === 'gray' ? '☀️' : '🌙';
+    });
+    // Fallback for ID if class not used everywhere yet
+    const idIcon = document.getElementById('themeIcon');
+    if (idIcon) idIcon.textContent = theme === 'gray' ? '☀️' : '🌙';
+}
+
+// Language Logic
+function toggleLanguage() {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage(currentLang);
+}
+
+function applyLanguage(lang) {
+    document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            // Handle input placeholders if needed, but mostly textContent
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = translations[lang][key];
+            } else if (el.tagName === 'OPTION') {
+                el.textContent = translations[lang][key];
+            } else {
+                el.textContent = translations[lang][key];
+            }
+        }
+    });
+
+    // Handle data-i18n-placeholder attribute
+    const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+    placeholderElements.forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[lang][key]) {
+            el.placeholder = translations[lang][key];
+        }
+    });
+
+    // Handle data-i18n-title attribute
+    const titleElements = document.querySelectorAll('[data-i18n-title]');
+    titleElements.forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (translations[lang][key]) {
+            el.setAttribute('title', translations[lang][key]);
+        }
+    });
+
+    // Update title attributes for buttons
+    const langToggleBtns = document.querySelectorAll('.lang-toggle-btn');
+    langToggleBtns.forEach(btn => {
+        if (translations[lang]['lang_toggle_title']) {
+            btn.setAttribute('title', translations[lang]['lang_toggle_title']);
+        }
+    });
+
+    const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
+    themeToggleBtns.forEach(btn => {
+        if (translations[lang]['theme_toggle_title']) {
+            btn.setAttribute('title', translations[lang]['theme_toggle_title']);
+        }
+    });
+
+    updateLangIcon(lang);
+}
+
+function updateLangIcon(lang) {
+    const icons = document.querySelectorAll('.lang-icon');
+    icons.forEach(icon => {
+        icon.textContent = lang === 'zh' ? 'EN' : '中';
+    });
+}
+
+/**
+ * Markdown2PDF Sync Scroll Feature
+ * 
+ * Provides smooth synchronized scrolling between the markdown editor and preview panel.
+ * When the user scrolls the editor, the preview automatically scrolls to the corresponding position
+ * with a smooth animation, creating a seamless editing experience.
+ * 
+ * Features:
+ * - Smooth cubic ease-out animation (200ms duration)
+ * - Dynamic target updates during continuous scrolling
+ * - User preference persistence via localStorage
+ * - Prevents circular scroll events
+ * 
+ * Usage:
+ * - Call md2pdfSyncScroll.init() on page load to restore preferences
+ * - Call md2pdfSyncScroll.toggle() when user toggles the sync scroll checkbox
+ * - Call md2pdfSyncScroll.sync() when the editor scrolls
+ */
+const md2pdfSyncScroll = {
+    /**
+     * State Variables
+     */
+    
+    // Flag to prevent circular scrolling
+    isSyncingScroll: false,
+    
+    // Whether sync scroll feature is enabled (user preference)
+    syncScrollEnabled: true,
+    
+    // ID of the current animation frame (for cancellation)
+    syncScrollAnimationId: null,
+    
+    // Target scroll position for preview (updated dynamically during scrolling)
+    syncScrollTarget: null,
+
+    /**
+     * Toggle sync scroll feature on/off
+     * 
+     * Called when user clicks the "Sync Scroll" checkbox in the UI.
+     * Saves the preference to localStorage and cancels any ongoing animation if disabling.
+     */
+    toggle: function() {
+        const checkbox = document.getElementById('sync-scroll');
+        this.syncScrollEnabled = checkbox ? checkbox.checked : true;
+        
+        // Save preference to localStorage for persistence across page reloads
+        if (checkbox) {
+            localStorage.setItem('md2pdf_sync_scroll', this.syncScrollEnabled);
+        }
+        
+        // Cancel any ongoing animation if disabling the feature
+        if (!this.syncScrollEnabled && this.syncScrollAnimationId) {
+            cancelAnimationFrame(this.syncScrollAnimationId);
+            this.syncScrollAnimationId = null;
+        }
+    },
+
+    /**
+     * Sync preview scroll with editor scroll using smooth animation
+     * 
+     * This function is called whenever the editor textarea is scrolled.
+     * It calculates the scroll percentage in the editor and applies the same
+     * percentage to the preview panel, creating synchronized scrolling.
+     * 
+     * Algorithm:
+     * 1. Calculate scroll percentage: (scrollTop / maxScroll) in editor
+     * 2. Apply same percentage to preview: targetScroll = percentage * previewMaxScroll
+     * 3. Animate preview scroll to target position using requestAnimationFrame
+     * 4. If user continues scrolling, update target and continue animation
+     * 
+     * Animation details:
+     * - Duration: 200ms (smooth but responsive)
+     * - Easing: Cubic ease-out (1 - (1-t)^3)
+     * - Uses requestAnimationFrame for 60fps smooth animation
+     */
+    sync: function() {
+        // Early return if feature is disabled
+        if (!this.syncScrollEnabled) return;
+        
+        // Get DOM elements
+        const input = document.getElementById('markdown-input');
+        const output = document.getElementById('preview-output');
+        
+        // Safety check: ensure elements exist
+        if (!input || !output) return;
+        
+        /**
+         * Calculate scroll percentage in editor
+         * Percentage = current scroll position / maximum scrollable distance
+         */
+        const inputScrollTop = input.scrollTop;
+        const inputScrollHeight = input.scrollHeight;
+        const inputClientHeight = input.clientHeight;
+        const inputMaxScroll = inputScrollHeight - inputClientHeight;
+        
+        // If editor has no scrollable content, nothing to sync
+        if (inputMaxScroll <= 0) return;
+        
+        const scrollPercentage = inputScrollTop / inputMaxScroll;
+        
+        /**
+         * Apply same percentage to preview panel
+         * Calculate target scroll position in preview based on the same percentage
+         */
+        const outputScrollHeight = output.scrollHeight;
+        const outputClientHeight = output.clientHeight;
+        const outputMaxScroll = outputScrollHeight - outputClientHeight;
+        
+        if (outputMaxScroll > 0) {
+            // Calculate target scroll position for preview
+            const targetScrollTop = scrollPercentage * outputMaxScroll;
+            this.syncScrollTarget = targetScrollTop;
+            
+            /**
+             * Start smooth scroll animation if not already running
+             * If animation is already running, it will automatically pick up the new target
+             */
+            if (!this.syncScrollAnimationId) {
+                this.isSyncingScroll = true;
+                const startScrollTop = output.scrollTop;
+                const duration = 200; // Animation duration in milliseconds
+                const startTime = performance.now();
+                const self = this; // Preserve 'this' context for nested function
+                
+                /**
+                 * Animation function called by requestAnimationFrame
+                 * Implements cubic ease-out easing for smooth deceleration
+                 */
+                function animateScroll(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1); // Clamp to [0, 1]
+                    
+                    /**
+                     * Cubic ease-out easing function
+                     * Creates smooth deceleration: fast start, slow end
+                     * Formula: 1 - (1-t)^3
+                     */
+                    const ease = 1 - Math.pow(1 - progress, 3);
+                    
+                    /**
+                     * Get current target (may have changed if user is still scrolling)
+                     * This allows the animation to smoothly follow continuous scrolling
+                     */
+                    const currentTarget = self.syncScrollTarget;
+                    const currentDistance = currentTarget - startScrollTop;
+                    
+                    // Apply eased scroll position
+                    output.scrollTop = startScrollTop + currentDistance * ease;
+                    
+                    /**
+                     * Continue animation if:
+                     * - Animation time hasn't exceeded duration (progress < 1)
+                     * - We're not yet close to target (within 0.5px)
+                     */
+                    if (progress < 1 && Math.abs(output.scrollTop - currentTarget) > 0.5) {
+                        // Continue animation
+                        self.syncScrollAnimationId = requestAnimationFrame(animateScroll);
+                    } else {
+                        // Animation complete or very close to target
+                        output.scrollTop = currentTarget;
+                        self.syncScrollAnimationId = null;
+                        
+                        /**
+                         * If target has changed while animating (user is still scrolling),
+                         * restart animation to smoothly follow the new target
+                         */
+                        if (Math.abs(output.scrollTop - self.syncScrollTarget) > 0.5) {
+                            self.syncScrollAnimationId = requestAnimationFrame(() => {
+                                self.sync(); // Recursively call to restart animation
+                            });
+                        } else {
+                            // Animation truly complete
+                            self.isSyncingScroll = false;
+                        }
+                    }
+                }
+                
+                // Start the animation
+                this.syncScrollAnimationId = requestAnimationFrame(animateScroll);
+            }
+            // If animation is already running, it will pick up the new target automatically
+            // because syncScrollTarget is updated above, and the animation checks it each frame
+        }
+    },
+
+    /**
+     * Sync editor scroll with preview scroll (Preview -> Editor)
+     * 
+     * Reverse direction of sync(): calculates scroll percentage in the preview
+     * and applies the same percentage to the editor. Uses the same smooth animation
+     * technique for consistent user experience.
+     * 
+     * This allows bidirectional scrolling: scrolling the preview will scroll the editor
+     * to the corresponding position, and vice versa.
+     * 
+     * Note: Uses a separate flag (isSyncingReverse) to prevent circular updates
+     * when syncing from preview to editor, while allowing editor->preview sync to work.
+     */
+    syncReverse: function() {
+        // Skip if sync is disabled
+        if (!this.syncScrollEnabled) return;
+        
+        // Skip if already syncing in reverse direction to prevent circular updates
+        // Also skip if forward sync is running to prevent conflicts
+        if (this.isSyncingReverse || this.isSyncingScroll) return;
+        
+        // Get DOM elements
+        const input = document.getElementById('markdown-input');
+        const output = document.getElementById('preview-output');
+        
+        // Safety check: ensure elements exist
+        if (!input || !output) return;
+        
+        /**
+         * Calculate scroll percentage in preview
+         * Percentage = current scroll position / maximum scrollable distance
+         */
+        const outputScrollTop = output.scrollTop;
+        const outputScrollHeight = output.scrollHeight;
+        const outputClientHeight = output.clientHeight;
+        const outputMaxScroll = outputScrollHeight - outputClientHeight;
+        
+        // If preview has no scrollable content, nothing to sync
+        if (outputMaxScroll <= 0) return;
+        
+        const scrollPercentage = outputScrollTop / outputMaxScroll;
+        
+        /**
+         * Apply same percentage to editor
+         * Calculate target scroll position in editor based on the same percentage
+         */
+        const inputScrollHeight = input.scrollHeight;
+        const inputClientHeight = input.clientHeight;
+        const inputMaxScroll = inputScrollHeight - inputClientHeight;
+        
+        if (inputMaxScroll > 0) {
+            // Calculate target scroll position for editor
+            const targetScrollTop = scrollPercentage * inputMaxScroll;
+            this.syncReverseTarget = targetScrollTop;
+            
+            /**
+             * Optimized: If animation is already running, just update the target
+             * This prevents creating multiple animation loops and reduces jank
+             */
+            if (this.syncReverseAnimationId) {
+                // Animation already running, just update target - it will be picked up in next frame
+                return;
+            }
+            
+            /**
+             * Start smooth scroll animation
+             * Uses shorter duration and optimized easing for better responsiveness
+             */
+            this.isSyncingReverse = true;
+            const startScrollTop = input.scrollTop;
+            const duration = 100; // Reduced from 200ms for more responsive feel
+            const startTime = performance.now();
+            const self = this; // Preserve 'this' context for nested function
+            
+            /**
+             * Animation function called by requestAnimationFrame
+             * Implements linear interpolation for smoother, more predictable scrolling
+             */
+            function animateScroll(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1); // Clamp to [0, 1]
+                
+                /**
+                 * Get current target (may have changed if user is still scrolling)
+                 * This allows the animation to smoothly follow continuous scrolling
+                 */
+                const currentTarget = self.syncReverseTarget;
+                const currentDistance = currentTarget - startScrollTop;
+                
+                /**
+                 * Use linear interpolation for smoother scrolling during active user input
+                 * This feels more responsive and less "laggy" than ease-out during scrolling
+                 */
+                const ease = progress;
+                
+                // Apply interpolated scroll position
+                input.scrollTop = startScrollTop + currentDistance * ease;
+                
+                /**
+                 * Continue animation if:
+                 * - Animation time hasn't exceeded duration (progress < 1)
+                 * - We're not yet close to target (within 1px for smoother feel)
+                 * - Target hasn't changed significantly (user is still scrolling)
+                 */
+                const distanceToTarget = Math.abs(input.scrollTop - currentTarget);
+                if (progress < 1 && distanceToTarget > 1) {
+                    // Continue animation
+                    self.syncReverseAnimationId = requestAnimationFrame(animateScroll);
+                } else {
+                    // Animation complete or very close to target
+                    input.scrollTop = currentTarget;
+                    self.syncReverseAnimationId = null;
+                    self.isSyncingReverse = false;
+                }
+            }
+            
+            // Start the animation
+            this.syncReverseAnimationId = requestAnimationFrame(animateScroll);
+        }
+    },
+
+    /**
+     * Initialize sync scroll feature
+     * 
+     * Should be called on page load (DOMContentLoaded) to:
+     * - Restore user's sync scroll preference from localStorage
+     * - Update the checkbox state to match the preference
+     */
+    init: function() {
+        // Restore sync scroll preference from localStorage
+        const savedSyncScroll = localStorage.getItem('md2pdf_sync_scroll');
+        if (savedSyncScroll !== null) {
+            this.syncScrollEnabled = savedSyncScroll === 'true';
+            
+            // Update checkbox to reflect saved preference
+            const syncScrollCheckbox = document.getElementById('sync-scroll');
+            if (syncScrollCheckbox) {
+                syncScrollCheckbox.checked = this.syncScrollEnabled;
+            }
+        }
+    }
+};
+
+// Ensure md2pdfSyncScroll is available globally
+// This helps with cases where the script might be loaded in different contexts
+if (typeof window !== 'undefined') {
+    window.md2pdfSyncScroll = md2pdfSyncScroll;
+}
+
+// Global i18n function for use in other scripts
+function i18n(key, params) {
+    const lang = currentLang || 'zh';
+    let text = translations[lang] && translations[lang][key] ? translations[lang][key] : key;
+    
+    // Simple parameter replacement: {count} -> value
+    if (params) {
+        for (const param in params) {
+            text = text.replace(new RegExp('\\{' + param + '\\}', 'g'), params[param]);
+        }
+    }
+    
+    return text;
+}
+
+// Make i18n available globally
+if (typeof window !== 'undefined') {
+    window.i18n = i18n;
+    window.currentLang = currentLang;
+}

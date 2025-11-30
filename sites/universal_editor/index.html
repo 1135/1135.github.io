@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Editor - 1135</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tool-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .tool-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Editor */
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .editor-container {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .editor-header {
+            padding: 12px 20px;
+            background: rgba(0, 255, 65, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-title {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .format-indicator {
+            padding: 4px 12px;
+            background: rgba(0, 255, 65, 0.2);
+            color: var(--primary-color);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+        }
+
+        .format-indicator.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+        }
+
+        #editor {
+            width: 100%;
+            min-height: 500px;
+            padding: 20px;
+            background: var(--bg-color);
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+
+        /* Statistics Panel */
+        .stats-panel {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .stats-header {
+            padding: 12px 20px;
+            background: rgba(0, 255, 65, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .stats-content {
+            padding: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-family: var(--font-mono);
+        }
+
+        /* Validation Messages */
+        .validation-messages {
+            padding: 15px 20px;
+            background: var(--bg-color);
+            border-top: 1px solid var(--border-color);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .validation-message {
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        .validation-message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 3px solid #ff5555;
+            color: #ff5555;
+        }
+
+        .validation-message.success {
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid #00ff00;
+            color: #00ff00;
+        }
+
+        @media (max-width: 1024px) {
+            .editor-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+
+    <div class="container">
+        <div class="tool-header">
+            <h1>📝 Universal Text Editor</h1>
+            <p style="color: var(--text-secondary);">Multi-format editor with validation and detailed statistics</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="file-import" class="btn" style="margin: 0; cursor: pointer;">
+                    📁 Import File
+                    <input type="file" id="file-import" style="display: none;" onchange="importFile(event)">
+                </label>
+            </div>
+
+            <div class="control-group">
+                <select id="format-select" onchange="changeFormat()">
+                    <option value="auto">Auto Detect</option>
+                    <option value="json">JSON</option>
+                    <option value="xml">XML</option>
+                    <option value="yaml">YAML</option>
+                    <option value="text">Plain Text</option>
+                </select>
+            </div>
+
+            <!-- Remove Duplicates Controls -->
+            <div class="control-group" id="dedup-controls">
+                <label data-i18n="dedup_mode" style="font-size: 0.85rem;">模式:</label>
+                <select id="sort-mode" onchange="processDedup()" style="font-size: 0.85rem; padding: 4px 8px;">
+                    <option value="keep" data-i18n="dedup_keep_order">保持原序</option>
+                    <option value="asc" data-i18n="dedup_sort_asc">升序排列</option>
+                    <option value="desc" data-i18n="dedup_sort_desc">降序排列</option>
+                </select>
+                <button class="btn" onclick="processDedup()" data-i18n="dedup_process" style="padding: 4px 12px; font-size: 0.85rem;">执行去重</button>
+                <span id="dedup-stats" style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 8px;"></span>
+            </div>
+
+            <div class="control-group" style="margin-left: auto;">
+                <button class="btn" onclick="exportFile()">💾 Export</button>
+                <button class="btn" onclick="clearEditor()">🗑️ Clear</button>
+            </div>
+        </div>
+
+        <!-- Editor and Stats -->
+        <div class="editor-wrapper">
+            <!-- Editor -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span class="editor-title">Editor</span>
+                    <span id="format-indicator" class="format-indicator">TEXT</span>
+                </div>
+                <textarea id="editor" oninput="handleInput()"
+                    placeholder="Paste or type your content here..."></textarea>
+                <div id="validation-messages" class="validation-messages" style="display: none;"></div>
+            </div>
+
+            <!-- Statistics Panel -->
+            <div class="stats-panel">
+                <div class="stats-header">📊 Statistics</div>
+                <div class="stats-content">
+                    <div class="stat-item">
+                        <span class="stat-label">总字数</span>
+                        <span class="stat-value" id="stat-total">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">UTF-8字符数</span>
+                        <span class="stat-value" id="stat-utf8">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">GBK字符数</span>
+                        <span class="stat-value" id="stat-gbk">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">中文字数</span>
+                        <span class="stat-value" id="stat-chinese">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">英文字数</span>
+                        <span class="stat-value" id="stat-english">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">标点字数</span>
+                        <span class="stat-value" id="stat-punctuation">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">空白字符数</span>
+                        <span class="stat-value" id="stat-whitespace">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">全角字数</span>
+                        <span class="stat-value" id="stat-fullwidth">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/main.js"></script>
+    <script>
+        // Load Navigation
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '../../navigation.html', true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                document.getElementById('navigation-container').innerHTML = xhr.responseText;
+                if (typeof applyLanguage === 'function') {
+                    applyLanguage(localStorage.getItem('lang') || 'zh');
+                }
+            }
+        };
+        xhr.send();
+
+        let currentFormat = 'auto';
+
+        // Handle input and trigger validation
+        function handleInput() {
+            const content = document.getElementById('editor').value;
+            updateStatistics(content);
+
+            if (currentFormat === 'auto') {
+                detectFormat(content);
+            } else {
+                validateFormat(content, currentFormat);
+            }
+
+            // Show/hide dedup controls based on content
+            toggleDedupControls(content);
+        }
+
+        // Toggle deduplication controls visibility
+        function toggleDedupControls(content) {
+            const dedupControls = document.getElementById('dedup-controls');
+            // Always show dedup controls, but update stats based on content
+            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+            if (lines.length > 0) {
+                updateDedupStats(content);
+            } else {
+                document.getElementById('dedup-stats').textContent = '';
+            }
+        }
+
+        // Process deduplication
+        function processDedup() {
+            const content = document.getElementById('editor').value;
+            if (!content) return;
+
+            const mode = document.getElementById('sort-mode').value;
+            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+            const originalCount = lines.length;
+            let uniqueLines = [];
+
+            if (mode === 'keep') {
+                uniqueLines = [...new Set(lines)];
+            } else {
+                uniqueLines = [...new Set(lines)];
+                if (mode === 'asc') {
+                    uniqueLines.sort();
+                } else if (mode === 'desc') {
+                    uniqueLines.sort().reverse();
+                }
+            }
+
+            const output = uniqueLines.join('\n');
+            document.getElementById('editor').value = output;
+            updateDedupStats(output);
+            handleInput(); // Trigger format detection again
+        }
+
+        // Update deduplication statistics
+        function updateDedupStats(content) {
+            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+            const uniqueLines = [...new Set(lines)];
+            const stats = document.getElementById('dedup-stats');
+            stats.textContent = `Original: ${lines.length} | Unique: ${uniqueLines.length} | Removed: ${lines.length - uniqueLines.length}`;
+        }
+
+        // Auto detect format
+        function detectFormat(content) {
+            if (!content.trim()) {
+                updateFormatIndicator('TEXT', true);
+                return;
+            }
+
+            const trimmed = content.trim();
+            
+            // Try JSON - improved detection
+            // Check if content looks like JSON (starts with { or [)
+            if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || 
+                (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                try {
+                    JSON.parse(content);
+                    updateFormatIndicator('JSON', true);
+                    showValidationSuccess('Valid JSON');
+                    return;
+                } catch (e) {
+                    // Still show as JSON even if invalid, but mark as error
+                    updateFormatIndicator('JSON', false);
+                    showValidationError('JSON Error: ' + e.message);
+                    return;
+                }
+            }
+
+            // Try XML - improved detection
+            if (trimmed.startsWith('<')) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(content, 'text/xml');
+                const errorNode = doc.querySelector('parsererror');
+                if (!errorNode) {
+                    updateFormatIndicator('XML', true);
+                    showValidationSuccess('Valid XML');
+                    return;
+                } else {
+                    // Still show as XML even if invalid
+                    updateFormatIndicator('XML', false);
+                    showValidationError('XML Error: ' + errorNode.textContent);
+                    return;
+                }
+            }
+
+            // Try YAML - improved detection
+            const yamlPattern = /^[\w-]+:\s*[\w\s]+$/m;
+            const yamlListPattern = /^[\s]*-[\s]+[\w\s]+$/m;
+            if (yamlPattern.test(content) || yamlListPattern.test(content) || 
+                /^[\w-]+:\s*$|^[\s]*-[\s]+[\w\s]+:/.test(content)) {
+                updateFormatIndicator('YAML', true);
+                showValidationSuccess('YAML detected');
+                return;
+            }
+
+            updateFormatIndicator('TEXT', true);
+        }
+
+        // Validate specific format
+        function validateFormat(content, format) {
+            if (!content.trim()) {
+                clearValidation();
+                return;
+            }
+
+            switch (format) {
+                case 'json':
+                    validateJSON(content);
+                    break;
+                case 'xml':
+                    validateXML(content);
+                    break;
+                case 'yaml':
+                    validateYAML(content);
+                    break;
+                default:
+                    clearValidation();
+            }
+        }
+
+        // Validate JSON
+        function validateJSON(content) {
+            try {
+                JSON.parse(content);
+                updateFormatIndicator('JSON', true);
+                showValidationSuccess('✓ Valid JSON');
+            } catch (e) {
+                updateFormatIndicator('JSON', false);
+                showValidationError('✗ JSON Error: ' + e.message);
+            }
+        }
+
+        // Validate XML
+        function validateXML(content) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, 'text/xml');
+            const errorNode = doc.querySelector('parsererror');
+
+            if (errorNode) {
+                updateFormatIndicator('XML', false);
+                showValidationError('✗ XML Error: ' + errorNode.textContent);
+            } else {
+                updateFormatIndicator('XML', true);
+                showValidationSuccess('✓ Valid XML');
+            }
+        }
+
+        // Validate YAML (basic)
+        function validateYAML(content) {
+            // Simple YAML validation
+            const lines = content.split('\n');
+            let valid = true;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line && !line.startsWith('#') && !line.startsWith('-') && !/^[\w-]+:/.test(line)) {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if (valid) {
+                updateFormatIndicator('YAML', true);
+                showValidationSuccess('✓ YAML format detected');
+            } else {
+                updateFormatIndicator('YAML', false);
+                showValidationError('✗ Invalid YAML structure');
+            }
+        }
+
+        // Update format indicator
+        function updateFormatIndicator(format, isValid) {
+            const indicator = document.getElementById('format-indicator');
+            indicator.textContent = format;
+            indicator.className = 'format-indicator' + (isValid ? '' : ' error');
+        }
+
+        // Show validation messages
+        function showValidationSuccess(message) {
+            const container = document.getElementById('validation-messages');
+            container.style.display = 'block';
+            container.innerHTML = `<div class="validation-message success">${message}</div>`;
+        }
+
+        function showValidationError(message) {
+            const container = document.getElementById('validation-messages');
+            container.style.display = 'block';
+            container.innerHTML = `<div class="validation-message error">${message}</div>`;
+        }
+
+        function clearValidation() {
+            document.getElementById('validation-messages').style.display = 'none';
+        }
+
+        // Update statistics
+        function updateStatistics(content) {
+            // Total characters
+            const total = content.length;
+
+            // UTF-8 character count (approximate byte count)
+            const utf8Bytes = new Blob([content]).size;
+
+            // Chinese characters (CJK Unified Ideographs)
+            const chinese = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
+
+            // English letters
+            const english = (content.match(/[a-zA-Z]/g) || []).length;
+
+            // Punctuation (basic)
+            const punctuation = (content.match(/[.,!?;:'"()（）【】《》，。！？；：""'']/g) || []).length;
+
+            // Whitespace
+            const whitespace = (content.match(/\s/g) || []).length;
+
+            // Full-width characters
+            const fullwidth = (content.match(/[\uff00-\uffef]/g) || []).length;
+
+            // GBK estimate (Chinese chars * 2 + others)
+            const gbkBytes = chinese * 2 + (content.length - chinese);
+
+            // Update display
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-utf8').textContent = utf8Bytes;
+            document.getElementById('stat-gbk').textContent = gbkBytes;
+            document.getElementById('stat-chinese').textContent = chinese;
+            document.getElementById('stat-english').textContent = english;
+            document.getElementById('stat-punctuation').textContent = punctuation;
+            document.getElementById('stat-whitespace').textContent = whitespace;
+            document.getElementById('stat-fullwidth').textContent = fullwidth;
+        }
+
+        // Change format manually
+        function changeFormat() {
+            currentFormat = document.getElementById('format-select').value;
+            const content = document.getElementById('editor').value;
+
+            if (currentFormat === 'auto') {
+                detectFormat(content);
+            } else {
+                validateFormat(content, currentFormat);
+            }
+        }
+
+        // Import file
+        function importFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('editor').value = e.target.result;
+                handleInput();
+            };
+            reader.readAsText(file);
+        }
+
+        // Export file
+        function exportFile() {
+            const content = document.getElementById('editor').value;
+            const format = document.getElementById('format-indicator').textContent.toLowerCase();
+            const extension = format === 'text' ? 'txt' : format;
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `document.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Clear editor
+        function clearEditor() {
+            if (confirm('Clear all content?')) {
+                document.getElementById('editor').value = '';
+                handleInput();
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('editor');
+            if (editor.value) {
+                handleInput();
+            }
+        });
+    </script>
+</body>
+
+</html>

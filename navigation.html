@@ -1,0 +1,170 @@
+<!-- Navigation component for reuse across sites -->
+<nav class="main-navigation">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <a href="/index.html" class="nav-logo" id="nav-home-link">1135</a>
+        </div>
+        <div class="nav-notes">
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-btn">
+                    <span data-i18n="nav_tools">工具集合</span>
+                    <span>▼</span>
+                </button>
+                <div class="nav-dropdown-content" id="navDropdown">
+                    <div class="dropdown-section">
+                        <h4 class="dropdown-section-title" data-i18n="nav_web_security">Web攻防工具</h4>
+                        <a href="../exec/index.html" class="dropdown-link" data-i18n="tool_exec_title">命令变形工具</a>
+                        <a href="../xss_weaponization/index.html" class="dropdown-link" data-i18n="tool_xss_title">
+                            XSS武器化</a>
+                        <a href="../diff_tool/index.html" class="dropdown-link" data-i18n="tool_diff_title">Diff工具</a>
+                        <a href="../universal_editor/index.html" class="dropdown-link"
+                            data-i18n="tool_editor_title">通用编辑器</a>
+                        <a href="../4/page.html" class="dropdown-link" data-i18n="tool_phishing_title">钓鱼页面演示demo</a>
+                        <a href="../2/download.html" class="dropdown-link" data-i18n="tool_download_title">下载工具
+                            (Download)</a>
+                        <a href="../3/read_clipborad.html" class="dropdown-link" data-i18n="tool_clipboard_title">剪贴板读取
+                            (Clipboard)</a>
+                        <a href="../5/read_localfile.html" class="dropdown-link" data-i18n="tool_localfile_title">本地文件读取
+                            (Local File)</a>
+                    </div>
+                    <div class="dropdown-section">
+                        <h4 class="dropdown-section-title" data-i18n="nav_general">通用工具</h4>
+                        <a href="../markdown2pdf/index.html" class="dropdown-link"
+                            data-i18n="tool_md2pdf_title">Markdown to PDF</a>
+                        <a href="../universal_editor/index.html" class="dropdown-link"
+                            data-i18n="tool_editor_title">通用编辑器</a>
+                        <a href="../ip_tool/index.html" class="dropdown-link" data-i18n="tool_ip_title">IP工具箱</a>
+                        <a href="https://gchq.github.io/CyberChef/" class="dropdown-link" target="_blank">
+                            <span data-i18n="tool_cyberchef_title">CyberChef</span>
+                            <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
+                        </a>
+                        <a href="https://hemmelig.app/" class="dropdown-link" target="_blank">
+                            <span data-i18n="tool_hemmelig_title">Hemmelig</span>
+                            <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <button class="lang-toggle-btn">
+                <span class="lang-icon">EN</span>
+            </button>
+            <button class="theme-toggle-btn">
+                <span class="theme-icon">🌙</span>
+            </button>
+            <div class="notes-dropdown">
+                <button class="notes-toggle-btn" data-i18n-title="notes_button_title" title="笔记">
+                    📖
+                </button>
+                <div class="notes-dropdown-content">
+                    <a href="https://github.com/1135/notes/blob/master/README.md" target="_blank"
+                        data-i18n="nav_notes_public">📗 公开笔记</a>
+                    <a href="https://github.com/1135/notes_private/blob/master/README.md" target="_blank"
+                        data-i18n="nav_notes_private">📕 私有笔记 🔒</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Dropdown toggle functionality
+    // Dropdown toggle functionality and Path Fixing
+    (function () {
+        const initNavigation = function () {
+            // Fix all navigation links based on current page location
+            const currentPath = window.location.pathname;
+            const isInSites = currentPath.includes('/sites/');
+
+            // Fix home link
+            const homeLink = document.getElementById('nav-home-link');
+            if (homeLink) {
+                if (isInSites) {
+                    // If in a sub-site (e.g. sites/markdown2pdf/), go up two levels
+                    homeLink.href = '../../index.html';
+                } else {
+                    homeLink.href = 'index.html';
+                }
+            }
+
+            // Fix all tool links in dropdown
+            const toolLinks = document.querySelectorAll('.dropdown-link[href^="../"]');
+            toolLinks.forEach(link => {
+                const originalHref = link.getAttribute('href');
+                if (originalHref && originalHref.startsWith('../')) {
+                    // Extract the path after ../
+                    const pathAfterParent = originalHref.replace('../', '');
+
+                    if (isInSites) {
+                        // Already in sites/ subdirectory, use relative path
+                        // e.g., ../exec/index.html -> ../exec/index.html (correct)
+                        // But if path already has sites/, remove it
+                        if (pathAfterParent.startsWith('sites/')) {
+                            link.href = '../' + pathAfterParent.replace('sites/', '');
+                        } else {
+                            link.href = originalHref; // Keep as is
+                        }
+                    } else {
+                        // At root level, need to add sites/ prefix
+                        // e.g., ../exec/index.html -> sites/exec/index.html
+                        if (!pathAfterParent.startsWith('sites/')) {
+                            link.href = 'sites/' + pathAfterParent;
+                        } else {
+                            link.href = pathAfterParent; // Already has sites/
+                        }
+                    }
+                }
+            });
+
+            // Tools dropdown
+            const dropdownBtn = document.querySelector('.nav-dropdown-btn');
+            const dropdownContent = document.querySelector('.nav-dropdown-content');
+
+            if (dropdownBtn && dropdownContent) {
+                // Remove existing listeners to avoid duplicates if re-initialized
+                const newBtn = dropdownBtn.cloneNode(true);
+                dropdownBtn.parentNode.replaceChild(newBtn, dropdownBtn);
+
+                newBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    dropdownContent.classList.toggle('show');
+                    // Close notes dropdown if open
+                    const notesDropdown = document.querySelector('.notes-dropdown-content');
+                    if (notesDropdown) notesDropdown.classList.remove('show');
+                });
+            }
+
+            // Notes dropdown
+            const notesBtn = document.querySelector('.notes-toggle-btn');
+            const notesContent = document.querySelector('.notes-dropdown-content');
+
+            if (notesBtn && notesContent) {
+                const newBtn = notesBtn.cloneNode(true);
+                notesBtn.parentNode.replaceChild(newBtn, notesBtn);
+
+                newBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    notesContent.classList.toggle('show');
+                    // Close tools dropdown if open
+                    if (dropdownContent) dropdownContent.classList.remove('show');
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function (e) {
+                if (dropdownContent && !e.target.closest('.nav-dropdown')) {
+                    dropdownContent.classList.remove('show');
+                }
+                if (notesContent && !e.target.closest('.notes-dropdown')) {
+                    notesContent.classList.remove('show');
+                }
+            });
+        };
+
+        // Run logic immediately if elements exist (dynamic load), otherwise wait for DOM (static load)
+        if (document.querySelector('.nav-dropdown-btn')) {
+            initNavigation();
+        } else {
+            document.addEventListener('DOMContentLoaded', initNavigation);
+        }
+    })();
+</script>

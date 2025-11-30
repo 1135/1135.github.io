@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navigation Debug</title>
+</head>
+<body>
+    <h1>Navigation Debug Page</h1>
+    <div id="debug-info"></div>
+    <div id="navigation-container"></div>
+    
+    <script>
+        function log(message) {
+            console.log(message);
+            document.getElementById('debug-info').innerHTML += '<p>' + message + '</p>';
+        }
+        
+        log('Starting navigation debug...');
+        log('Current URL: ' + window.location.href);
+        log('Base URL: ' + window.location.origin);
+        log('Pathname: ' + window.location.pathname);
+        
+        // Test different paths
+        const paths = [
+            '../../navigation.html',
+            '/navigation.html',
+            'http://localhost:8000/navigation.html'
+        ];
+        
+        paths.forEach((path, index) => {
+            log('Testing path ' + (index + 1) + ': ' + path);
+            
+            fetch(path)
+                .then(response => {
+                    log('Path ' + (index + 1) + ' - Response status: ' + response.status);
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                })
+                .then(data => {
+                    log('Path ' + (index + 1) + ' - Success! Data length: ' + data.length);
+                    if (index === 0) { // Use the first successful path
+                        document.getElementById('navigation-container').innerHTML = data;
+                    }
+                })
+                .catch(error => {
+                    log('Path ' + (index + 1) + ' - Error: ' + error.message);
+                });
+        });
+    </script>
+</body>
+</html>
+

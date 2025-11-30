@@ -1,165 +1,324 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1135 工具集合</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Page-specific styles for index.html */
+        /* Lightbulb hint button */
+        .hint-lightbulb {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
+            z-index: 9998;
+            transition: all 0.3s ease;
+        }
 
-<meta charset="utf-8" />
-<title>1135</title>
+        /* Toast banner */
+        .welcome-toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--surface-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            font-size: 0.95rem;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-<link href="./Holmes_files/css" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="./Holmes_files/style.css">
+        .hint-lightbulb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
+        }
 
-<style type="text/css">
-html
-{
-    background-image: url("data:image/png;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAAqACAAQAAAABAAAA6KADAAQAAAABAAAAWwAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/+IH2ElDQ19QUk9GSUxFAAEBAAAHyGFwcGwCIAAAbW50clJHQiBYWVogB9kAAgAZAAsAGgALYWNzcEFQUEwAAAAAYXBwbAAAAAAAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y1hcHBsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALZGVzYwAAAQgAAABvZHNjbQAAAXgAAAWKY3BydAAABwQAAAA4d3RwdAAABzwAAAAUclhZWgAAB1AAAAAUZ1hZWgAAB2QAAAAUYlhZWgAAB3gAAAAUclRSQwAAB4wAAAAOY2hhZAAAB5wAAAAsYlRSQwAAB4wAAAAOZ1RSQwAAB4wAAAAOZGVzYwAAAAAAAAAUR2VuZXJpYyBSR0IgUHJvZmlsZQAAAAAAAAAAAAAAFEdlbmVyaWMgUkdCIFByb2ZpbGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAG1sdWMAAAAAAAAAHwAAAAxza1NLAAAAKAAAAYRkYURLAAAAJAAAAaxjYUVTAAAAJAAAAdB2aVZOAAAAJAAAAfRwdEJSAAAAJgAAAhh1a1VBAAAAKgAAAj5mckZVAAAAKAAAAmhodUhVAAAAKAAAApB6aFRXAAAAEgAAArhrb0tSAAAAFgAAAspuYk5PAAAAJgAAAuBjc0NaAAAAIgAAAwZoZUlMAAAAHgAAAyhyb1JPAAAAJAAAA0ZkZURFAAAALAAAA2ppdElUAAAAKAAAA5ZzdlNFAAAAJgAAAuB6aENOAAAAEgAAA75qYUpQAAAAGgAAA9BlbEdSAAAAIgAAA+pwdFBPAAAAJgAABAxubE5MAAAAKAAABDJlc0VTAAAAJgAABAx0aFRIAAAAJAAABFp0clRSAAAAIgAABH5maUZJAAAAKAAABKBockhSAAAAKAAABMhwbFBMAAAALAAABPBydVJVAAAAIgAABRxlblVTAAAAJgAABT5hckVHAAAAJgAABWQAVgFhAGUAbwBiAGUAYwBuAP0AIABSAEcAQgAgAHAAcgBvAGYAaQBsAEcAZQBuAGUAcgBlAGwAIABSAEcAQgAtAHAAcgBvAGYAaQBsAFAAZQByAGYAaQBsACAAUgBHAEIAIABnAGUAbgDoAHIAaQBjAEMepQB1ACAAaADsAG4AaAAgAFIARwBCACAAQwBoAHUAbgBnAFAAZQByAGYAaQBsACAAUgBHAEIAIABHAGUAbgDpAHIAaQBjAG8EFwQwBDMEMAQ7BEwEPQQ4BDkAIAQ/BEAEPgREBDAEOQQ7ACAAUgBHAEIAUAByAG8AZgBpAGwAIABnAOkAbgDpAHIAaQBxAHUAZQAgAFIAVgBCAMEAbAB0AGEAbADhAG4AbwBzACAAUgBHAEIAIABwAHIAbwBmAGkAbJAadSgAUgBHAEKCcl9pY8+P8Md8vBgAIABSAEcAQgAg1QS4XNMMx3wARwBlAG4AZQByAGkAcwBrACAAUgBHAEIALQBwAHIAbwBmAGkAbABPAGIAZQBjAG4A/QAgAFIARwBCACAAcAByAG8AZgBpAGwF5AXoBdUF5AXZBdwAIABSAEcAQgAgBdsF3AXcBdkAUAByAG8AZgBpAGwAIABSAEcAQgAgAGcAZQBuAGUAcgBpAGMAQQBsAGwAZwBlAG0AZQBpAG4AZQBzACAAUgBHAEIALQBQAHIAbwBmAGkAbABQAHIAbwBmAGkAbABvACAAUgBHAEIAIABnAGUAbgBlAHIAaQBjAG9mbpAaAFIARwBCY8+P8GWHTvZOAIIsACAAUgBHAEIAIDDXMO0w1TChMKQw6wOTA7UDvQO5A7oDzAAgA8ADwQO/A8YDrwO7ACAAUgBHAEIAUABlAHIAZgBpAGwAIABSAEcAQgAgAGcAZQBuAOkAcgBpAGMAbwBBAGwAZwBlAG0AZQBlAG4AIABSAEcAQgAtAHAAcgBvAGYAaQBlAGwOQg4bDiMORA4fDiUOTAAgAFIARwBCACAOFw4xDkgOJw5EDhsARwBlAG4AZQBsACAAUgBHAEIAIABQAHIAbwBmAGkAbABpAFkAbABlAGkAbgBlAG4AIABSAEcAQgAtAHAAcgBvAGYAaQBpAGwAaQBHAGUAbgBlAHIAaQENAGsAaQAgAFIARwBCACAAcAByAG8AZgBpAGwAVQBuAGkAdwBlAHIAcwBhAGwAbgB5ACAAcAByAG8AZgBpAGwAIABSAEcAQgQeBDEESQQ4BDkAIAQ/BEAEPgREBDgEOwRMACAAUgBHAEIARwBlAG4AZQByAGkAYwAgAFIARwBCACAAUAByAG8AZgBpAGwAZQZFBkQGQQAgBioGOQYxBkoGQQAgAFIARwBCACAGJwZEBjkGJwZFAAB0ZXh0AAAAAENvcHlyaWdodCAyMDA3IEFwcGxlIEluYy4sIGFsbCByaWdodHMgcmVzZXJ2ZWQuAFhZWiAAAAAAAADzUgABAAAAARbPWFlaIAAAAAAAAHRNAAA97gAAA9BYWVogAAAAAAAAWnUAAKxzAAAXNFhZWiAAAAAAAAAoGgAAFZ8AALg2Y3VydgAAAAAAAAABAc0AAHNmMzIAAAAAAAEMQgAABd7///MmAAAHkgAA/ZH///ui///9owAAA9wAAMBs/8AAEQgAWwDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAgICAgICAwICAwUDAwMFBgUFBQUGCAYGBgYGCAoICAgICAgKCgoKCgoKCgwMDAwMDA4ODg4ODw8PDw8PDw8PD//bAEMBAgICBAQEBwQEBxALCQsQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEP/dAAQAD//aAAwDAQACEQMRAD8A+sKKKK/n8/tAKKKKACiiigAooooAKKKKAI5WZF3KM4qv9qOOV/X/AOtVyq7KYiWUZQ9R/UU0JiC43dEJ+lO88DqrD6ijyopBuUYz3FJsmXlHz7GnoAv2iPuSPqKd58X96mea6j94nHtzThJC/cZ96LAP82P+8Pzp9V50RYiQoB47VYAwMCkMKKKKQBRRRQAUUVFHMshIHBH8qAJaKKKACiiigAooooA//9D6wooprOqkBjjNfz+f2gOooooAKKKKACiiigAopCQBk8Cmq6vnac4oAfRRRQBXIMJLoMoeo9PcVOCGAYHINLVcgwkugyh6j09xTEWKY0aP95c04EMAwOQaWkMrG2H8LEe3UUuZ06gOParFMd1jXJ/AU7isMWdSQrAqT61NVOMNJMWf+HtVyhggooopDK9w+1Nv97+VRhHkKlBsC8AnrUk/ysknoeasUxFYZgb5iSjd/erNNZQ6lW6GoY2KN5L/AIH2oAsUVHJIsY56+lRK0vmjfwCOlFguWaKKKQz/0frCq9wu4oD0Jx+dWKgn4VW7hhX4Aj+z2NR2iby5OnY1ZprorrtaoEdom8uTp2NAFmiqTiRH5chT0NTbZuokB/CiwXJWZUXc3Sod8sn3F2j1NNaOYsGYhsdqbvllJjGB6kU7BcYUMr7Q24jqew+lTwqEkdB2xUyIqLtWol/4+G+lFwsT0UUVIwooooArkGEl0GUPUenuKnBDAMDkGmSvsQnv2+tQYa3AOcg9R7+1MRYd1jXJ/AVBgqDNL97sPSnohJ82Xr2HpTSTO+B9xTyfWgCSFCic/ePJqWiikMKKKKAI5QGjYH0ohbdGp/ComJmfy1+6OpojIjZ0JwByPpTFcs1WmIc+Wgy47+lKWebhPlT19amRFQYUYoAZHEFO5jub1prf69D6g1PVdmDToBztzmi4FiiiikM//9L6wqG4H7on0xU1RTDMTV+AI/tBktNdFddrUJ9xfoKdSAqbvLBim5XsaSN2iA3g7D09qtOiuu1qpFpGBgX5sd/aqRLJndpW8uPp3NToiou1agRJlXauEH607ymP35CfpxQNExZV+8cVAHVrgbTn5cUx0iiwAu5z0FSRRBPmb7x/SgCeiiipGFFFQzSeWnHU9KAIncM+8/dTge5qREJPmy9ew9KjhRVwzkZ7D0pSWnbavCDqfWqZIEtO21eEHU+tWQAoCgYAoACgKBgClpDCiiikMKhldiRHH949fYU6STyxxyx6Cq6nZlU+aQ9T6U0hNk2UgTb3/U0wRGRvMlGPQf409IsHe/zMe9TUXCwUUVBJIxbyovvdz6UhhJIxbyovvdz6U+OMRrgde5ojjEa4HXuakpiCiiikM//T+sKZJ/q2+hp9IwypFfz+j+0BkRzGv0qSoYP9UtMd2lby4+nc0xXB3aVvLj6dzQqLHMFUcFanRFRdq1FJxLGfqKLgT1FJLs4HLHoKJJdnA5Y9BSRx7fnflzQARx7fnflzU1FFIYUUUUAFMeNH+8M4p9FAEXkRf3akACjAGAKWigAooooAKa7hFLN0FOqKSJZMbiePSgCqqyTOX6D1/wAKuIixjCimCEDgO350nkKeSSfxqmJInoqD7Onqfzpfs8Xpn8aQxJJGLeVF97ufSnxxiNcDr3NKiKnCjGafQIKKKKQwooooA//U+sKKKK/n8/tAzhIQvlZ2jJyaspJCihVPH0NWKKbYrEInU8AH8qilcvtKKcqQenFW6KLgQxx7fnflzU1FFIYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//2Q==");
-}
-</style>
-<!--
-background-image: url("./images/bg.png");
--->
+        .hint-lightbulb::before {
+            content: '💡';
+            font-size: 24px;
+        }
 
+        .main-content {
+            padding: 3rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .tool-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .tool-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .tool-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .tool-link::after {
+            content: '→';
+            margin-left: 0.25rem;
+            transition: transform 0.2s;
+        }
+
+        .tool-link:hover::after {
+            transform: translateX(4px);
+        }
+    </style>
 </head>
 
-
 <body>
+    <!-- Navigation Container -->
+    <div id="navigation-container"></div>
+    <script>
+        // Load Navigation immediately on body start to minimize FOUC
+        (function() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'navigation.html', false); // Synchronous to prevent flash
+            try {
+                xhr.send();
+                if (xhr.status === 200) {
+                    const navContainer = document.getElementById('navigation-container');
+                    navContainer.innerHTML = xhr.responseText;
+                }
+            } catch(e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
 
-<header>
-<h1>
-<a href="https://1135.github.io/">1135.github.io</a>
-</h1>
+    <!-- Lightbulb Hint -->
+    <div class="hint-lightbulb" onclick="toggleToast(event)" data-i18n-title="about_site_title" title="关于本站"></div>
 
-<h3>
-Redirecting...
-</h3>
+    <!-- Toast Banner -->
+    <div id="welcome-toast" class="welcome-toast" style="display:none;">
+        <span data-i18n="welcome_title">欢迎来到 1135 工具集合</span>
+    </div>
 
-</header>
+    <!-- Old inline navigation removed -->
+    <nav class="main-navigation" style="display: none;">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" class="nav-logo">1135</a>
+            </div>
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-btn" onclick="toggleDropdown()">
+                    <span data-i18n="nav_tools">工具集合</span>
+                    <span>▼</span>
+                </button>
+                <div class="nav-dropdown-content" id="navDropdown">
+                    <div class="dropdown-section">
+                        <h4 class="dropdown-section-title" data-i18n="nav_web_security">Web攻防工具</h4>
+                        <a href="sites/exec/index.html" class="dropdown-link" data-i18n="tool_exec_title">命令变形工具</a>
+                        <a href="sites/xss_weaponization/index.html" class="dropdown-link"
+                            data-i18n="tool_xss_title">XSS武器化</a>
+                        <a href="sites/4/page.html" class="dropdown-link" data-i18n="tool_phishing_title">
+                            钓鱼页面演示demo</a>
+                        <a href="sites/2/download.html" class="dropdown-link" data-i18n="tool_download_title">下载工具
+                            (Download)</a>
+                        <a href="sites/3/read_clipborad.html" class="dropdown-link" data-i18n="tool_clipboard_title">
+                            剪贴板读取 (Clipboard)</a>
+                        <a href="sites/5/read_localfile.html" class="dropdown-link" data-i18n="tool_localfile_title">
+                            本地文件读取 (Local File)</a>
+                    </div>
+                    <div class="dropdown-section">
+                        <h4 class="dropdown-section-title" data-i18n="nav_general">通用工具</h4>
+                        <a href="sites/Markdown_ToC_Generator/Markdown_ToC_Generator.html" class="dropdown-link"
+                            data-i18n="tool_toc_title">
+                            Markdown ToC Generator</a>
+                        <a href="sites/markdown2pdf/index.html" class="dropdown-link" data-i18n="tool_md2pdf_title">
+                            Markdown to PDF</a>
+                        <a href="sites/universal_editor/index.html" class="dropdown-link"
+                            data-i18n="tool_editor_title">通用编辑器</a>
+                        <a href="sites/ip_tool/index.html" class="dropdown-link" data-i18n="tool_ip_title">IP工具箱</a>
+                        <a href="https://gchq.github.io/CyberChef/" class="dropdown-link" target="_blank">
+                            <span data-i18n="tool_cyberchef_title">CyberChef</span>
+                            <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-notes">
+                <button class="lang-toggle-btn">
+                    <span class="lang-icon">EN</span>
+                </button>
+                <button class="theme-toggle-btn" onclick="toggleTheme()">
+                    <span id="themeIcon" class="theme-icon">🌙</span>
+                </button>
+                <a href="https://github.com/1135/notes/blob/master/README.md" class="btn btn-primary"
+                    style="background-color: transparent; color: var(--success-color); border: 1px solid var(--success-color);"
+                    target="_blank" data-i18n="nav_notes_public">公开笔记</a>
+                <a href="https://github.com/1135/notes_private/blob/master/README.md" class="btn btn-primary"
+                    style="background-color: transparent; color: var(--danger-color); border: 1px solid var(--danger-color);"
+                    target="_blank" data-i18n="nav_notes_private">私有笔记 🔒</a>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Web攻防工具分类 -->
+        <section class="tool-category">
+            <h2 class="category-title" data-i18n="cat_web_security">🛡️ Web攻防工具</h2>
+            <div class="tools-grid">
+                <a href="sites/exec/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_exec_title">🔧 命令变形工具</h3>
+                    <p data-i18n="tool_exec_desc">提供代码执行和测试功能，支持多种编程语言的在线运行环境。</p>
+                </a>
 
-<a id="more"></a>
-<!--
-<span class="separator" data-category="Demo"></span>
--->
+                <a href="sites/xss_weaponization/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_xss_title">🛡️ XSS武器化</h3>
+                    <p data-i18n="tool_xss_desc">XSS攻击测试和防护工具，帮助开发者了解和防范跨站脚本攻击。</p>
+                </a>
 
+                <a href="sites/diff_tool/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_diff_title">📊 Diff工具</h3>
+                    <p data-i18n="tool_diff_desc">文本差异对比工具，支持文件、代码、文本的差异比较和合并。</p>
+                </a>
 
-<div class="search">
-<input type="search" placeholder="search here" required="">
-<div class="controls">
-<button class="visible" data-tooltip="Use of the .visible class"><span class="icon">visible</span></button>
-<button class="mark" data-tooltip="Mark / highlight mode"><span class="icon">highlight</span></button>
-</div>
-</div>
-<div class="results">
-<blockquote class="visible">
-‘My name is Sherlock Holmes. It is my business to know what other people don’t know.’
-<cite> — The Adventure of the Blue Carbuncle</cite>
-</blockquote>
-<blockquote class="visible">
-‘There is nothing like first-hand evidence.’
-<cite> — A Study in Scarlet</cite>
-</blockquote>
-<blockquote class="visible">
-“The world is full of obvious things which nobody by any chance ever observes.”
-<cite> — The Hound of the Baskervilles Chapter 3: “The Problem”</cite>
-</blockquote>
-<blockquote class="visible">
-‘Eliminate all other factors, and the one which remains must be the truth.’
-<cite> — The Sign of Four Chapter 1: “The Science of Deduction”</cite>
-</blockquote>
+                <a href="sites/4/page.html" class="card tool-card">
+                    <h3 data-i18n="tool_phishing_title">🎣 钓鱼页面演示demo</h3>
+                    <p data-i18n="tool_phishing_desc">钓鱼页面演示和测试工具，用于安全教育和防护测试。</p>
+                </a>
 
-<div id="holmes-placeholder" class="hidden" hidden="true"><h3>— No results. —</h3></div></div>
-<span class="separator"></span>
+                <a href="sites/2/download.html" class="card tool-card">
+                    <h3 data-i18n="tool_download_title">⬇️ 下载工具 (Download)</h3>
+                    <p data-i18n="tool_download_desc">提供各种文件下载功能，支持多种格式和下载方式。</p>
+                </a>
 
-<footer>
+                <a href="sites/3/read_clipborad.html" class="card tool-card">
+                    <h3 data-i18n="tool_clipboard_title">📋 剪贴板读取 (Clipboard)</h3>
+                    <p data-i18n="tool_clipboard_desc">安全的剪贴板内容读取工具，支持多种数据格式。</p>
+                </a>
 
-<p>Design by 1135
- <span class="pull-right">
-  <a href="https://github.com/1135">github</a>
-</span>
-</p>
+                <a href="sites/5/read_localfile.html" class="card tool-card">
+                    <h3 data-i18n="tool_localfile_title">📁 本地文件读取 (Local File)</h3>
+                    <p data-i18n="tool_localfile_desc">安全的本地文件读取工具，支持多种文件格式的预览和处理。</p>
+                </a>
+            </div>
+        </section>
 
-</footer>
+        <!-- 通用工具分类 -->
+        <section class="tool-category">
+            <h2 class="category-title" data-i18n="cat_general">🔧 通用工具</h2>
+            <div class="tools-grid">
+                <a href="sites/markdown2pdf/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_md2pdf_title">📄 Markdown to PDF</h3>
+                    <p data-i18n="tool_md2pdf_desc">在线将Markdown转换为PDF，支持多种风格（黑客、学术、商务）和中文输出。</p>
+                </a>
+                <a href="sites/Markdown_ToC_Generator/Markdown_ToC_Generator.html" class="card tool-card">
+                    <h3 data-i18n="tool_toc_title">📝 Markdown ToC Generator</h3>
+                    <p data-i18n="tool_toc_desc">自动为Markdown文档生成目录结构，提高文档的可读性和导航性。</p>
+                </a>
+                <a href="sites/universal_editor/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_editor_title">📝 通用编辑器</h3>
+                    <p data-i18n="tool_editor_desc">功能强大的在线文本编辑器，支持多种文件格式、语法高亮、代码折叠、去重等功能。</p>
+                </a>
+                <a href="sites/ip_tool/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_ip_title">🌐 IP工具箱</h3>
+                    <p data-i18n="tool_ip_desc">IP地址计算器，支持CIDR掩码计算、公网/内网判断、进制转换等功能。</p>
+                </a>
+                <a href="https://gchq.github.io/CyberChef/" class="card tool-card" target="_blank">
+                    <h3>
+                        <span data-i18n="tool_cyberchef_title">🍳 CyberChef</span>
+                        <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
+                    </h3>
+                    <p data-i18n="tool_cyberchef_desc">The Cyber Swiss Army Knife - a web app for encryption, encoding,
+                        compression and data analysis.</p>
+                </a>
+                <a href="https://hemmelig.app/" class="card tool-card" target="_blank">
+                    <h3>
+                        <span data-i18n="tool_hemmelig_title">🔐 Hemmelig</span>
+                        <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
+                    </h3>
+                    <p data-i18n="tool_hemmelig_desc">Secure secret sharing service for sharing sensitive information.</p>
+                </a>
+            </div>
+        </section>
+    </div>
 
-<script src="./Holmes_files/holmes.js"></script>
-<script src="./Holmes_files/microlight.js"></script>
-<script>
-  // holmes setup
-  var h = holmes({
-    input: '.search input',
-    find: '.results blockquote',
-    placeholder: '<h3>— No results. —</h3>',
-    mark: false,
-    hiddenAttr: true,
-    class: {
-      visible: 'visible',
-      hidden: 'hidden'
-    },
-    onHidden(el) {
-      console.log('hidden', el);
-    },
-    onFound(el) {
-      console.log('found', el);
-    },
-    onInput(el) {
-      console.log('input', el);
-    },
-    onVisible(el) {
-      console.log('visible', el);
-    },
-    onEmpty(el) {
-      console.log('empty', el);
-    }
-  });
+    <!-- 页脚 -->
+    <footer>
+        <p>arr0w1 | <a href="https://github.com/1135" style="color: var(--primary-color);"> 1135</a></p>
+    </footer>
 
-  // show all of the options
-  document.getElementById('more').addEventListener('click',function(e){
-    e.preventDefault();
-    document.getElementById('full-doc').classList.toggle('hidden');
-  });
+    <!-- Main content starts here -->
+    <script src="js/main.js"></script>
+    <script>
+        // Navigation is already loaded in head, just ensure language is applied
+        if (typeof applyLanguage === 'function') {
+            applyLanguage(localStorage.getItem('lang') || 'zh');
+        }
 
-  // Toggle clicked class
-  var actions = document.querySelectorAll('[data-tooltip]');
+        // Toggle toast banner
+        function toggleToast(event) {
+            if (event) event.stopPropagation();
+            const toast = document.getElementById('welcome-toast');
+            const isVisible = toast.style.display === 'flex' || toast.style.display === 'block';
+            toast.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) {
+                setTimeout(() => { toast.style.display = 'none'; }, 3000);
+                setTimeout(() => { document.addEventListener('click', closeToastOnOutsideClick); }, 0);
+            } else {
+                document.removeEventListener('click', closeToastOnOutsideClick);
+            }
+        }
+        function closeToastOnOutsideClick(event) {
+            const toast = document.getElementById('welcome-toast');
+            if (!toast.contains(event.target) && event.target !== document.querySelector('.hint-lightbulb')) {
+                toast.style.display = 'none';
+                document.removeEventListener('click', closeToastOnOutsideClick);
+            }
+        }
+    </script>
+</body>
 
-  for (var i = 0; i < actions.length; i++ ) {
-    actions[i].addEventListener('click', function() {
-      if (this.classList.contains('clicked')) {
-        this.classList.remove('clicked')
-      } else {
-        this.classList.add('clicked')
-      }
-    })
-  }
-
-  // toggle for showing hidden elements
-  document.querySelector('.visible').addEventListener('click', function(e) {
-    document.querySelector('.results').classList.toggle('classes');
-  });
-
-  document.querySelector('.mark').addEventListener('click',function(){
-    h.stop().then(function(){
-      h.options.mark = !h.options.mark;
-      h.start();
-      // hack to make it run at button click
-      h.input.dispatchEvent(new Event('input'));
-    })
-  });
-  </script>
-
-<!--跳转 -->
-<script language="javascript">
-
-setTimeout("jump_route()",100)
-
-function jump_route(){
-if (location.hash.slice(1) == "p"){ //en
-    window.location.href="https://github.com/1135/notes_private/blob/master/README.md"
-}
-else{
-    window.location.href="https://github.com/1135/notes/blob/master/README.md"
-}
-}
-
-</script>
-
-</body></html>
+</html>

