@@ -120,8 +120,13 @@
         }
 
         body {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            /* navigation, controls, workspace, footer */
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
         #navigation-container {
@@ -134,11 +139,12 @@
 
         .workspace {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 0.8fr 1.2fr;
+            grid-template-rows: 1fr;
+            gap: 15px;
             flex: 1;
             min-height: 0;
-            padding: 20px;
+            padding: 5px 15px;
             overflow: hidden;
         }
 
@@ -197,16 +203,16 @@
         /* Controls Bar */
         .controls {
             background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 15px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             flex-wrap: wrap;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .control-group {
@@ -247,6 +253,17 @@
         #font-selector {
             width: 140px;
             max-width: 140px;
+        }
+
+        /* Standardized Footer Overrides */
+        .unified-footer {
+            margin-top: 0 !important;
+            padding: 1rem 0 !important;
+            /* Slightly tighter for this complex tool */
+            flex-shrink: 0;
+            background: var(--surface-color) !important;
+            border-top: 1px solid var(--border-color) !important;
+            font-size: 0.85rem;
         }
 
         .control-divider {
@@ -387,13 +404,10 @@
         #preview-output {
             flex: 1;
             background: white;
-            /* Preview needs white bg for PDF WYSIWYG usually */
             color: black;
-            padding: 40px;
-            /* Print margins */
+            padding: 25px 35px;
             overflow-y: auto;
             font-family: 'Times New Roman', serif;
-            /* Default print font */
             line-height: 1.6;
         }
 
@@ -1824,6 +1838,13 @@
             margin-top: -5px;
             box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
         }
+
+        /* Compact Footer for Full-screen Workspace */
+        .unified-footer {
+            margin-top: 0 !important;
+            padding: 1rem 0 !important;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 
@@ -1831,61 +1852,29 @@
     <!-- Navigation -->
     <div id="navigation-container"></div>
     <script>
-        // Load Navigation with protocol-aware handling
+        // Load Navigation synchronously to prevent page flash/jitter
         (function () {
-            const navContainer = document.getElementById('navigation-container');
-            if (!navContainer) return;
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false); // Synchronous to prevent flash
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) { // 0 for file:// protocol
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
 
-            const navPath = '../../navigation.html';
-
-            // Function to handle successful response
-            const handleSuccess = (html) => {
-                navContainer.innerHTML = html;
-                // Re-run scripts in navigation if any (though usually nav is static HTML)
-                const scripts = navContainer.querySelectorAll('script');
-                scripts.forEach(script => {
-                    const newScript = document.createElement('script');
-                    if (script.src) newScript.src = script.src;
-                    else newScript.textContent = script.textContent;
-                    document.body.appendChild(newScript);
-                });
-            };
-
-            // Function to handle error
-            const handleError = (err) => {
-                console.warn('Failed to load navigation:', err);
-            };
-
-            // Check protocol
-            if (window.location.protocol === 'file:') {
-                // For file protocol, use XHR (works in Firefox/Safari, might fail in Chrome due to CORS)
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', navPath, true); // Asynchronous
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 0 || xhr.status === 200) {
-                            handleSuccess(xhr.responseText);
-                        } else {
-                            handleError(new Error(`XHR status: ${xhr.status}`));
-                        }
-                    }
-                };
-                xhr.onerror = () => handleError(new Error('XHR network error'));
-                try {
-                    xhr.send();
-                } catch (e) {
-                    handleError(e);
-                    console.warn('File protocol XHR failed (likely Chrome CORS restriction). Navigation bar may not appear.');
+                    // Manually execute scripts from the loaded HTML
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        // Copy attributes
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        // Copy content
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
                 }
-            } else {
-                // For http/https, use fetch (modern, cleaner)
-                fetch(navPath)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        return response.text();
-                    })
-                    .then(handleSuccess)
-                    .catch(handleError);
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
             }
         })();
     </script>
@@ -1994,6 +1983,12 @@
                 <input type="checkbox" id="toc-insert" onchange="handleTocInsertChange()"
                     style="width: 16px; height: 16px; cursor: pointer;">
                 <span data-i18n="toc_insert_label" style="white-space: nowrap;">插入目录</span>
+            </label>
+            <label class="checkbox-label"
+                style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 8px;">
+                <input type="checkbox" id="export-auto-title" onchange="debouncedUpdateToc()" checked
+                    style="width: 16px; height: 16px; cursor: pointer;">
+                <span data-i18n="export_auto_title" style="white-space: nowrap;">自动填写文件标题</span>
             </label>
         </div>
 
@@ -3239,24 +3234,28 @@ Click the button to generate a ToC!
 
         // Function to get filename from first actual heading
         function getFilenameFromFirstHeading(extension) {
-            const firstHeading = getFirstActualHeading();
-            if (firstHeading) {
-                let filename = firstHeading.textContent.trim();
-                // Remove invalid filename characters
-                filename = filename.replace(/[<>:"/\\|?*]/g, '');
-                // Replace spaces and special chars with hyphens
-                filename = filename.replace(/[\s_]+/g, '-');
-                // Remove leading/trailing hyphens
-                filename = filename.replace(/^-+|-+$/g, '');
-                // Limit length
-                if (filename.length > 50) {
-                    filename = filename.substring(0, 50);
+            const autoTitleEnabled = document.getElementById('export-auto-title')?.checked;
+
+            if (autoTitleEnabled) {
+                const firstHeading = getFirstActualHeading();
+                if (firstHeading) {
+                    let filename = firstHeading.textContent.trim();
+                    // Remove invalid filename characters
+                    filename = filename.replace(/[<>:"/\\|?*]/g, '');
+                    // Replace spaces and special chars with hyphens
+                    filename = filename.replace(/[\s_]+/g, '-');
+                    // Remove leading/trailing hyphens
+                    filename = filename.replace(/^-+|-+$/g, '');
+                    // Limit length
+                    if (filename.length > 50) {
+                        filename = filename.substring(0, 50);
+                    }
+                    // If empty or too short, use default
+                    if (!filename || filename.length < 1) {
+                        filename = 'document';
+                    }
+                    return filename + extension;
                 }
-                // If empty or too short, use default
-                if (!filename || filename.length < 1) {
-                    filename = 'document';
-                }
-                return filename + extension;
             }
             return 'document' + extension;
         }
@@ -3309,6 +3308,8 @@ Click the button to generate a ToC!
                 // Remove ToC if unchecked
                 removeTocFromDocument();
             }
+            // Always ensure title state is synchronized
+            debouncedUpdateToc();
         }
 
         // Function to remove existing ToC from content
@@ -3440,12 +3441,6 @@ Click the button to generate a ToC!
             input.value = toc + content;
             tocInserted = true;
 
-            // Update page title to first actual heading (for PDF export filename)
-            const firstHeading = getFirstActualHeadingFromMarkdown(content);
-            if (firstHeading) {
-                document.title = firstHeading;
-            }
-
             // Immediately update preview after inserting ToC, but skip hash scroll
             updatePreview(false, true);
         }
@@ -3457,8 +3452,6 @@ Click the button to generate a ToC!
                 input.value = originalContent;
                 tocInserted = false;
                 originalContent = '';
-                // Restore original page title
-                document.title = originalPageTitle;
                 updatePreview();
             }
         }
@@ -3469,10 +3462,16 @@ Click the button to generate a ToC!
                 clearTimeout(tocUpdateTimer);
             }
             tocUpdateTimer = setTimeout(() => {
-                if (document.getElementById('toc-insert').checked) {
+                const tocEnabled = document.getElementById('toc-insert').checked;
+                const autoTitleEnabled = document.getElementById('export-auto-title').checked;
+
+                // 1. Handle ToC insertion/update
+                if (tocEnabled) {
                     updateTocInDocument();
-                } else {
-                    // Even if ToC is not inserted, update title if content changed
+                }
+
+                // 2. Handle Title update (Independent of ToC)
+                if (autoTitleEnabled) {
                     const input = document.getElementById('markdown-input');
                     const firstHeading = getFirstActualHeadingFromMarkdown(input.value);
                     if (firstHeading) {
@@ -3480,6 +3479,9 @@ Click the button to generate a ToC!
                     } else {
                         document.title = originalPageTitle;
                     }
+                } else {
+                    // Only restore default title if auto-fill is disabled
+                    document.title = originalPageTitle;
                 }
             }, 500); // Wait 500ms after user stops typing
         }
@@ -3908,6 +3910,17 @@ ${output.innerHTML}
             } else if (format === 'docx') {
                 downloadWord();
             } else if (format === 'pdf') {
+                // Ensure document title is correct for PDF filename before printing
+                const autoTitleEnabled = document.getElementById('export-auto-title').checked;
+                if (autoTitleEnabled) {
+                    const firstHeading = getFirstActualHeading();
+                    if (firstHeading) {
+                        document.title = firstHeading.textContent.trim();
+                    }
+                } else {
+                    document.title = originalPageTitle;
+                }
+
                 // Before printing, ensure all styles from preview are preserved
                 const output = document.getElementById('preview-output');
                 if (output) {
@@ -5080,9 +5093,12 @@ $$ A = \\pi r^2 $$
                     updatePreview();
                 }, 150); // 150ms debounce for preview
 
-                // If ToC insert is enabled, update it with debounce
-                if (document.getElementById('toc-insert').checked) {
+                // If ToC insert or Auto title is enabled, update it with debounce
+                if (document.getElementById('toc-insert').checked || document.getElementById('export-auto-title').checked) {
                     debouncedUpdateToc();
+                } else {
+                    // Restore title if both disabled
+                    document.title = originalPageTitle;
                 }
             });
 
@@ -5184,6 +5200,33 @@ $$ A = \\pi r^2 $$
             }
         });
     </script>
+
+    <!-- Standardized Footer -->
+    <footer class="unified-footer injected-footer">
+        <p>
+            <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135"
+                    target="_blank" class="author-link"
+                    style="color: inherit; text-decoration: none; transition: color 0.2s;"
+                    onmouseover="this.style.color='var(--primary-color)'"
+                    onmouseout="this.style.color='inherit'">1135</a></span>
+            <span style="opacity: 0.2;">|</span>
+            <span class="footer-donation-icons">
+                <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee" class="donation-link">
+                    <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                </a>
+                <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                </a>
+            </span>
+        </p>
+    </footer>
+
+    <!-- Floating Buttons -->
+    <div id="back-to-top" title="Back to Top">
+        <svg viewBox="0 0 24 24">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+        </svg>
+    </div>
 </body>
 
 </html>

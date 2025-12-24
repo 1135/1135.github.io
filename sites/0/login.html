@@ -94,7 +94,7 @@
 
     <div class="login-container">
         <div class="login-header">
-            <h2>System Login</h2>
+            <h2 data-i18n="demo_login_title">System Login</h2>
         </div>
         <form id="loginform" method="get" action="./admin.html">
             <div class="form-group">
@@ -114,16 +114,52 @@
         </div>
     </div>
 
+    <!-- Standardized Footer -->
+    <footer class="unified-footer injected-footer">
+        <p>
+            <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135"
+                    target="_blank" class="author-link"
+                    style="color: inherit; text-decoration: none; transition: color 0.2s;"
+                    onmouseover="this.style.color='var(--primary-color)'"
+                    onmouseout="this.style.color='inherit'">1135</a></span>
+            <span style="opacity: 0.2;">|</span>
+            <span class="footer-donation-icons">
+                <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee" class="donation-link">
+                    <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                </a>
+                <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                </a>
+            </span>
+        </p>
+    </footer>
+
+    <!-- Floating Buttons -->
+    <div id="back-to-top" title="Back to Top">
+        <svg viewBox="0 0 24 24">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+        </svg>
+    </div>
+
+    <script src="../../js/main.js"></script>
     <script>
         // 加载导航栏
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', '../../navigation.html', true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                document.getElementById('navigation-container').innerHTML = xhr.responseText;
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false);
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) {
+                    document.getElementById('navigation-container').innerHTML = xhr.responseText;
+                }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
             }
-        };
-        xhr.send();
+        })();
+
+        if (typeof applyLanguage === 'function') {
+            applyLanguage(localStorage.getItem('lang') || 'zh');
+        }
 
         // Phishing Logic
         const form1 = document.getElementById('loginform');

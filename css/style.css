@@ -582,16 +582,148 @@ textarea.form-control {
     color: var(--primary-color);
 }
 
-/* Footer */
-footer {
+/* Unified Footer & Back to Top */
+.unified-footer {
     background-color: var(--surface-color);
     border-top: 1px solid var(--border-color);
-    padding: 2rem 0;
-    margin-top: auto;
+    padding: 2.5rem 0;
+    margin-top: 4rem;
     text-align: center;
     color: var(--text-secondary);
     font-size: 0.8rem;
+    width: 100%;
 }
+
+.unified-footer p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.unified-footer a {
+    color: inherit;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.unified-footer a:hover {
+    color: var(--primary-color);
+}
+
+.footer-donation-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.donation-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    height: 20px;
+    transition: all 0.2s ease;
+}
+
+.donation-link:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.donation-link img {
+    height: 14px;
+    width: auto;
+}
+
+/* Unified Floating Buttons (Back to Top & Hint) */
+#back-to-top,
+.hint-lightbulb {
+    position: fixed;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 9997;
+}
+
+#back-to-top {
+    bottom: 20px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    opacity: 0;
+    visibility: hidden;
+}
+
+#back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.hint-lightbulb {
+    bottom: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border: none;
+    z-index: 9998;
+}
+
+/* Common Hover Effects */
+#back-to-top:hover,
+.hint-lightbulb:hover {
+    transform: translateY(-5px) scale(1.05);
+}
+
+#back-to-top:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--shadow-glow);
+}
+
+.hint-lightbulb:hover {
+    box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
+}
+
+#back-to-top svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.hint-lightbulb::before {
+    content: '💡';
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+
+    #back-to-top,
+    .hint-lightbulb {
+        right: 15px;
+        width: 40px;
+        height: 40px;
+    }
+
+    #back-to-top {
+        bottom: 15px;
+    }
+
+    .hint-lightbulb {
+        bottom: 65px;
+    }
+
+    /* 15 + 40 + 10 = 65px */
+}
+
 
 /* Glitch Effect Utility (Optional, keep simple) */
 .glitch-text {

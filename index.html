@@ -9,25 +9,15 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* Page-specific styles for index.html */
-        /* Lightbulb hint button */
-        .hint-lightbulb {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 255, 65, 0.4);
-            z-index: 9998;
-            transition: all 0.3s ease;
+        /* Toast banner */
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Toast banner */
         .welcome-toast {
             position: fixed;
             top: 80px;
@@ -42,19 +32,9 @@
             font-size: 0.95rem;
         }
 
-        .hint-lightbulb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
-        }
-
-        .hint-lightbulb::before {
-            content: '💡';
-            font-size: 24px;
-        }
-
         .main-content {
-            padding: 3rem 1rem;
-            max-width: 1200px;
+            padding: 3rem 1.5rem;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
@@ -72,7 +52,7 @@
 
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             margin-bottom: 4rem;
         }
@@ -112,24 +92,41 @@
         .tool-link:hover::after {
             transform: translateX(4px);
         }
+
+        /* Standardized Footer Overrides */
+        .unified-footer {
+            margin-top: 0 !important;
+            padding: 1.5rem 0 !important;
+            flex-shrink: 0;
+            background: var(--surface-color) !important;
+            border-top: 1px solid var(--border-color) !important;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Navigation Container -->
     <div id="navigation-container"></div>
     <script>
-        // Load Navigation immediately on body start to minimize FOUC
-        (function() {
+        // Load Navigation synchronously to prevent page flash/jitter
+        (function () {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', 'navigation.html', false); // Synchronous to prevent flash
             try {
                 xhr.send();
-                if (xhr.status === 200) {
-                    const navContainer = document.getElementById('navigation-container');
-                    navContainer.innerHTML = xhr.responseText;
+                if (xhr.status === 200 || xhr.status === 0) {
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+
+                    // Manually execute scripts from the loaded HTML
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error('Failed to load navigation:', e);
             }
         })();
@@ -210,38 +207,23 @@
             <h2 class="category-title" data-i18n="cat_web_security">🛡️ Web攻防工具</h2>
             <div class="tools-grid">
                 <a href="sites/exec/index.html" class="card tool-card">
-                    <h3 data-i18n="tool_exec_title">🔧 命令变形工具</h3>
-                    <p data-i18n="tool_exec_desc">提供代码执行和测试功能，支持多种编程语言的在线运行环境。</p>
+                    <h3 data-i18n="tool_exec_title">命令变形工具</h3>
+                    <p data-i18n="tool_exec_desc">生成各种命令执行payload，支持Java/Shell/Node.js/PowerShell等环境。</p>
                 </a>
 
                 <a href="sites/xss_weaponization/index.html" class="card tool-card">
-                    <h3 data-i18n="tool_xss_title">🛡️ XSS武器化</h3>
-                    <p data-i18n="tool_xss_desc">XSS攻击测试和防护工具，帮助开发者了解和防范跨站脚本攻击。</p>
+                    <h3 data-i18n="tool_xss_title">XSS武器化</h3>
+                    <p data-i18n="tool_xss_desc">生成隐蔽的XSS payload，支持多种标签和编码方式。</p>
                 </a>
 
                 <a href="sites/diff_tool/index.html" class="card tool-card">
-                    <h3 data-i18n="tool_diff_title">📊 Diff工具</h3>
+                    <h3 data-i18n="tool_diff_title">Diff工具</h3>
                     <p data-i18n="tool_diff_desc">文本差异对比工具，支持文件、代码、文本的差异比较和合并。</p>
                 </a>
 
-                <a href="sites/4/page.html" class="card tool-card">
-                    <h3 data-i18n="tool_phishing_title">🎣 钓鱼页面演示demo</h3>
-                    <p data-i18n="tool_phishing_desc">钓鱼页面演示和测试工具，用于安全教育和防护测试。</p>
-                </a>
-
-                <a href="sites/2/download.html" class="card tool-card">
-                    <h3 data-i18n="tool_download_title">⬇️ 下载工具 (Download)</h3>
-                    <p data-i18n="tool_download_desc">提供各种文件下载功能，支持多种格式和下载方式。</p>
-                </a>
-
-                <a href="sites/3/read_clipborad.html" class="card tool-card">
-                    <h3 data-i18n="tool_clipboard_title">📋 剪贴板读取 (Clipboard)</h3>
-                    <p data-i18n="tool_clipboard_desc">安全的剪贴板内容读取工具，支持多种数据格式。</p>
-                </a>
-
-                <a href="sites/5/read_localfile.html" class="card tool-card">
-                    <h3 data-i18n="tool_localfile_title">📁 本地文件读取 (Local File)</h3>
-                    <p data-i18n="tool_localfile_desc">安全的本地文件读取工具，支持多种文件格式的预览和处理。</p>
+                <a href="sites/ip_tool/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_ip_title">IP工具箱</h3>
+                    <p data-i18n="tool_ip_desc">IP地址计算器 + SSRF Payload生成器，支持CIDR、进制转换、绕过技术等。</p>
                 </a>
             </div>
         </section>
@@ -251,24 +233,24 @@
             <h2 class="category-title" data-i18n="cat_general">🔧 通用工具</h2>
             <div class="tools-grid">
                 <a href="sites/markdown2pdf/index.html" class="card tool-card">
-                    <h3 data-i18n="tool_md2pdf_title">📄 Markdown to PDF</h3>
+                    <h3 data-i18n="tool_md2pdf_title">Markdown to PDF</h3>
                     <p data-i18n="tool_md2pdf_desc">在线将Markdown转换为PDF，支持多种风格（黑客、学术、商务）和中文输出。</p>
                 </a>
                 <a href="sites/Markdown_ToC_Generator/Markdown_ToC_Generator.html" class="card tool-card">
-                    <h3 data-i18n="tool_toc_title">📝 Markdown ToC Generator</h3>
+                    <h3 data-i18n="tool_toc_title">Markdown ToC Generator</h3>
                     <p data-i18n="tool_toc_desc">自动为Markdown文档生成目录结构，提高文档的可读性和导航性。</p>
                 </a>
                 <a href="sites/universal_editor/index.html" class="card tool-card">
-                    <h3 data-i18n="tool_editor_title">📝 通用编辑器</h3>
+                    <h3 data-i18n="tool_editor_title">通用编辑器</h3>
                     <p data-i18n="tool_editor_desc">功能强大的在线文本编辑器，支持多种文件格式、语法高亮、代码折叠、去重等功能。</p>
                 </a>
-                <a href="sites/ip_tool/index.html" class="card tool-card">
-                    <h3 data-i18n="tool_ip_title">🌐 IP工具箱</h3>
-                    <p data-i18n="tool_ip_desc">IP地址计算器，支持CIDR掩码计算、公网/内网判断、进制转换等功能。</p>
+                <a href="sites/totp-generator/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_totp_title">TOTP生成器</h3>
+                    <p data-i18n="tool_totp_desc">生成基于时间的一次性密码(TOTP)，支持自定义密钥和参数。</p>
                 </a>
                 <a href="https://gchq.github.io/CyberChef/" class="card tool-card" target="_blank">
                     <h3>
-                        <span data-i18n="tool_cyberchef_title">🍳 CyberChef</span>
+                        <span data-i18n="tool_cyberchef_title">CyberChef</span>
                         <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
                     </h3>
                     <p data-i18n="tool_cyberchef_desc">The Cyber Swiss Army Knife - a web app for encryption, encoding,
@@ -276,22 +258,78 @@
                 </a>
                 <a href="https://hemmelig.app/" class="card tool-card" target="_blank">
                     <h3>
-                        <span data-i18n="tool_hemmelig_title">🔐 Hemmelig</span>
+                        <span data-i18n="tool_hemmelig_title">Hemmelig</span>
                         <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
                     </h3>
-                    <p data-i18n="tool_hemmelig_desc">Secure secret sharing service for sharing sensitive information.</p>
+                    <p data-i18n="tool_hemmelig_desc">Secure secret sharing service for sharing sensitive information.
+                    </p>
+                </a>
+            </div>
+        </section>
+
+        <!-- 演示/Demo分类 -->
+        <section class="tool-category">
+            <h2 class="category-title" data-i18n="cat_demos">🎭 演示/Demo</h2>
+            <div class="tools-grid">
+                <a href="sites/0/login.html" class="card tool-card">
+                    <h3 data-i18n="tool_login_demo_title">登录页面演示</h3>
+                    <p data-i18n="tool_login_demo_desc">模拟登录页面，用于演示钓鱼攻击和安全意识培训。</p>
+                </a>
+                <a href="sites/2/download.html" class="card tool-card">
+                    <h3 data-i18n="tool_download_title">HTML Smuggling</h3>
+                    <p data-i18n="tool_download_desc">HTML走私技术演示，通过JavaScript动态生成并下载文件。</p>
+                </a>
+                <a href="sites/3/read_clipborad.html" class="card tool-card">
+                    <h3 data-i18n="tool_clipboard_title">剪贴板读取</h3>
+                    <p data-i18n="tool_clipboard_desc">演示浏览器剪贴板API，展示潜在的隐私风险。</p>
+                </a>
+                <a href="sites/4/page.html" class="card tool-card">
+                    <h3 data-i18n="tool_phishing_title">钓鱼页面演示</h3>
+                    <p data-i18n="tool_phishing_desc">钓鱼页面演示，用于安全教育和防护意识培训。</p>
+                </a>
+                <a href="sites/5/read_localfile.html" class="card tool-card">
+                    <h3 data-i18n="tool_localfile_title">本地文件读取</h3>
+                    <p data-i18n="tool_localfile_desc">演示file://协议下的本地文件读取，展示XSS/LFI漏洞利用场景。</p>
+                </a>
+                <a href="sites/demo_postMessage/index.html" class="card tool-card">
+                    <h3 data-i18n="tool_postmessage_title">postMessage漏洞演示</h3>
+                    <p data-i18n="tool_postmessage_desc">演示window.postMessage API的安全问题和跨域通信漏洞。</p>
                 </a>
             </div>
         </section>
     </div>
 
-    <!-- 页脚 -->
-    <footer>
-        <p>arr0w1 | <a href="https://github.com/1135" style="color: var(--primary-color);"> 1135</a></p>
-    </footer>
+    <!-- Dynamic Footer will be injected here via navigation.html -->
 
     <!-- Main content starts here -->
     <script src="js/main.js"></script>
+
+    <!-- Standardized Footer -->
+    <footer class="unified-footer injected-footer">
+        <p>
+            <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135"
+                    target="_blank" class="author-link"
+                    style="color: inherit; text-decoration: none; transition: color 0.2s;"
+                    onmouseover="this.style.color='var(--primary-color)'"
+                    onmouseout="this.style.color='inherit'">1135</a></span>
+            <span style="opacity: 0.2;">|</span>
+            <span class="footer-donation-icons">
+                <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee" class="donation-link">
+                    <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                </a>
+                <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                </a>
+            </span>
+        </p>
+    </footer>
+
+    <!-- Floating Buttons -->
+    <div id="back-to-top" title="Back to Top">
+        <svg viewBox="0 0 24 24">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+        </svg>
+    </div>
     <script>
         // Navigation is already loaded in head, just ensure language is applied
         if (typeof applyLanguage === 'function') {

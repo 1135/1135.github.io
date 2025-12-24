@@ -9,7 +9,17 @@
     <link rel="stylesheet" href="../../css/style.css">
     <style>
         /* Tool Specific Styles */
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
         .container {
+            width: 100%;
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
@@ -201,22 +211,40 @@
         .hint-code code {
             font-family: inherit;
         }
+
+        /* Standardized Footer Overrides */
+        .unified-footer {
+            margin-top: 0 !important;
+            padding: 1.5rem 0 !important;
+            flex-shrink: 0;
+            background: var(--surface-color) !important;
+            border-top: 1px solid var(--border-color) !important;
+            z-index: 10;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Navigation -->
     <div id="navigation-container"></div>
     <script>
-        // Load Navigation immediately on body start to minimize FOUC
+        // Load Navigation synchronously to prevent page flash/jitter
         (function () {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', '../../navigation.html', false); // Synchronous to prevent flash
             try {
                 xhr.send();
-                if (xhr.status === 200) {
-                    const navContainer = document.getElementById('navigation-container');
-                    navContainer.innerHTML = xhr.responseText;
+                if (xhr.status === 200 || xhr.status === 0) {
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+
+                    // Manually execute scripts
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
                 }
             } catch (e) {
                 console.error('Failed to load navigation:', e);
@@ -224,205 +252,224 @@
         })();
     </script>
 
-    <div class="container">
-        <!-- Module 1: CIDR Calculator -->
-        <div class="input-section">
-            <h1 style="margin-bottom: 20px; color: var(--primary-color);">CIDR Calculator & Info</h1>
-            <input type="text" id="ip-input" class="ip-input" placeholder="e.g. 192.168.1.1/24" oninput="calculateIP()">
-            <p style="color: var(--text-secondary); margin-bottom: 15px;">Supports IPv4 CIDR notation</p>
-            <div class="examples" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                <button class="btn btn-sm" onclick="setIP('192.168.1.1/24')">192.168.1.1/24</button>
-                <button class="btn btn-sm" onclick="setIP('10.0.0.0/8')">10.0.0.0/8</button>
-                <button class="btn btn-sm" onclick="setIP('172.16.0.0/12')">172.16.0.0/12</button>
-            </div>
-        </div>
-
-        <div class="results-grid" id="results" style="display: none;">
-            <!-- Network Info -->
-            <div class="card">
-                <h3 data-i18n="ip_network_info">Network Details</h3>
-                <div class="info-row">
-                    <span class="label">IP Address:</span>
-                    <span class="value" id="res-ip"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Netmask:</span>
-                    <span class="value" id="res-mask"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Network Address:</span>
-                    <span class="value" id="res-net"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Broadcast:</span>
-                    <span class="value" id="res-broadcast"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Type:</span>
-                    <span class="value" id="res-type"></span>
-                </div>
-                <div id="res-type-desc"
-                    style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary-color); font-size: 0.85rem; color: var(--text-secondary); display: none;">
+    <main>
+        <div class="container">
+            <!-- Module 1: CIDR Calculator -->
+            <div class="input-section">
+                <h1 style="margin-bottom: 20px; color: var(--primary-color);">CIDR Calculator & Info</h1>
+                <input type="text" id="ip-input" class="ip-input" placeholder="e.g. 192.168.1.1/24"
+                    oninput="calculateIP()">
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">Supports IPv4 CIDR notation</p>
+                <div class="examples" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-sm" onclick="setIP('192.168.1.1/24')">192.168.1.1/24</button>
+                    <button class="btn btn-sm" onclick="setIP('10.0.0.0/8')">10.0.0.0/8</button>
+                    <button class="btn btn-sm" onclick="setIP('172.16.0.0/12')">172.16.0.0/12</button>
                 </div>
             </div>
 
-            <!-- Range Info -->
-            <div class="card">
-                <h3 data-i18n="ip_range_info">Address Range</h3>
-                <div class="info-row">
-                    <span class="label">First Usable:</span>
-                    <span class="value" id="res-first"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Last Usable:</span>
-                    <span class="value" id="res-last"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Total Hosts:</span>
-                    <span class="value" id="res-total"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Usable Hosts:</span>
-                    <span class="value" id="res-usable"></span>
-                </div>
-            </div>
-
-            <!-- Formats -->
-            <div class="card">
-                <h3 data-i18n="ip_formats">Formats</h3>
-                <div class="info-row">
-                    <span class="label">Decimal:</span>
-                    <span class="value" id="res-decimal"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Hex:</span>
-                    <span class="value" id="res-hex"></span>
-                </div>
-                <div class="binary-row">
-                    <div style="margin-bottom: 5px;">Binary (IP):</div>
-                    <div id="res-bin-ip" style="color: var(--accent-color);"></div>
-                </div>
-                <div class="binary-row">
-                    <div style="margin-bottom: 5px;">Binary (Mask):</div>
-                    <div id="res-bin-mask" style="color: var(--text-primary);"></div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Module 2: SSRF Generator -->
-    <div class="container">
-        <div class="input-section">
-            <h1 style="margin-bottom: 20px; color: var(--primary-color);">🔗 SSRF Payload Generator</h1>
-            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
-                <div style="flex: 1; min-width: 250px;">
-                    <label for="ssrf-ip-input"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Target IP /
-                        Domain</label>
-                    <input type="text" id="ssrf-ip-input" class="ip-input" placeholder="e.g. 127.0.0.1"
-                        style="margin-bottom: 0;" oninput="generateSSRF()">
-                    <div id="ssrf-input-hint" style="display: none; margin-top: 5px; font-size: 0.75em; color: var(--text-secondary); line-height: 1.4;">
-                        <span style="color: var(--primary-color);">🌐 Input Type: Domain/Hostname</span><br>
-                        IP format variations are not applicable. Only protocol schemes, encoding, and domain-specific bypasses are shown.
+            <div class="results-grid" id="results" style="display: none;">
+                <!-- Network Info -->
+                <div class="card">
+                    <h3 data-i18n="ip_network_info">Network Details</h3>
+                    <div class="info-row">
+                        <span class="label">IP Address:</span>
+                        <span class="value" id="res-ip"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Netmask:</span>
+                        <span class="value" id="res-mask"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Network Address:</span>
+                        <span class="value" id="res-net"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Broadcast:</span>
+                        <span class="value" id="res-broadcast"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Type:</span>
+                        <span class="value" id="res-type"></span>
+                    </div>
+                    <div id="res-type-desc"
+                        style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary-color); font-size: 0.85rem; color: var(--text-secondary); display: none;">
                     </div>
                 </div>
-                <div style="flex: 0 0 150px;">
-                    <label for="ssrf-port-input"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Port</label>
-                    <input type="number" id="ssrf-port-input" class="ip-input" placeholder="80" value="80"
-                        style="margin-bottom: 0;" oninput="generateSSRF()">
+
+                <!-- Range Info -->
+                <div class="card">
+                    <h3 data-i18n="ip_range_info">Address Range</h3>
+                    <div class="info-row">
+                        <span class="label">First Usable:</span>
+                        <span class="value" id="res-first"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Last Usable:</span>
+                        <span class="value" id="res-last"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Total Hosts:</span>
+                        <span class="value" id="res-total"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Usable Hosts:</span>
+                        <span class="value" id="res-usable"></span>
+                    </div>
                 </div>
-                <div style="flex: 1; min-width: 200px;">
-                    <label for="ssrf-path-input"
-                        style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Path
-                        (Optional)</label>
-                    <input type="text" id="ssrf-path-input" class="ip-input" placeholder="/admin"
-                        style="margin-bottom: 0;" oninput="generateSSRF()">
+
+                <!-- Formats -->
+                <div class="card">
+                    <h3 data-i18n="ip_formats">Formats</h3>
+                    <div class="info-row">
+                        <span class="label">Decimal:</span>
+                        <span class="value" id="res-decimal"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Hex:</span>
+                        <span class="value" id="res-hex"></span>
+                    </div>
+                    <div class="binary-row">
+                        <div style="margin-bottom: 5px;">Binary (IP):</div>
+                        <div id="res-bin-ip" style="color: var(--accent-color);"></div>
+                    </div>
+                    <div class="binary-row">
+                        <div style="margin-bottom: 5px;">Binary (Mask):</div>
+                        <div id="res-bin-mask" style="color: var(--text-primary);"></div>
+                    </div>
                 </div>
             </div>
-            <!-- Floating Copy Button -->
-            <button onclick="copyAllPayloads()" id="fab-copy-btn" title="Copy All Payloads">
-                Copy All Payloads
-            </button>
-            <style>
-                #fab-copy-btn {
-                    position: fixed;
-                    bottom: 30px;
-                    right: 30px;
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 50%;
-                    background: var(--primary-color);
-                    color: var(--bg-color);
-                    border: none;
-                    box-shadow: 0 4px 15px rgba(0, 255, 65, 0.4);
-                    font-size: 10px;
-                    font-weight: 500;
-                    cursor: pointer;
-                    z-index: 1000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.3s ease;
-                    text-align: center;
-                    line-height: 1.2;
-                    padding: 4px;
-                    word-wrap: break-word;
-                }
 
-                #fab-copy-btn:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
-                }
-
-                #fab-copy-btn:active {
-                    transform: scale(0.95);
-                }
-
-                /* Hide initially, show when SSRF section is visible */
-                #ssrf-section[style*="display: none"]~#fab-copy-btn {
-                    display: none;
-                }
-            </style>
         </div>
 
-        <!-- SSRF Payloads Section -->
-        <div class="ssrf-section" id="ssrf-section" style="display: none; margin-top: 0; border-top: none;">
+        <!-- Module 2: SSRF Generator -->
+        <div class="container">
+            <div class="input-section">
+                <h1 style="margin-bottom: 20px; color: var(--primary-color);">🔗 SSRF Payload Generator</h1>
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label for="ssrf-ip-input"
+                            style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Target IP /
+                            Domain</label>
+                        <input type="text" id="ssrf-ip-input" class="ip-input" placeholder="e.g. 127.0.0.1"
+                            style="margin-bottom: 0;" oninput="generateSSRF()">
+                        <div id="ssrf-input-hint"
+                            style="display: none; margin-top: 5px; font-size: 0.75em; color: var(--text-secondary); line-height: 1.4;">
+                            <span style="color: var(--primary-color);">🌐 Input Type: Domain/Hostname</span><br>
+                            IP format variations are not applicable. Only protocol schemes, encoding, and
+                            domain-specific
+                            bypasses are shown.
+                        </div>
+                    </div>
+                    <div style="flex: 0 0 150px;">
+                        <label for="ssrf-port-input"
+                            style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Port</label>
+                        <input type="number" id="ssrf-port-input" class="ip-input" placeholder="80" value="80"
+                            style="margin-bottom: 0;" oninput="generateSSRF()">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="ssrf-path-input"
+                            style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Path
+                            (Optional)</label>
+                        <input type="text" id="ssrf-path-input" class="ip-input" placeholder="/admin"
+                            style="margin-bottom: 0;" oninput="generateSSRF()">
+                    </div>
+                </div>
+                <!-- Floating Copy Button -->
+                <button onclick="copyAllPayloads()" id="fab-copy-btn" title="Copy All Payloads">
+                    Copy All Payloads
+                </button>
+                <style>
+                    #fab-copy-btn {
+                        position: fixed;
+                        bottom: 140px;
+                        /* Above back-to-top (20px) and hint (80px) */
+                        right: 20px;
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 50%;
+                        background: var(--primary-color);
+                        color: var(--bg-color);
+                        border: none;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                        font-size: 9px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        z-index: 9999;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        text-align: center;
+                        line-height: 1.2;
+                        padding: 8px;
+                        word-wrap: break-word;
+                        text-transform: uppercase;
+                    }
 
-            <div class="output-block" id="ssrf-protocols-container">
-                <h3>1 - Protocol Schemes</h3>
+                    @media (max-width: 768px) {
+                        #fab-copy-btn {
+                            bottom: 115px;
+                            /* Adjust for mobile btt (15px) and hint (65px) */
+                            right: 15px;
+                            width: 40px;
+                            height: 40px;
+                            font-size: 8px;
+                        }
+                    }
+
+                    #fab-copy-btn:hover {
+                        transform: scale(1.1);
+                        box-shadow: 0 6px 20px rgba(0, 255, 65, 0.6);
+                    }
+
+                    #fab-copy-btn:active {
+                        transform: scale(0.95);
+                    }
+
+                    /* Hide initially, show when SSRF section is visible */
+                    #ssrf-section[style*="display: none"]~#fab-copy-btn {
+                        display: none;
+                    }
+                </style>
             </div>
 
-            <div class="output-block" id="ssrf-ip-formats-container">
-                <h3>2 - IP Format Variations</h3>
-            </div>
+            <!-- SSRF Payloads Section -->
+            <div class="ssrf-section" id="ssrf-section" style="display: none; margin-top: 0; border-top: none;">
 
-            <div class="output-block" id="ssrf-encoding-container">
-                <h3>3 - URL Encoding</h3>
-            </div>
+                <div class="output-block" id="ssrf-protocols-container">
+                    <h3>1 - Protocol Schemes</h3>
+                </div>
 
-            <div class="output-block" id="ssrf-special-container">
-                <h3>4 - Special Bypasses</h3>
-            </div>
+                <div class="output-block" id="ssrf-ip-formats-container">
+                    <h3>2 - IP Format Variations</h3>
+                </div>
 
-            <div class="output-block" id="ssrf-obfuscation-container">
-                <h3>5 - Obfuscation (Unicode)</h3>
-            </div>
+                <div class="output-block" id="ssrf-encoding-container">
+                    <h3>3 - URL Encoding</h3>
+                </div>
 
-            <div class="output-block" id="ssrf-bypass-filters-container">
-                <h3>6 - Bypassing Filters</h3>
+                <div class="output-block" id="ssrf-special-container">
+                    <h3>4 - Special Bypasses</h3>
+                </div>
+
+                <div class="output-block" id="ssrf-obfuscation-container">
+                    <h3>5 - Obfuscation (Unicode)</h3>
+                </div>
+
+                <div class="output-block" id="ssrf-bypass-filters-container">
+                    <h3>6 - Bypassing Filters</h3>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Scripts -->
     <script src="../../js/main.js"></script>
     <script>
         // Navigation is already loaded, just ensure language is applied
-                if (typeof applyLanguage === 'function') {
-                    applyLanguage(localStorage.getItem('lang') || 'zh');
-                }
+        if (typeof applyLanguage === 'function') {
+            applyLanguage(localStorage.getItem('lang') || 'zh');
+        }
 
         // Initialize Defaults on Load
         window.addEventListener('DOMContentLoaded', initDefaults);
@@ -460,7 +507,7 @@
             }
 
             try {
-                    calculateIPv4(input);
+                calculateIPv4(input);
             } catch (e) {
                 // console.error(e);
                 results.style.display = 'none';
@@ -571,7 +618,7 @@
 
             // Determine if input is IP or domain
             const isIP = validateIPv4(ip);
-            
+
             // Extract IP parts (only valid for IP addresses)
             let parts = [];
             if (isIP) {
@@ -637,7 +684,7 @@
                 let portTag = '';
                 if (item.noPort) {
                     portTag = '<span class="tag tag-reserved" style="font-size: 0.7em; margin-left: 5px;">No Port</span>';
-            } else {
+                } else {
                     portTag = `<span class="tag tag-private" style="font-size: 0.7em; margin-left: 5px;">Port: ${port}</span>`;
                 }
                 strong.innerHTML = `${item.name} ${portTag}`;
@@ -970,11 +1017,11 @@
                 <span>📁 Extended Linux File Paths (${uniqueFiles.length} files)</span>
                 <span class="toggle-icon" style="transition: transform 0.3s ease;">▼</span>
             `;
-            toggleBtn.onmouseenter = function() {
+            toggleBtn.onmouseenter = function () {
                 this.style.borderColor = 'var(--primary-color)';
                 this.style.color = 'var(--primary-color)';
             };
-            toggleBtn.onmouseleave = function() {
+            toggleBtn.onmouseleave = function () {
                 this.style.borderColor = 'var(--border-color)';
                 this.style.color = 'var(--text-primary)';
             };
@@ -1001,7 +1048,7 @@
             });
 
             // Toggle functionality
-            toggleBtn.onclick = function() {
+            toggleBtn.onclick = function () {
                 const isExpanded = contentContainer.style.display !== 'none';
                 contentContainer.style.display = isExpanded ? 'none' : 'block';
                 const icon = this.querySelector('.toggle-icon');
@@ -1126,7 +1173,7 @@
 
             // Double URL encode specific characters
             function doubleUrlEncode(str, charsToEncode) {
-            let result = '';
+                let result = '';
                 for (let i = 0; i < str.length; i++) {
                     const char = str[i];
                     if (charsToEncode.includes(char)) {
@@ -1137,9 +1184,9 @@
                     } else {
                         result += char;
                     }
+                }
+                return result;
             }
-            return result;
-        }
 
             if (isIP) {
                 encodings.push({
@@ -1376,7 +1423,7 @@
         // Generate bypass filter payloads
         function generateBypassFiltersPayloads(ip, ipNum, parts, port, path, isIP) {
             const bypasses = [];
-            
+
             // Check if input is localhost-related (IP or domain)
             const isLocalhostIP = isIP && parts.length > 0 && parseInt(parts[0]) === 127;
             const isLocalhostDomain = ip.toLowerCase() === 'localhost';
@@ -1443,7 +1490,7 @@
             if (isIP) {
                 // Generate short-hand versions
                 const shorthandVariants = [];
-                
+
                 // 0/ -> 0.0.0.0
                 if (ip === '0.0.0.0' || parts[0] === '0') {
                     shorthandVariants.push(
@@ -1504,7 +1551,7 @@
                     const localhostIP = isLocalhostIP ? ip : '127.0.0.1';
                     const localhostIPNum = isLocalhostIP ? ipNum : 2130706433;
                     const localhostHex = `0x${(localhostIPNum >>> 0).toString(16)}`;
-                    
+
                     bypasses.push(
                         { name: `Decimal: ${localhostIPNum}`, url: `http://${localhostIPNum}:${port}${path}`, description: `${localhostIP} as decimal number. Common bypass for localhost filters.` },
                         { name: `Hex: ${localhostHex}`, url: `http://${localhostHex}:${port}${path}`, description: `${localhostIP} as hexadecimal. Common bypass for localhost filters.` }
@@ -1646,6 +1693,33 @@
             };
         }
     </script>
+
+    <!-- Standardized Footer -->
+    <footer class="unified-footer injected-footer">
+        <p>
+            <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135"
+                    target="_blank" class="author-link"
+                    style="color: inherit; text-decoration: none; transition: color 0.2s;"
+                    onmouseover="this.style.color='var(--primary-color)'"
+                    onmouseout="this.style.color='inherit'">1135</a></span>
+            <span style="opacity: 0.2;">|</span>
+            <span class="footer-donation-icons">
+                <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee" class="donation-link">
+                    <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                </a>
+                <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                </a>
+            </span>
+        </p>
+    </footer>
+
+    <!-- Floating Buttons -->
+    <div id="back-to-top" title="Back to Top">
+        <svg viewBox="0 0 24 24">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+        </svg>
+    </div>
 </body>
 
 </html>

@@ -14,18 +14,10 @@
                     <div class="dropdown-section">
                         <h4 class="dropdown-section-title" data-i18n="nav_web_security">Web攻防工具</h4>
                         <a href="../exec/index.html" class="dropdown-link" data-i18n="tool_exec_title">命令变形工具</a>
-                        <a href="../xss_weaponization/index.html" class="dropdown-link" data-i18n="tool_xss_title">
-                            XSS武器化</a>
+                        <a href="../xss_weaponization/index.html" class="dropdown-link"
+                            data-i18n="tool_xss_title">XSS武器化</a>
                         <a href="../diff_tool/index.html" class="dropdown-link" data-i18n="tool_diff_title">Diff工具</a>
-                        <a href="../universal_editor/index.html" class="dropdown-link"
-                            data-i18n="tool_editor_title">通用编辑器</a>
-                        <a href="../4/page.html" class="dropdown-link" data-i18n="tool_phishing_title">钓鱼页面演示demo</a>
-                        <a href="../2/download.html" class="dropdown-link" data-i18n="tool_download_title">下载工具
-                            (Download)</a>
-                        <a href="../3/read_clipborad.html" class="dropdown-link" data-i18n="tool_clipboard_title">剪贴板读取
-                            (Clipboard)</a>
-                        <a href="../5/read_localfile.html" class="dropdown-link" data-i18n="tool_localfile_title">本地文件读取
-                            (Local File)</a>
+                        <a href="../ip_tool/index.html" class="dropdown-link" data-i18n="tool_ip_title">IP工具箱</a>
                     </div>
                     <div class="dropdown-section">
                         <h4 class="dropdown-section-title" data-i18n="nav_general">通用工具</h4>
@@ -33,7 +25,8 @@
                             data-i18n="tool_md2pdf_title">Markdown to PDF</a>
                         <a href="../universal_editor/index.html" class="dropdown-link"
                             data-i18n="tool_editor_title">通用编辑器</a>
-                        <a href="../ip_tool/index.html" class="dropdown-link" data-i18n="tool_ip_title">IP工具箱</a>
+                        <a href="../totp-generator/index.html" class="dropdown-link"
+                            data-i18n="tool_totp_title">TOTP生成器</a>
                         <a href="https://gchq.github.io/CyberChef/" class="dropdown-link" target="_blank">
                             <span data-i18n="tool_cyberchef_title">CyberChef</span>
                             <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
@@ -42,6 +35,19 @@
                             <span data-i18n="tool_hemmelig_title">Hemmelig</span>
                             <span style="font-size: 0.75em; opacity: 0.7;" data-i18n="third_party">(第三方)</span>
                         </a>
+                    </div>
+                    <div class="dropdown-section">
+                        <h4 class="dropdown-section-title" data-i18n="nav_demos">演示/Demo</h4>
+                        <a href="../0/login.html" class="dropdown-link" data-i18n="tool_login_demo_title">登录页面演示</a>
+                        <a href="../2/download.html" class="dropdown-link" data-i18n="tool_download_title">HTML
+                            Smuggling</a>
+                        <a href="../3/read_clipborad.html" class="dropdown-link"
+                            data-i18n="tool_clipboard_title">剪贴板读取</a>
+                        <a href="../4/page.html" class="dropdown-link" data-i18n="tool_phishing_title">钓鱼页面演示</a>
+                        <a href="../5/read_localfile.html" class="dropdown-link"
+                            data-i18n="tool_localfile_title">本地文件读取</a>
+                        <a href="../demo_postMessage/index.html" class="dropdown-link"
+                            data-i18n="tool_postmessage_title">postMessage漏洞演示</a>
                     </div>
                 </div>
             </div>
@@ -71,7 +77,7 @@
     // Dropdown toggle functionality and Path Fixing
     (function () {
         const initNavigation = function () {
-            // Fix all navigation links based on current page location
+            // Determine if we are in a sub-site (e.g. sites/markdown2pdf/) or at root
             const currentPath = window.location.pathname;
             const isInSites = currentPath.includes('/sites/');
 
@@ -79,61 +85,55 @@
             const homeLink = document.getElementById('nav-home-link');
             if (homeLink) {
                 if (isInSites) {
-                    // If in a sub-site (e.g. sites/markdown2pdf/), go up two levels
+                    // In sub-site: go up two levels to root
                     homeLink.href = '../../index.html';
                 } else {
+                    // At root: stay at index.html
                     homeLink.href = 'index.html';
                 }
             }
 
-            // Fix all tool links in dropdown
-            const toolLinks = document.querySelectorAll('.dropdown-link[href^="../"]');
+            // Fix tool links
+            // Default links in HTML are relative to sub-sites: "../tool/index.html"
+            const toolLinks = document.querySelectorAll('.dropdown-link');
             toolLinks.forEach(link => {
                 const originalHref = link.getAttribute('href');
-                if (originalHref && originalHref.startsWith('../')) {
-                    // Extract the path after ../
-                    const pathAfterParent = originalHref.replace('../', '');
+                if (!originalHref) return;
 
-                    if (isInSites) {
-                        // Already in sites/ subdirectory, use relative path
-                        // e.g., ../exec/index.html -> ../exec/index.html (correct)
-                        // But if path already has sites/, remove it
-                        if (pathAfterParent.startsWith('sites/')) {
-                            link.href = '../' + pathAfterParent.replace('sites/', '');
-                        } else {
-                            link.href = originalHref; // Keep as is
-                        }
-                    } else {
-                        // At root level, need to add sites/ prefix
-                        // e.g., ../exec/index.html -> sites/exec/index.html
-                        if (!pathAfterParent.startsWith('sites/')) {
-                            link.href = 'sites/' + pathAfterParent;
-                        } else {
-                            link.href = pathAfterParent; // Already has sites/
-                        }
+                // Skip external links
+                if (originalHref.startsWith('http') || originalHref.startsWith('//')) return;
+
+                if (isInSites) {
+                    // We are in a sub-site (e.g. sites/markdown2pdf/)
+                    // The default links "../tool/index.html" are CORRECT for sibling tools.
+                    // No change needed.
+                } else {
+                    // We are at root (index.html)
+                    // The default links "../tool/index.html" are WRONG.
+                    // We need to change "../" to "sites/" to point to "sites/tool/index.html".
+                    if (originalHref.startsWith('../')) {
+                        link.href = originalHref.replace('../', 'sites/');
                     }
                 }
             });
 
-            // Tools dropdown
+            // Dropdown event listeners
             const dropdownBtn = document.querySelector('.nav-dropdown-btn');
             const dropdownContent = document.querySelector('.nav-dropdown-content');
 
             if (dropdownBtn && dropdownContent) {
-                // Remove existing listeners to avoid duplicates if re-initialized
+                // Clone to remove old listeners
                 const newBtn = dropdownBtn.cloneNode(true);
                 dropdownBtn.parentNode.replaceChild(newBtn, dropdownBtn);
 
                 newBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     dropdownContent.classList.toggle('show');
-                    // Close notes dropdown if open
                     const notesDropdown = document.querySelector('.notes-dropdown-content');
                     if (notesDropdown) notesDropdown.classList.remove('show');
                 });
             }
 
-            // Notes dropdown
             const notesBtn = document.querySelector('.notes-toggle-btn');
             const notesContent = document.querySelector('.notes-dropdown-content');
 
@@ -144,12 +144,10 @@
                 newBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     notesContent.classList.toggle('show');
-                    // Close tools dropdown if open
                     if (dropdownContent) dropdownContent.classList.remove('show');
                 });
             }
 
-            // Close dropdowns when clicking outside
             document.addEventListener('click', function (e) {
                 if (dropdownContent && !e.target.closest('.nav-dropdown')) {
                     dropdownContent.classList.remove('show');
@@ -158,9 +156,68 @@
                     notesContent.classList.remove('show');
                 }
             });
+            // 1. Unified Footer Injection
+            const injectFooter = function () {
+                // Add Back to Top button if not exists
+                if (!document.getElementById('back-to-top')) {
+                    const bttHTML = `
+                    <div id="back-to-top" title="Back to Top">
+                        <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>
+                    </div>`;
+                    document.body.insertAdjacentHTML('beforeend', bttHTML);
+                }
+
+                // Initialize Back to Top
+                const btt = document.getElementById('back-to-top');
+                if (btt && !btt.dataset.initialized) {
+                    window.addEventListener('scroll', () => {
+                        if (window.scrollY > 300) {
+                            btt.classList.add('show');
+                        } else {
+                            btt.classList.remove('show');
+                        }
+                    });
+                    btt.addEventListener('click', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    btt.dataset.initialized = "true";
+                }
+
+                // Remove existing footers that ARE NOT our injected footer
+                const existingFooters = document.querySelectorAll('footer:not(.injected-footer), .unified-footer:not(.injected-footer)');
+                existingFooters.forEach(f => f.remove());
+
+                // Check if already injected to avoid duplication on re-runs
+                if (document.querySelector('.injected-footer')) return;
+
+                const footerHTML = `
+                <footer class="unified-footer injected-footer">
+                    <p>
+                        <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135" target="_blank" class="author-link" style="color: inherit; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='inherit'">1135</a></span>
+                        <span style="opacity: 0.2;">|</span>
+                        <span class="footer-donation-icons">
+                            <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee" class="donation-link">
+                                <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                            </a>
+                            <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                                <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                            </a>
+                        </span>
+                    </p>
+                </footer>`;
+
+                document.body.insertAdjacentHTML('beforeend', footerHTML);
+            };
+
+            // Only run injection once the full page is likely ready
+            if (document.readyState === 'complete') {
+                injectFooter();
+            } else {
+                window.addEventListener('load', injectFooter);
+            }
         };
 
-        // Run logic immediately if elements exist (dynamic load), otherwise wait for DOM (static load)
+        // Run immediately if elements exist (dynamic load), otherwise wait
         if (document.querySelector('.nav-dropdown-btn')) {
             initNavigation();
         } else {
