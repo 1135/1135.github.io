@@ -8,6 +8,14 @@
   <link rel="icon" type="image/x-icon" href="../../favicon.ico">
   <link rel="stylesheet" href="../../css/style.css">
   <style>
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
     .main-content {
       padding: 40px 20px;
       max-width: 600px;
@@ -106,6 +114,15 @@
       color: var(--primary-color);
       text-decoration: none;
     }
+
+    /* Standardized Footer Overrides */
+    .unified-footer {
+      margin-top: 0 !important;
+      padding: 1.5rem 0 !important;
+      flex-shrink: 0;
+      background: var(--surface-color) !important;
+      border-top: 1px solid var(--border-color) !important;
+    }
   </style>
 </head>
 
@@ -113,67 +130,111 @@
   <!-- 导航栏 -->
   <div id="navigation-container"></div>
 
-  <section id="app" class="main-content">
-    <div class="totp-card">
-      <h1 style="text-align: center; margin-bottom: 30px; color: var(--primary-color);">TOTP Token Generator</h1>
+  <main class="main-content">
+    <section id="app">
+      <div class="totp-card">
+        <h1 style="text-align: center; margin-bottom: 30px; color: var(--primary-color);" data-i18n="totp_title">TOTP
+          Token Generator</h1>
 
-      <div class="field">
-        <label class="label">Your Secret Key</label>
-        <div class="control">
-          <input class="input" type="text" v-model="secret_key" placeholder="Base-32 Secret Key">
+        <div class="field">
+          <label class="label" data-i18n="totp_secret_label">Your Secret Key</label>
+          <div class="control">
+            <input class="input" type="text" v-model="secret_key" placeholder="Base-32 Secret Key">
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="label">Number of Digits</label>
-        <div class="control">
-          <input class="input" type="text" v-model="digits" placeholder="6">
+        <div class="field">
+          <label class="label" data-i18n="totp_digits_label">Number of Digits</label>
+          <div class="control">
+            <input class="input" type="text" v-model="digits" placeholder="6">
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label class="label">Token Period (seconds)</label>
-        <div class="control">
-          <input class="input" type="text" v-model="period" placeholder="30">
+        <div class="field">
+          <label class="label" data-i18n="totp_period_label">Token Period (seconds)</label>
+          <div class="control">
+            <input class="input" type="text" v-model="period" placeholder="30">
+          </div>
         </div>
-      </div>
 
-      <div class="content">
-        <span style="color: var(--text-secondary); font-size: 0.8rem;">Updating in {{ updatingIn }} seconds</span>
-        <div class="progress-bar">
-          <div class="progress-value" :style="{ width: ((period - updatingIn) / period * 100) + '%' }"></div>
+        <div class="content">
+          <span style="color: var(--text-secondary); font-size: 0.8rem;" data-i18n="totp_time_remaining">Updating in {{
+            updatingIn }} seconds</span>
+          <div class="progress-bar">
+            <div class="progress-value" :style="{ width: ((period - updatingIn) / period * 100) + '%' }"></div>
+          </div>
         </div>
-      </div>
 
-      <div class="token-display" id="token">{{ token }}</div>
+        <div class="token-display" id="token">{{ token }}</div>
 
-      <div style="overflow: hidden;">
-        <button class="copy-btn" id="clipboard-button" data-clipboard-target="#token">
-          COPY TOKEN
-        </button>
-      </div>
-    </div>
+        <div style="overflow: hidden;">
+          <button class="copy-btn" id="clipboard-button" data-clipboard-target="#token">
+            COPY TOKEN
+          </button>
+        </div>
+    </section>
+  </main>
 
-    <footer class="footer">
-      <p>Built by <a href="https://dan.hersam.com">Dan Hersam</a> | Optimized by arr0w1</p>
-    </footer>
-  </section>
+  <!-- Standardized Footer -->
+  <footer class="unified-footer injected-footer">
+    <p>
+      <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135" target="_blank"
+          class="author-link" style="color: inherit; text-decoration: none; transition: color 0.2s;"
+          onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='inherit'">1135</a></span>
+      <span style="opacity: 0.2;">|</span>
+      <span class="footer-donation-icons">
+        <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee" class="donation-link">
+          <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+        </a>
+        <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+          <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+        </a>
+      </span>
+    </p>
+  </footer>
+
+  <!-- Floating Buttons -->
+  <div id="back-to-top" title="Back to Top">
+    <svg viewBox="0 0 24 24">
+      <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+    </svg>
+  </div>
 
   <script src="js/vue-2.4.0.min.js"></script>
   <script src="js/otpauth-3.1.3.min.js"></script>
   <script src="js/clipboard-2.0.6.min.js"></script>
   <script src="js/app.js?v=1.0"></script>
+  <script src="../../js/main.js"></script>
 
   <script>
-    // 加载导航栏
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '../../navigation.html', true);
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        document.getElementById('navigation-container').innerHTML = xhr.responseText;
+    // Load Navigation synchronously to prevent page flash/jitter
+    (function () {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '../../navigation.html', false); // Synchronous to prevent flash
+      try {
+        xhr.send();
+        if (xhr.status === 200 || xhr.status === 0) {
+          const container = document.getElementById('navigation-container');
+          container.innerHTML = xhr.responseText;
+
+          // Manually execute scripts
+          const scripts = container.querySelectorAll('script');
+          scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.textContent = oldScript.textContent;
+            document.body.appendChild(newScript);
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load navigation:', e);
       }
-    };
-    xhr.send();
+    })();
+
+    // Apply language
+    if (typeof applyLanguage === 'function') {
+      applyLanguage(localStorage.getItem('lang') || 'zh');
+    }
   </script>
 </body>
 

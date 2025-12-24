@@ -9,12 +9,14 @@ const translations = {
         'nav_tools': '工具集合',
         'nav_web_security': 'Web攻防工具',
         'nav_general': '通用工具',
+        'nav_demos': '演示/Demo',
         'nav_notes_public': '公开笔记',
         'nav_notes_private': '私有笔记 🔒',
         'welcome_title': '欢迎来到 1135 工具集合',
         'welcome_desc': '这里收集了各种实用的在线工具，帮助您提高工作效率。所有工具都经过精心设计，确保良好的用户体验。',
         'cat_web_security': 'Web攻防工具',
         'cat_general': '通用工具',
+        'cat_demos': '演示/Demo',
         'tool_exec_title': '命令变形工具',
         'tool_exec_desc': '提供代码执行和测试功能，支持多种编程语言的在线运行环境。',
         'tool_xss_title': 'XSS武器化',
@@ -28,14 +30,20 @@ const translations = {
         'diff_unchanged_lines': '未变更行数',
         'diff_line_similarity': '行相似度',
         'third_party': '(第三方)',
-        'tool_phishing_title': '钓鱼页面演示demo',
-        'tool_phishing_desc': '钓鱼页面演示和测试工具，用于安全教育和防护测试。',
-        'tool_download_title': '下载工具 (Download)',
-        'tool_download_desc': '提供各种文件下载功能，支持多种格式和下载方式。',
-        'tool_clipboard_title': '剪贴板读取 (Clipboard)',
-        'tool_clipboard_desc': '安全的剪贴板内容读取工具，支持多种数据格式。',
-        'tool_localfile_title': '本地文件读取 (Local File)',
-        'tool_localfile_desc': '安全的本地文件读取工具，支持多种文件格式的预览和处理。',
+        'tool_phishing_title': '钓鱼页面演示',
+        'tool_phishing_desc': '钓鱼页面演示，用于安全教育和防护意识培训。',
+        'tool_download_title': 'HTML Smuggling',
+        'tool_download_desc': 'HTML走私技术演示，通过JavaScript动态生成并下载文件。',
+        'tool_clipboard_title': '剪贴板读取',
+        'tool_clipboard_desc': '演示浏览器剪贴板API，展示潜在的隐私风险。',
+        'tool_localfile_title': '本地文件读取',
+        'tool_localfile_desc': '演示file://协议下的本地文件读取，展示XSS/LFI漏洞利用场景。',
+        'tool_login_demo_title': '登录页面演示',
+        'tool_login_demo_desc': '模拟登录页面，用于演示钓鱼攻击和安全意识培训。',
+        'tool_postmessage_title': 'postMessage漏洞演示',
+        'tool_postmessage_desc': '演示window.postMessage API的安全问题和跨域通信漏洞。',
+        'tool_totp_title': 'TOTP生成器',
+        'tool_totp_desc': '生成基于时间的一次性密码(TOTP)，支持自定义密钥和参数。',
         'tool_md2pdf_title': 'Markdown to PDF',
         'tool_md2pdf_desc': '在线将Markdown转换为PDF，支持多种风格（黑客、学术、商务）和中文输出。',
         'tool_toc_title': 'Markdown ToC Generator',
@@ -70,6 +78,7 @@ const translations = {
         'toc_confirm_button': '生成目录',
         'toc_title_in_doc': '生成目录',
         'toc_insert_label': '插入目录',
+        'export_auto_title': '自动填写文件标题',
         'toc_copy_button': '复制到剪贴板',
         'code_block_space_error': '代码块标记（如 ```mermaid）前有空格，必须从行首开始（无缩进）',
         'code_block_trailing_space': '代码块标记后有空格，建议移除',
@@ -101,6 +110,42 @@ const translations = {
         'input_placeholder': '在此输入 Markdown 内容...',
         'notes_button_title': '笔记',
         'about_site_title': '关于本站',
+        // exec page
+        'exec_title': '命令变形工具',
+        'exec_desc': '生成各种命令执行payload，支持Java/Shell/Node.js/PowerShell等环境。',
+        'exec_input_label': '要执行的命令：',
+        'exec_env_label': '目标环境：',
+        'exec_preset_btn': '快捷命令',
+        'exec_copy': '复制',
+        'exec_copied': '已复制!',
+        // xss page
+        'xss_title': 'XSS 武器化',
+        'xss_desc': '生成隐蔽的XSS payload，在页面上不可见。',
+        'xss_input_label': 'JavaScript文件URL：',
+        // totp page
+        'totp_title': 'TOTP 生成器',
+        'totp_desc': '生成基于时间的一次性密码',
+        'totp_secret_label': '密钥 (Secret Key)',
+        'totp_digits_label': '位数',
+        'totp_period_label': '周期 (秒)',
+        'totp_algorithm_label': '算法',
+        'totp_current_code': '当前验证码',
+        'totp_time_remaining': '剩余时间',
+        // postmessage page
+        'postmessage_title': 'postMessage 漏洞演示',
+        'postmessage_desc': '演示 window.postMessage API 的安全问题',
+        'postmessage_same_domain': '同域 Iframe',
+        'postmessage_cross_domain': '跨域 Iframe',
+        'postmessage_send': '发送消息',
+        // demo pages
+        'demo_login_title': '登录页面演示',
+        'demo_login_desc': '模拟登录页面，用于钓鱼攻击演示',
+        'demo_download_title': 'HTML Smuggling 演示',
+        'demo_download_desc': '通过JavaScript动态生成并下载文件',
+        'demo_clipboard_title': '剪贴板读取演示',
+        'demo_clipboard_desc': '演示浏览器剪贴板API的隐私风险',
+        'demo_phishing_title': '钓鱼页面演示',
+        'demo_phishing_desc': '用于安全意识培训',
         'localfile_title': '本地文件读取工具',
         'localfile_desc': '尝试通过 <code>file:///</code> 协议读取敏感本地文件（需要存在漏洞的上下文）并发送到服务器。',
         'localfile_section1_title': '单文件测试 - 对比所有5种方法',
@@ -151,12 +196,14 @@ const translations = {
         'nav_tools': 'Tools',
         'nav_web_security': 'Web Security',
         'nav_general': 'General Tools',
+        'nav_demos': 'Demos',
         'nav_notes_public': 'Public Notes',
         'nav_notes_private': 'Private Notes 🔒',
         'welcome_title': 'Welcome to 1135 Tool Collection',
         'welcome_desc': 'A collection of practical online tools to improve your efficiency. All tools are designed for a great user experience.',
         'cat_web_security': 'Web Security',
         'cat_general': 'General Tools',
+        'cat_demos': 'Demos',
         'tool_exec_title': 'Command Obfuscator',
         'tool_exec_desc': 'Code execution and testing environment supporting multiple programming languages.',
         'tool_xss_title': 'XSS Weaponizer',
@@ -171,13 +218,19 @@ const translations = {
         'diff_line_similarity': 'Line Similarity',
         'third_party': '(Third Party)',
         'tool_phishing_title': 'Phishing Demo',
-        'tool_phishing_desc': 'Phishing page demo and testing tool for security education.',
-        'tool_download_title': 'Download Tools',
-        'tool_download_desc': 'File download utilities supporting various formats.',
+        'tool_phishing_desc': 'Phishing page demonstration for security awareness training.',
+        'tool_download_title': 'HTML Smuggling',
+        'tool_download_desc': 'HTML smuggling technique demo - dynamically generate and download files via JavaScript.',
         'tool_clipboard_title': 'Clipboard Reader',
-        'tool_clipboard_desc': 'Safe clipboard content reader supporting multiple data formats.',
+        'tool_clipboard_desc': 'Browser Clipboard API demonstration showing potential privacy risks.',
         'tool_localfile_title': 'Local File Reader',
-        'tool_localfile_desc': 'Safe local file reader for previewing and processing files.',
+        'tool_localfile_desc': 'Demonstrates local file reading via file:// protocol for XSS/LFI exploitation scenarios.',
+        'tool_login_demo_title': 'Login Page Demo',
+        'tool_login_demo_desc': 'Simulated login page for phishing attack demonstration and security awareness training.',
+        'tool_postmessage_title': 'postMessage Vulnerability Demo',
+        'tool_postmessage_desc': 'Demonstrates window.postMessage API security issues and cross-origin communication vulnerabilities.',
+        'tool_totp_title': 'TOTP Generator',
+        'tool_totp_desc': 'Generate Time-based One-Time Passwords (TOTP) with custom secret keys and parameters.',
         'tool_md2pdf_title': 'Markdown to PDF',
         'tool_md2pdf_desc': 'Convert Markdown to PDF online with multiple styles (Hacker, Academic, Business).',
         'tool_toc_title': 'Markdown ToC Generator',
@@ -214,6 +267,7 @@ const translations = {
         'toc_confirm_button': 'Generate ToC',
         'toc_title_in_doc': 'Table of Contents',
         'toc_insert_label': 'Insert ToC',
+        'export_auto_title': 'Auto-fill filename',
         'toc_copy_button': 'Copy to Clipboard',
         'code_block_space_error': 'Code block marker (e.g., ```mermaid) has leading spaces, must start at line beginning (no indentation)',
         'code_block_trailing_space': 'Code block marker has trailing spaces, should be removed',
@@ -245,6 +299,42 @@ const translations = {
         'input_placeholder': 'Type your markdown here...',
         'notes_button_title': 'Notes',
         'about_site_title': 'About This Site',
+        // exec page
+        'exec_title': 'EXEC Payload Generator',
+        'exec_desc': 'Generate weaponized Command Execution payloads for Java/Shell/Node.js/PowerShell.',
+        'exec_input_label': 'Command to execute:',
+        'exec_env_label': 'Target Environment:',
+        'exec_preset_btn': 'Quick Commands',
+        'exec_copy': 'Copy',
+        'exec_copied': 'Copied!',
+        // xss page
+        'xss_title': 'XSS Weaponizer',
+        'xss_desc': 'Generate stealthy XSS payloads that are invisible on the page.',
+        'xss_input_label': 'JavaScript file URL:',
+        // totp page
+        'totp_title': 'TOTP Generator',
+        'totp_desc': 'Generate Time-based One-Time Passwords',
+        'totp_secret_label': 'Secret Key',
+        'totp_digits_label': 'Digits',
+        'totp_period_label': 'Period (seconds)',
+        'totp_algorithm_label': 'Algorithm',
+        'totp_current_code': 'Current Code',
+        'totp_time_remaining': 'Time Remaining',
+        // postmessage page
+        'postmessage_title': 'postMessage Vulnerability Demo',
+        'postmessage_desc': 'Demonstrates window.postMessage API security issues',
+        'postmessage_same_domain': 'Same Domain Iframe',
+        'postmessage_cross_domain': 'Cross Domain Iframe',
+        'postmessage_send': 'Send Message',
+        // demo pages
+        'demo_login_title': 'Login Page Demo',
+        'demo_login_desc': 'Simulated login page for phishing demonstration',
+        'demo_download_title': 'HTML Smuggling Demo',
+        'demo_download_desc': 'Dynamically generate and download files via JavaScript',
+        'demo_clipboard_title': 'Clipboard Reader Demo',
+        'demo_clipboard_desc': 'Demonstrates browser Clipboard API privacy risks',
+        'demo_phishing_title': 'Phishing Page Demo',
+        'demo_phishing_desc': 'For security awareness training',
         'localfile_title': 'Local File Exfiltration Tool',
         'localfile_desc': 'Attempts to read sensitive local files via <code>file:///</code> protocol (requires vulnerable context) and exfiltrate them to a server.',
         'localfile_section1_title': 'Single File Test - Compare All 5 Methods',
@@ -458,16 +548,16 @@ const md2pdfSyncScroll = {
     /**
      * State Variables
      */
-    
+
     // Flag to prevent circular scrolling
     isSyncingScroll: false,
-    
+
     // Whether sync scroll feature is enabled (user preference)
     syncScrollEnabled: true,
-    
+
     // ID of the current animation frame (for cancellation)
     syncScrollAnimationId: null,
-    
+
     // Target scroll position for preview (updated dynamically during scrolling)
     syncScrollTarget: null,
 
@@ -477,15 +567,15 @@ const md2pdfSyncScroll = {
      * Called when user clicks the "Sync Scroll" checkbox in the UI.
      * Saves the preference to localStorage and cancels any ongoing animation if disabling.
      */
-    toggle: function() {
+    toggle: function () {
         const checkbox = document.getElementById('sync-scroll');
         this.syncScrollEnabled = checkbox ? checkbox.checked : true;
-        
+
         // Save preference to localStorage for persistence across page reloads
         if (checkbox) {
             localStorage.setItem('md2pdf_sync_scroll', this.syncScrollEnabled);
         }
-        
+
         // Cancel any ongoing animation if disabling the feature
         if (!this.syncScrollEnabled && this.syncScrollAnimationId) {
             cancelAnimationFrame(this.syncScrollAnimationId);
@@ -511,17 +601,17 @@ const md2pdfSyncScroll = {
      * - Easing: Cubic ease-out (1 - (1-t)^3)
      * - Uses requestAnimationFrame for 60fps smooth animation
      */
-    sync: function() {
+    sync: function () {
         // Early return if feature is disabled
         if (!this.syncScrollEnabled) return;
-        
+
         // Get DOM elements
         const input = document.getElementById('markdown-input');
         const output = document.getElementById('preview-output');
-        
+
         // Safety check: ensure elements exist
         if (!input || !output) return;
-        
+
         /**
          * Calculate scroll percentage in editor
          * Percentage = current scroll position / maximum scrollable distance
@@ -530,12 +620,12 @@ const md2pdfSyncScroll = {
         const inputScrollHeight = input.scrollHeight;
         const inputClientHeight = input.clientHeight;
         const inputMaxScroll = inputScrollHeight - inputClientHeight;
-        
+
         // If editor has no scrollable content, nothing to sync
         if (inputMaxScroll <= 0) return;
-        
+
         const scrollPercentage = inputScrollTop / inputMaxScroll;
-        
+
         /**
          * Apply same percentage to preview panel
          * Calculate target scroll position in preview based on the same percentage
@@ -543,12 +633,12 @@ const md2pdfSyncScroll = {
         const outputScrollHeight = output.scrollHeight;
         const outputClientHeight = output.clientHeight;
         const outputMaxScroll = outputScrollHeight - outputClientHeight;
-        
+
         if (outputMaxScroll > 0) {
             // Calculate target scroll position for preview
             const targetScrollTop = scrollPercentage * outputMaxScroll;
             this.syncScrollTarget = targetScrollTop;
-            
+
             /**
              * Start smooth scroll animation if not already running
              * If animation is already running, it will automatically pick up the new target
@@ -559,7 +649,7 @@ const md2pdfSyncScroll = {
                 const duration = 200; // Animation duration in milliseconds
                 const startTime = performance.now();
                 const self = this; // Preserve 'this' context for nested function
-                
+
                 /**
                  * Animation function called by requestAnimationFrame
                  * Implements cubic ease-out easing for smooth deceleration
@@ -567,24 +657,24 @@ const md2pdfSyncScroll = {
                 function animateScroll(currentTime) {
                     const elapsed = currentTime - startTime;
                     const progress = Math.min(elapsed / duration, 1); // Clamp to [0, 1]
-                    
+
                     /**
                      * Cubic ease-out easing function
                      * Creates smooth deceleration: fast start, slow end
                      * Formula: 1 - (1-t)^3
                      */
                     const ease = 1 - Math.pow(1 - progress, 3);
-                    
+
                     /**
                      * Get current target (may have changed if user is still scrolling)
                      * This allows the animation to smoothly follow continuous scrolling
                      */
                     const currentTarget = self.syncScrollTarget;
                     const currentDistance = currentTarget - startScrollTop;
-                    
+
                     // Apply eased scroll position
                     output.scrollTop = startScrollTop + currentDistance * ease;
-                    
+
                     /**
                      * Continue animation if:
                      * - Animation time hasn't exceeded duration (progress < 1)
@@ -597,7 +687,7 @@ const md2pdfSyncScroll = {
                         // Animation complete or very close to target
                         output.scrollTop = currentTarget;
                         self.syncScrollAnimationId = null;
-                        
+
                         /**
                          * If target has changed while animating (user is still scrolling),
                          * restart animation to smoothly follow the new target
@@ -612,7 +702,7 @@ const md2pdfSyncScroll = {
                         }
                     }
                 }
-                
+
                 // Start the animation
                 this.syncScrollAnimationId = requestAnimationFrame(animateScroll);
             }
@@ -634,21 +724,21 @@ const md2pdfSyncScroll = {
      * Note: Uses a separate flag (isSyncingReverse) to prevent circular updates
      * when syncing from preview to editor, while allowing editor->preview sync to work.
      */
-    syncReverse: function() {
+    syncReverse: function () {
         // Skip if sync is disabled
         if (!this.syncScrollEnabled) return;
-        
+
         // Skip if already syncing in reverse direction to prevent circular updates
         // Also skip if forward sync is running to prevent conflicts
         if (this.isSyncingReverse || this.isSyncingScroll) return;
-        
+
         // Get DOM elements
         const input = document.getElementById('markdown-input');
         const output = document.getElementById('preview-output');
-        
+
         // Safety check: ensure elements exist
         if (!input || !output) return;
-        
+
         /**
          * Calculate scroll percentage in preview
          * Percentage = current scroll position / maximum scrollable distance
@@ -657,12 +747,12 @@ const md2pdfSyncScroll = {
         const outputScrollHeight = output.scrollHeight;
         const outputClientHeight = output.clientHeight;
         const outputMaxScroll = outputScrollHeight - outputClientHeight;
-        
+
         // If preview has no scrollable content, nothing to sync
         if (outputMaxScroll <= 0) return;
-        
+
         const scrollPercentage = outputScrollTop / outputMaxScroll;
-        
+
         /**
          * Apply same percentage to editor
          * Calculate target scroll position in editor based on the same percentage
@@ -670,12 +760,12 @@ const md2pdfSyncScroll = {
         const inputScrollHeight = input.scrollHeight;
         const inputClientHeight = input.clientHeight;
         const inputMaxScroll = inputScrollHeight - inputClientHeight;
-        
+
         if (inputMaxScroll > 0) {
             // Calculate target scroll position for editor
             const targetScrollTop = scrollPercentage * inputMaxScroll;
             this.syncReverseTarget = targetScrollTop;
-            
+
             /**
              * Optimized: If animation is already running, just update the target
              * This prevents creating multiple animation loops and reduces jank
@@ -684,7 +774,7 @@ const md2pdfSyncScroll = {
                 // Animation already running, just update target - it will be picked up in next frame
                 return;
             }
-            
+
             /**
              * Start smooth scroll animation
              * Uses shorter duration and optimized easing for better responsiveness
@@ -694,7 +784,7 @@ const md2pdfSyncScroll = {
             const duration = 100; // Reduced from 200ms for more responsive feel
             const startTime = performance.now();
             const self = this; // Preserve 'this' context for nested function
-            
+
             /**
              * Animation function called by requestAnimationFrame
              * Implements linear interpolation for smoother, more predictable scrolling
@@ -702,23 +792,23 @@ const md2pdfSyncScroll = {
             function animateScroll(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1); // Clamp to [0, 1]
-                
+
                 /**
                  * Get current target (may have changed if user is still scrolling)
                  * This allows the animation to smoothly follow continuous scrolling
                  */
                 const currentTarget = self.syncReverseTarget;
                 const currentDistance = currentTarget - startScrollTop;
-                
+
                 /**
                  * Use linear interpolation for smoother scrolling during active user input
                  * This feels more responsive and less "laggy" than ease-out during scrolling
                  */
                 const ease = progress;
-                
+
                 // Apply interpolated scroll position
                 input.scrollTop = startScrollTop + currentDistance * ease;
-                
+
                 /**
                  * Continue animation if:
                  * - Animation time hasn't exceeded duration (progress < 1)
@@ -736,7 +826,7 @@ const md2pdfSyncScroll = {
                     self.isSyncingReverse = false;
                 }
             }
-            
+
             // Start the animation
             this.syncReverseAnimationId = requestAnimationFrame(animateScroll);
         }
@@ -749,12 +839,12 @@ const md2pdfSyncScroll = {
      * - Restore user's sync scroll preference from localStorage
      * - Update the checkbox state to match the preference
      */
-    init: function() {
+    init: function () {
         // Restore sync scroll preference from localStorage
         const savedSyncScroll = localStorage.getItem('md2pdf_sync_scroll');
         if (savedSyncScroll !== null) {
             this.syncScrollEnabled = savedSyncScroll === 'true';
-            
+
             // Update checkbox to reflect saved preference
             const syncScrollCheckbox = document.getElementById('sync-scroll');
             if (syncScrollCheckbox) {
@@ -774,14 +864,14 @@ if (typeof window !== 'undefined') {
 function i18n(key, params) {
     const lang = currentLang || 'zh';
     let text = translations[lang] && translations[lang][key] ? translations[lang][key] : key;
-    
+
     // Simple parameter replacement: {count} -> value
     if (params) {
         for (const param in params) {
             text = text.replace(new RegExp('\\{' + param + '\\}', 'g'), params[param]);
         }
     }
-    
+
     return text;
 }
 

