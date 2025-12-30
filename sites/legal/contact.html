@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - 1135 Tools</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .legal-content {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-glow);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .contact-card {
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .contact-card h3 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .contact-card p {
+            color: var(--text-primary);
+        }
+
+        .contact-card a {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navigation-container"></div>
+    <script>
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false);
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) {
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
+
+    <main class="legal-content">
+        <h1>Contact Us</h1>
+        <p>Have questions or need support? We're here to help.</p>
+
+        <div class="contact-info">
+            <div class="contact-card">
+                <h3>Technical Support</h3>
+                <p>For issues with tools or bug reports.</p>
+                <a href="mailto:support@1135.github.io">support@1135.github.io</a>
+            </div>
+
+            <div class="contact-card">
+                <h3>Business & Billing</h3>
+                <p>For partnership or billing inquiries.</p>
+                <a href="mailto:billing@1135.github.io">billing@1135.github.io</a>
+            </div>
+
+            <div class="contact-card">
+                <h3>Social</h3>
+                <p>Follow us for updates.</p>
+                <a href="https://github.com/1135" target="_blank">GitHub @1135</a>
+            </div>
+        </div>
+
+        <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                Response time: We typically respond within 24-48 business hours.
+            </p>
+        </div>
+    </main>
+
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>
