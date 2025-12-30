@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - 1135 Tools</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .legal-content {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navigation-container"></div>
+    <script>
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false);
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) {
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
+
+    <main class="legal-content">
+        <h1>About Us</h1>
+        <p>1135 Tools is a collection of productivity and security tools designed for developers, security researchers,
+            and hackers. Our mission is to provide fast, client-side tools that respect user privacy while offering a
+            premium user experience.</p>
+
+        <h2>Our Story</h2>
+        <p>Founded by 1135 (arr0w1), this project started as a set of personal scripts to simplify daily
+            tasks—converting markdown documents for reports, generating payloads for security research, and managing
+            networking data. Over time, it grew into a comprehensive platform used by thousands of users worldwide.</p>
+
+        <h2>Why Choose 1135 Tools?</h2>
+        <ul>
+            <li><strong>Privacy First:</strong> Most tools run entirely in your browser. Your data never touches our
+                servers.</li>
+            <li><strong>Performance:</strong> Optimized for speed and low resource usage.</li>
+            <li><strong>Modern Aesthetics:</strong> A consistent hacker-themed UI that is both beautiful and functional.
+            </li>
+            <li><strong>Open Source Roots:</strong> We believe in sharing tools and knowledge with the community.</li>
+        </ul>
+
+        <h2>Contact the Author</h2>
+        <div class="author-info">
+            <div>
+                <strong>1135 (arr0w1)</strong><br>
+                <span style="color: var(--text-secondary);">Security Researcher & Full Stack Developer</span><br>
+                <a href="https://github.com/1135" target="_blank" style="color: var(--primary-color);">GitHub: @1135</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

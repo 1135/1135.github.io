@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - 1135 Tools</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .pricing-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .pricing-card.popular {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(0, 184, 255, 0.1);
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 1.5rem 0;
+            color: var(--text-primary);
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .features li {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .features li::before {
+            content: '✓';
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .btn-pricing {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: var(--accent-color);
+            color: #000;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navigation-container"></div>
+    <script>
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false);
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) {
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
+
+    <div style="text-align: center; margin-top: 5rem;">
+        <h1 style="color: var(--primary-color); font-size: 2.5rem;">Simple & Transparent Pricing</h1>
+        <p style="color: var(--text-secondary); margin-top: 1rem;">Choose the plan that fits your developer workflow.
+        </p>
+    </div>
+
+    <main class="pricing-grid">
+        <!-- Community Plan -->
+        <div class="pricing-card">
+            <h2>Community</h2>
+            <p>For individuals and open-source</p>
+            <div class="price">$0<span>/forever</span></div>
+            <ul class="features">
+                <li>All Markdown tools</li>
+                <li>XSS & Security Demos</li>
+                <li>Unlimited local conversions</li>
+                <li>No account required</li>
+            </ul>
+            <a href="../../index.html" class="btn btn-primary btn-pricing">Get Started</a>
+        </div>
+
+        <!-- Pro Plan (placeholder for Stripe approval) -->
+        <div class="pricing-card popular">
+            <div class="badge">COMING SOON</div>
+            <h2>Pro</h2>
+            <p>For professional development</p>
+            <div class="price">$5<span>/month</span></div>
+            <ul class="features">
+                <li>Cloud synchronization</li>
+                <li>Custom PDF styles</li>
+                <li>Early access to new tools</li>
+                <li>Priority support</li>
+            </ul>
+            <button class="btn btn-secondary btn-pricing" disabled>Coming Soon</button>
+        </div>
+    </main>
+
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>

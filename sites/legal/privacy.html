@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - 1135 Tools</title>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .legal-content {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        ul {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navigation-container"></div>
+    <script>
+        (function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../../navigation.html', false);
+            try {
+                xhr.send();
+                if (xhr.status === 200 || xhr.status === 0) {
+                    const container = document.getElementById('navigation-container');
+                    container.innerHTML = xhr.responseText;
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = oldScript.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load navigation:', e);
+            }
+        })();
+    </script>
+
+    <main class="legal-content">
+        <h1>Privacy Policy</h1>
+        <p>Last Updated: December 30, 2025</p>
+
+        <h2>1. Introduction</h2>
+        <p>At 1135 Tools, we respect your privacy and are committed to protecting it. This Privacy Policy explains how
+            we collect, use, and safeguard your information when you use our website.</p>
+
+        <h2>2. Data Collection</h2>
+        <p><strong>Most of our tools, including the Markdown to PDF converter, are client-side only.</strong> This means
+            your data (such as the content you type or files you convert) never leaves your browser and is not stored on
+            our servers.</p>
+        <p>We may collect minimal technical data such as:</p>
+        <ul>
+            <li>IP address (for security and rate limiting).</li>
+            <li>Browser type and version.</li>
+            <li>Page usage statistics (to improve our tools).</li>
+        </ul>
+
+        <h2>3. Third-Party Services</h2>
+        <p>We use third-party CDNs (like Cloudflare, jsDelivr) to provide static assets. These services may collect
+            server logs in accordance with their own privacy policies.</p>
+        <p>If you use donation links (Buy Me a Coffee, Ko-fi, Stripe), those services will handle your payment
+            information directly according to their privacy policies.</p>
+
+        <h2>4. Cookies</h2>
+        <p>We use local storage only to remember your preferences, such as theme choice (dark/light) and language
+            settings. We do not use tracking or advertising cookies.</p>
+
+        <h2>5. Data Security</h2>
+        <p>We implement industry-standard security measures to protect any data we may handle. Since most processing is
+            done locally on your device, your sensitive data is inherently protected from server-side breaches.</p>
+
+        <h2>6. Changes to This Policy</h2>
+        <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
+            Privacy Policy on this page.</p>
+
+        <h2>7. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy, please contact us at: <a
+                href="mailto:privacy@1135.github.io" style="color: var(--primary-color);">privacy@1135.github.io</a></p>
+    </main>
+
+    <script src="../../js/main.js"></script>
+</body>
+
+</html>
