@@ -1126,6 +1126,75 @@
             border-color: #e2e8f0;
         }
 
+        /* Font Classes - Independent from themes */
+        .font-yahei #preview-output {
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif !important;
+        }
+
+        .font-simsun #preview-output {
+            font-family: 'SimSun', '宋体', serif !important;
+        }
+
+        .font-kaiti #preview-output {
+            font-family: 'KaiTi', '楷体', serif !important;
+        }
+
+        .font-simhei #preview-output {
+            font-family: 'SimHei', '黑体', sans-serif !important;
+        }
+
+        .font-fangsong #preview-output {
+            font-family: 'FangSong', '仿宋', serif !important;
+        }
+
+        .font-pingfang #preview-output {
+            font-family: 'PingFang SC', '苹方', sans-serif !important;
+        }
+
+        .font-noto #preview-output {
+            font-family: 'Noto Sans SC', '思源黑体', sans-serif !important;
+        }
+
+        .font-noto-serif #preview-output {
+            font-family: 'Noto Serif SC', '思源宋体', serif !important;
+        }
+
+        .font-wenquanyi #preview-output {
+            font-family: 'WenQuanYi Micro Hei', '文泉驿微米黑', sans-serif !important;
+        }
+
+        .font-stheiti #preview-output {
+            font-family: 'STHeiti', '华文黑体', sans-serif !important;
+        }
+
+        .font-stsong #preview-output {
+            font-family: 'STSong', '华文宋体', serif !important;
+        }
+
+        .font-stkaiti #preview-output {
+            font-family: 'STKaiti', '华文楷体', serif !important;
+        }
+
+        .font-arial #preview-output {
+            font-family: 'Arial', sans-serif !important;
+        }
+
+        .font-times #preview-output {
+            font-family: 'Times New Roman', serif !important;
+        }
+
+        .font-courier #preview-output {
+            font-family: 'Courier New', monospace !important;
+        }
+
+        .font-georgia #preview-output {
+            font-family: 'Georgia', serif !important;
+        }
+
+        .font-verdana #preview-output {
+            font-family: 'Verdana', sans-serif !important;
+        }
+
         /* General Code Block Styling - Fallback for themes without specific styles */
         #preview-output pre {
             background: #282c34;
@@ -3059,14 +3128,60 @@ Click the button to generate a ToC!
 
         function changeStyle() {
             const style = document.getElementById('style-selector').value;
-            workspace.className = 'workspace ' + style;
+            const currentFont = getCurrentFont();
+            // Preserve font class when changing style
+            workspace.className = 'workspace ' + style + (currentFont ? ' ' + currentFont : '');
             // Update preview to reflect style changes
             updatePreview();
         }
 
         function changeFont() {
-            const font = document.getElementById('font-selector').value;
-            output.style.fontFamily = font;
+            const fontSelector = document.getElementById('font-selector').value;
+            // Map font-family values to CSS class names
+            const fontMap = {
+                "'Microsoft YaHei', '微软雅黑', sans-serif": 'font-yahei',
+                "'SimSun', '宋体', serif": 'font-simsun',
+                "'KaiTi', '楷体', serif": 'font-kaiti',
+                "'SimHei', '黑体', sans-serif": 'font-simhei',
+                "'FangSong', '仿宋', serif": 'font-fangsong',
+                "'PingFang SC', '苹方', sans-serif": 'font-pingfang',
+                "'Noto Sans SC', '思源黑体', sans-serif": 'font-noto',
+                "'Noto Serif SC', '思源宋体', serif": 'font-noto-serif',
+                "'WenQuanYi Micro Hei', '文泉驿微米黑', sans-serif": 'font-wenquanyi',
+                "'STHeiti', '华文黑体', sans-serif": 'font-stheiti',
+                "'STSong', '华文宋体', serif": 'font-stsong',
+                "'STKaiti', '华文楷体', serif": 'font-stkaiti',
+                "'Arial', sans-serif": 'font-arial',
+                "'Times New Roman', serif": 'font-times',
+                "'Courier New', monospace": 'font-courier',
+                "'Georgia', serif": 'font-georgia',
+                "'Verdana', sans-serif": 'font-verdana'
+            };
+
+            const fontClass = fontMap[fontSelector];
+            if (fontClass) {
+                // Remove all existing font classes
+                const allFontClasses = Object.values(fontMap);
+                workspace.classList.remove(...allFontClasses);
+                // Add the new font class
+                workspace.classList.add(fontClass);
+            }
+        }
+
+        // Helper function to get current font class
+        function getCurrentFont() {
+            const fontClasses = [
+                'font-yahei', 'font-simsun', 'font-kaiti', 'font-simhei',
+                'font-fangsong', 'font-pingfang', 'font-noto', 'font-noto-serif',
+                'font-wenquanyi', 'font-stheiti', 'font-stsong', 'font-stkaiti',
+                'font-arial', 'font-times', 'font-courier', 'font-georgia', 'font-verdana'
+            ];
+            for (const fontClass of fontClasses) {
+                if (workspace.classList.contains(fontClass)) {
+                    return fontClass;
+                }
+            }
+            return '';
         }
 
         function changeBgColor() {
