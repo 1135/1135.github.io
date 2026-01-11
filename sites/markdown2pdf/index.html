@@ -1142,7 +1142,7 @@
         }
 
         .style-professional #preview-output th {
-            background: #4299e1;
+            background: #2c3e50;
             color: white;
             font-weight: 600;
         }
@@ -4220,7 +4220,8 @@ Click the button to generate a ToC!
             text-align: left; 
         }
         th { 
-            background: ${currentStyle === 'hacker' ? '#111' : '#f4f4f4'}; 
+            background: ${currentStyle === 'hacker' ? '#111' : currentStyle === 'professional' ? '#2c3e50' : '#f4f4f4'}; 
+            color: ${currentStyle === 'professional' ? '#ffffff' : 'inherit'};
             font-weight: bold; 
         }
         tr:nth-child(even) {
@@ -4345,7 +4346,8 @@ ${output.innerHTML}
             text-align: left; 
         }
         th { 
-            background: ${currentStyle === 'hacker' ? '#111' : '#f4f4f4'}; 
+            background: ${currentStyle === 'hacker' ? '#111' : currentStyle === 'professional' ? '#2c3e50' : '#f4f4f4'}; 
+            color: ${currentStyle === 'professional' ? '#ffffff' : 'inherit'};
             font-weight: bold; 
         }
         tr:nth-child(even) {
