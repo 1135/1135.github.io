@@ -73,6 +73,12 @@ const translations = {
         'ip_range_info': '地址范围',
         'ip_formats': '格式转换',
         'export_button': '导出',
+        'pdf_mobile': '.pdf (手机友好)',
+        'enable_bg_color': '自定义背景',
+        'enable_bg_color': '自定义背景',
+        'enable_watermark': 'PDF 水印',
+        'watermark_type_footer': '页脚 (右下角)',
+        'watermark_type_full': '全屏 (斜向)',
         'toc_button': '生成目录',
         'toc_modal_title': '生成目录设置',
         'toc_confirm_button': '生成目录',
@@ -99,6 +105,7 @@ const translations = {
         'font_kaiti': '楷体',
         'font_pingfang': '苹方',
         'font_noto': '思源黑体',
+        'font_noto_serif': '思源宋体',
         'font_source_han': '思源黑体 (Source Han)',
         'font_wenquanyi': '文泉驿微米黑',
         'font_stheiti': '华文黑体',
@@ -107,6 +114,11 @@ const translations = {
         'font_stkaiti': '华文楷体',
         'font_jhenghei': '微软正黑体',
         'font_simhei': '黑体',
+        'font_arial': 'Arial',
+        'font_times': 'Times New Roman',
+        'font_courier': 'Courier New',
+        'font_georgia': 'Georgia',
+        'font_verdana': 'Verdana',
         'input_placeholder': '在此输入 Markdown 内容...',
         'notes_button_title': '笔记',
         'about_site_title': '关于本站',
@@ -262,6 +274,12 @@ const translations = {
         'lang_toggle_title': 'Switch Language',
         'theme_toggle_title': 'Switch Theme',
         'export_button': 'Export',
+        'pdf_mobile': '.pdf (Mobile Friendly)',
+        'enable_bg_color': 'Custom Background',
+        'enable_bg_color': 'Custom Background',
+        'enable_watermark': 'PDF Watermark',
+        'watermark_type_footer': 'Footer (Bottom Right)',
+        'watermark_type_full': 'Full Page (Diagonal)',
         'toc_button': 'Generate ToC',
         'toc_modal_title': 'Generate Table of Contents',
         'toc_confirm_button': 'Generate ToC',
@@ -288,6 +306,7 @@ const translations = {
         'font_kaiti': 'KaiTi',
         'font_pingfang': 'PingFang',
         'font_noto': 'Noto Sans SC',
+        'font_noto_serif': 'Noto Serif SC',
         'font_source_han': 'Source Han Sans SC',
         'font_wenquanyi': 'WenQuanYi Micro Hei',
         'font_stheiti': 'STHeiti',
@@ -296,6 +315,11 @@ const translations = {
         'font_stkaiti': 'STKaiti',
         'font_jhenghei': 'Microsoft JhengHei',
         'font_simhei': 'SimHei',
+        'font_arial': 'Arial',
+        'font_times': 'Times New Roman',
+        'font_courier': 'Courier New',
+        'font_georgia': 'Georgia',
+        'font_verdana': 'Verdana',
         'input_placeholder': 'Type your markdown here...',
         'notes_button_title': 'Notes',
         'about_site_title': 'About This Site',
@@ -548,309 +572,192 @@ const md2pdfSyncScroll = {
     /**
      * State Variables
      */
-
-    // Flag to prevent circular scrolling
-    isSyncingScroll: false,
-
-    // Whether sync scroll feature is enabled (user preference)
     syncScrollEnabled: true,
 
-    // ID of the current animation frame (for cancellation)
-    syncScrollAnimationId: null,
+    // Tracks which side is currently driving the scroll: 'editor' or 'preview'
+    // 'editor' = User is scrolling the editor
+    // 'preview' = User is scrolling the preview
+    currentDriver: null,
 
-    // Target scroll position for preview (updated dynamically during scrolling)
-    syncScrollTarget: null,
+    // Timeout handle for clearing the driver lock
+    driverTimeout: null,
+
+    // Animation state
+    animationId: null,
+    targetScrollTop: null,
+
+    /**
+     * Initialize the feature
+     */
+    init: function () {
+        // Restore preference
+        const saved = localStorage.getItem('md2pdf_sync_scroll');
+        if (saved !== null) {
+            this.syncScrollEnabled = (saved === 'true');
+        }
+
+        const checkbox = document.getElementById('sync-scroll');
+        if (checkbox) {
+            checkbox.checked = this.syncScrollEnabled;
+        }
+    },
 
     /**
      * Toggle sync scroll feature on/off
-     * 
-     * Called when user clicks the "Sync Scroll" checkbox in the UI.
-     * Saves the preference to localStorage and cancels any ongoing animation if disabling.
      */
     toggle: function () {
         const checkbox = document.getElementById('sync-scroll');
         this.syncScrollEnabled = checkbox ? checkbox.checked : true;
 
-        // Save preference to localStorage for persistence across page reloads
         if (checkbox) {
             localStorage.setItem('md2pdf_sync_scroll', this.syncScrollEnabled);
         }
 
-        // Cancel any ongoing animation if disabling the feature
-        if (!this.syncScrollEnabled && this.syncScrollAnimationId) {
-            cancelAnimationFrame(this.syncScrollAnimationId);
-            this.syncScrollAnimationId = null;
+        if (!this.syncScrollEnabled) {
+            this.cancelAnimation();
+            this.clearDriver();
         }
     },
 
     /**
-     * Sync preview scroll with editor scroll using smooth animation
-     * 
-     * This function is called whenever the editor textarea is scrolled.
-     * It calculates the scroll percentage in the editor and applies the same
-     * percentage to the preview panel, creating synchronized scrolling.
-     * 
-     * Algorithm:
-     * 1. Calculate scroll percentage: (scrollTop / maxScroll) in editor
-     * 2. Apply same percentage to preview: targetScroll = percentage * previewMaxScroll
-     * 3. Animate preview scroll to target position using requestAnimationFrame
-     * 4. If user continues scrolling, update target and continue animation
-     * 
-     * Animation details:
-     * - Duration: 200ms (smooth but responsive)
-     * - Easing: Cubic ease-out (1 - (1-t)^3)
-     * - Uses requestAnimationFrame for 60fps smooth animation
+     * Set the current driver (lock)
+     * @param {string} driver - 'editor' or 'preview'
+     */
+    setDriver: function (driver) {
+        // If we are switching drivers, or renewing current driver
+        if (this.driverTimeout) {
+            clearTimeout(this.driverTimeout);
+        }
+
+        this.currentDriver = driver;
+
+        // Release lock after scroll events stop (debounce)
+        // 500ms to safely exceed the 200ms animation duration + buffer
+        // This prevents the scroll events generated by animateTo from being interpreted as user input
+        this.driverTimeout = setTimeout(() => {
+            this.currentDriver = null;
+        }, 500);
+    },
+
+    clearDriver: function () {
+        if (this.driverTimeout) {
+            clearTimeout(this.driverTimeout);
+        }
+        this.currentDriver = null;
+    },
+
+    cancelAnimation: function () {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    },
+
+    /**
+     * Sync preview scroll with editor scroll (Editor -> Preview)
      */
     sync: function () {
-        // Early return if feature is disabled
         if (!this.syncScrollEnabled) return;
 
-        // Get DOM elements
+        // If Preview is driving (user is scrolling preview), ignore this echo
+        if (this.currentDriver === 'preview') return;
+
+        // Lock as Editor
+        this.setDriver('editor');
+
         const input = document.getElementById('markdown-input');
         const output = document.getElementById('preview-output');
-
-        // Safety check: ensure elements exist
         if (!input || !output) return;
 
-        /**
-         * Calculate scroll percentage in editor
-         * Percentage = current scroll position / maximum scrollable distance
-         */
+        // Calculate percentage
         const inputScrollTop = input.scrollTop;
-        const inputScrollHeight = input.scrollHeight;
-        const inputClientHeight = input.clientHeight;
-        const inputMaxScroll = inputScrollHeight - inputClientHeight;
+        const inputMaxScroll = input.scrollHeight - input.clientHeight;
 
-        // If editor has no scrollable content, nothing to sync
         if (inputMaxScroll <= 0) return;
 
-        const scrollPercentage = inputScrollTop / inputMaxScroll;
+        const percentage = inputScrollTop / inputMaxScroll;
 
-        /**
-         * Apply same percentage to preview panel
-         * Calculate target scroll position in preview based on the same percentage
-         */
-        const outputScrollHeight = output.scrollHeight;
-        const outputClientHeight = output.clientHeight;
-        const outputMaxScroll = outputScrollHeight - outputClientHeight;
+        // Calculate target
+        const outputMaxScroll = output.scrollHeight - output.clientHeight;
+        if (outputMaxScroll <= 0) return;
 
-        if (outputMaxScroll > 0) {
-            // Calculate target scroll position for preview
-            const targetScrollTop = scrollPercentage * outputMaxScroll;
-            this.syncScrollTarget = targetScrollTop;
+        const target = percentage * outputMaxScroll;
 
-            /**
-             * Start smooth scroll animation if not already running
-             * If animation is already running, it will automatically pick up the new target
-             */
-            if (!this.syncScrollAnimationId) {
-                this.isSyncingScroll = true;
-                const startScrollTop = output.scrollTop;
-                const duration = 200; // Animation duration in milliseconds
-                const startTime = performance.now();
-                const self = this; // Preserve 'this' context for nested function
-
-                /**
-                 * Animation function called by requestAnimationFrame
-                 * Implements cubic ease-out easing for smooth deceleration
-                 */
-                function animateScroll(currentTime) {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1); // Clamp to [0, 1]
-
-                    /**
-                     * Cubic ease-out easing function
-                     * Creates smooth deceleration: fast start, slow end
-                     * Formula: 1 - (1-t)^3
-                     */
-                    const ease = 1 - Math.pow(1 - progress, 3);
-
-                    /**
-                     * Get current target (may have changed if user is still scrolling)
-                     * This allows the animation to smoothly follow continuous scrolling
-                     */
-                    const currentTarget = self.syncScrollTarget;
-                    const currentDistance = currentTarget - startScrollTop;
-
-                    // Apply eased scroll position
-                    output.scrollTop = startScrollTop + currentDistance * ease;
-
-                    /**
-                     * Continue animation if:
-                     * - Animation time hasn't exceeded duration (progress < 1)
-                     * - We're not yet close to target (within 0.5px)
-                     */
-                    if (progress < 1 && Math.abs(output.scrollTop - currentTarget) > 0.5) {
-                        // Continue animation
-                        self.syncScrollAnimationId = requestAnimationFrame(animateScroll);
-                    } else {
-                        // Animation complete or very close to target
-                        output.scrollTop = currentTarget;
-                        self.syncScrollAnimationId = null;
-
-                        /**
-                         * If target has changed while animating (user is still scrolling),
-                         * restart animation to smoothly follow the new target
-                         */
-                        if (Math.abs(output.scrollTop - self.syncScrollTarget) > 0.5) {
-                            self.syncScrollAnimationId = requestAnimationFrame(() => {
-                                self.sync(); // Recursively call to restart animation
-                            });
-                        } else {
-                            // Animation truly complete
-                            self.isSyncingScroll = false;
-                        }
-                    }
-                }
-
-                // Start the animation
-                this.syncScrollAnimationId = requestAnimationFrame(animateScroll);
-            }
-            // If animation is already running, it will pick up the new target automatically
-            // because syncScrollTarget is updated above, and the animation checks it each frame
-        }
+        // Animate
+        this.animateTo(output, target);
     },
 
     /**
      * Sync editor scroll with preview scroll (Preview -> Editor)
-     * 
-     * Reverse direction of sync(): calculates scroll percentage in the preview
-     * and applies the same percentage to the editor. Uses the same smooth animation
-     * technique for consistent user experience.
-     * 
-     * This allows bidirectional scrolling: scrolling the preview will scroll the editor
-     * to the corresponding position, and vice versa.
-     * 
-     * Note: Uses a separate flag (isSyncingReverse) to prevent circular updates
-     * when syncing from preview to editor, while allowing editor->preview sync to work.
      */
     syncReverse: function () {
-        // Skip if sync is disabled
         if (!this.syncScrollEnabled) return;
 
-        // Skip if already syncing in reverse direction to prevent circular updates
-        // Also skip if forward sync is running to prevent conflicts
-        if (this.isSyncingReverse || this.isSyncingScroll) return;
+        // If Editor is driving (user is scrolling editor), ignore this echo
+        if (this.currentDriver === 'editor') return;
 
-        // Get DOM elements
+        // Lock as Preview
+        this.setDriver('preview');
+
         const input = document.getElementById('markdown-input');
         const output = document.getElementById('preview-output');
-
-        // Safety check: ensure elements exist
         if (!input || !output) return;
 
-        /**
-         * Calculate scroll percentage in preview
-         * Percentage = current scroll position / maximum scrollable distance
-         */
+        // Calculate percentage
         const outputScrollTop = output.scrollTop;
-        const outputScrollHeight = output.scrollHeight;
-        const outputClientHeight = output.clientHeight;
-        const outputMaxScroll = outputScrollHeight - outputClientHeight;
+        const outputMaxScroll = output.scrollHeight - output.clientHeight;
 
-        // If preview has no scrollable content, nothing to sync
         if (outputMaxScroll <= 0) return;
 
-        const scrollPercentage = outputScrollTop / outputMaxScroll;
+        const percentage = outputScrollTop / outputMaxScroll;
 
-        /**
-         * Apply same percentage to editor
-         * Calculate target scroll position in editor based on the same percentage
-         */
-        const inputScrollHeight = input.scrollHeight;
-        const inputClientHeight = input.clientHeight;
-        const inputMaxScroll = inputScrollHeight - inputClientHeight;
+        // Calculate target
+        const inputMaxScroll = input.scrollHeight - input.clientHeight;
+        if (inputMaxScroll <= 0) return;
 
-        if (inputMaxScroll > 0) {
-            // Calculate target scroll position for editor
-            const targetScrollTop = scrollPercentage * inputMaxScroll;
-            this.syncReverseTarget = targetScrollTop;
+        const target = percentage * inputMaxScroll;
 
-            /**
-             * Optimized: If animation is already running, just update the target
-             * This prevents creating multiple animation loops and reduces jank
-             */
-            if (this.syncReverseAnimationId) {
-                // Animation already running, just update target - it will be picked up in next frame
-                return;
-            }
-
-            /**
-             * Start smooth scroll animation
-             * Uses shorter duration and optimized easing for better responsiveness
-             */
-            this.isSyncingReverse = true;
-            const startScrollTop = input.scrollTop;
-            const duration = 100; // Reduced from 200ms for more responsive feel
-            const startTime = performance.now();
-            const self = this; // Preserve 'this' context for nested function
-
-            /**
-             * Animation function called by requestAnimationFrame
-             * Implements linear interpolation for smoother, more predictable scrolling
-             */
-            function animateScroll(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1); // Clamp to [0, 1]
-
-                /**
-                 * Get current target (may have changed if user is still scrolling)
-                 * This allows the animation to smoothly follow continuous scrolling
-                 */
-                const currentTarget = self.syncReverseTarget;
-                const currentDistance = currentTarget - startScrollTop;
-
-                /**
-                 * Use linear interpolation for smoother scrolling during active user input
-                 * This feels more responsive and less "laggy" than ease-out during scrolling
-                 */
-                const ease = progress;
-
-                // Apply interpolated scroll position
-                input.scrollTop = startScrollTop + currentDistance * ease;
-
-                /**
-                 * Continue animation if:
-                 * - Animation time hasn't exceeded duration (progress < 1)
-                 * - We're not yet close to target (within 1px for smoother feel)
-                 * - Target hasn't changed significantly (user is still scrolling)
-                 */
-                const distanceToTarget = Math.abs(input.scrollTop - currentTarget);
-                if (progress < 1 && distanceToTarget > 1) {
-                    // Continue animation
-                    self.syncReverseAnimationId = requestAnimationFrame(animateScroll);
-                } else {
-                    // Animation complete or very close to target
-                    input.scrollTop = currentTarget;
-                    self.syncReverseAnimationId = null;
-                    self.isSyncingReverse = false;
-                }
-            }
-
-            // Start the animation
-            this.syncReverseAnimationId = requestAnimationFrame(animateScroll);
-        }
+        // Animate
+        this.animateTo(input, target);
     },
 
     /**
-     * Initialize sync scroll feature
-     * 
-     * Should be called on page load (DOMContentLoaded) to:
-     * - Restore user's sync scroll preference from localStorage
-     * - Update the checkbox state to match the preference
+     * Smooth scroll animation
      */
-    init: function () {
-        // Restore sync scroll preference from localStorage
-        const savedSyncScroll = localStorage.getItem('md2pdf_sync_scroll');
-        if (savedSyncScroll !== null) {
-            this.syncScrollEnabled = savedSyncScroll === 'true';
+    animateTo: function (element, target) {
+        this.targetScrollTop = target;
 
-            // Update checkbox to reflect saved preference
-            const syncScrollCheckbox = document.getElementById('sync-scroll');
-            if (syncScrollCheckbox) {
-                syncScrollCheckbox.checked = this.syncScrollEnabled;
+        // If already animating, just update target
+        if (this.animationId) return;
+
+        const start = element.scrollTop;
+        const startTime = performance.now();
+        const duration = 200; // ms
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Cubic ease-out
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            const currentTarget = this.targetScrollTop;
+            element.scrollTop = start + (currentTarget - start) * ease;
+
+            if (progress < 1 && Math.abs(element.scrollTop - currentTarget) > 0.5) {
+                this.animationId = requestAnimationFrame(animate);
+            } else {
+                element.scrollTop = currentTarget;
+                this.animationId = null;
+
+                // Check if target moved while we were animating
+                if (Math.abs(element.scrollTop - this.targetScrollTop) > 1) {
+                    this.animationId = requestAnimationFrame(() => this.animateTo(element, this.targetScrollTop));
+                }
             }
-        }
+        };
+
+        this.animationId = requestAnimationFrame(animate);
     }
 };
 

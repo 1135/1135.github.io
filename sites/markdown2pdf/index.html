@@ -32,6 +32,12 @@
     <script src="../../js/vendor/mermaid.min.js"></script>
     <!-- Use jsdelivr for html-docx-js to avoid CORB issues -->
     <script src="../../js/vendor/html-docx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/watermark-dom@2.3.0/index.min.js"></script> <!-- Watermark Library -->
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
     <script src="../../js/main.js"
         onerror="console.error('Failed to load main.js. Please check the file path and network connection.');"></script>
     <script>
@@ -96,13 +102,25 @@
                     console.log('MathJax is initialized, and the initial typeset is queued');
 
                     // Trigger updatePreview after MathJax is ready to render any LaTeX in the default content
-                    // This ensures LaTeX is rendered even if the page loaded before MathJax was ready
-                    setTimeout(() => {
+                    // rely on MathJax.startup.promise which resolves when initial typesetting is done
+                    MathJax.startup.promise.then(() => {
                         if (document.getElementById('enable-latex')?.checked) {
-                            console.log('MathJax ready - triggering updatePreview to render LaTeX');
-                            updatePreview();
+                            // Only trigger updatePreview if the page is fully loaded.
+                            // If the page is still loading, the DOMContentLoaded listener will handle the initial render
+                            // (which includes setting the input value and calling updatePreview).
+                            // This prevents rendering empty content or race conditions.
+                            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                                setTimeout(() => {
+                                    if (typeof updatePreview === 'function') {
+                                        console.log('MathJax ready & Page loaded - updating preview');
+                                        updatePreview();
+                                    }
+                                }, 50);
+                            } else {
+                                console.log('MathJax ready but Page loading - waiting for DOMContentLoaded');
+                            }
                         }
-                    }, 100);
+                    });
                 }
             }
         };
@@ -892,19 +910,26 @@
         }
 
         .style-dark #preview-output table {
-            border-color: #3e3e42;
+            border-color: #404040;
         }
 
         .style-dark #preview-output th {
-            background-color: #2d2d30;
+            background-color: #2d2d2d;
+            color: #d4d4d4;
+            border-color: #404040;
         }
 
         .style-dark #preview-output td {
-            border-color: #3e3e42;
+            border-color: #404040;
+            color: #d4d4d4;
         }
 
         .style-dark #preview-output tr:nth-child(even) {
             background-color: #252526;
+        }
+
+        .style-dark #preview-output tr:hover {
+            background-color: #2a2d2e;
         }
 
         /* Style: Colorful */
@@ -1403,6 +1428,22 @@
                 font-family: 'Consolas', 'Monaco', monospace !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                border-right: none !important;
+                /* Fix potential white border */
+            }
+
+            /* Ensure page background is dark for dark theme */
+            .style-dark #preview-output::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #1e1e1e !important;
+                z-index: -1;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .style-colorful #preview-output {
@@ -1759,6 +1800,145 @@
             }
         }
 
+        /* Mobile Friendly PDF Styles */
+        /* Mobile Friendly PDF Mode (Applied to Screen & Print) */
+        .mobile-pdf-mode {
+            /* Larger base font size for readability */
+            font-size: 18pt !important;
+            line-height: 1.6 !important;
+            /* Maximize width */
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 20px !important;
+            /* Add padding for screen view */
+            margin: 0 !important;
+        }
+
+        .mobile-pdf-mode h1 {
+            font-size: 24pt !important;
+            margin-top: 1em !important;
+            margin-bottom: 0.8em !important;
+        }
+
+        .mobile-pdf-mode h2 {
+            font-size: 20pt !important;
+            margin-top: 1.2em !important;
+            margin-bottom: 0.8em !important;
+        }
+
+        .mobile-pdf-mode h3 {
+            font-size: 18pt !important;
+            margin-top: 1.2em !important;
+            margin-bottom: 0.6em !important;
+        }
+
+        .mobile-pdf-mode p,
+        .mobile-pdf-mode li,
+        .mobile-pdf-mode table {
+            font-size: 18pt !important;
+        }
+
+        .mobile-pdf-mode pre {
+            padding: 1em !important;
+            margin: 1.5em 0 !important;
+            white-space: pre-wrap !important;
+            word-break: break-all !important;
+        }
+
+        .mobile-pdf-mode code {
+            font-size: 16pt !important;
+            font-family: 'Courier New', monospace !important;
+        }
+
+        @media print {
+            .mobile-pdf-mode {
+                padding: 0 !important;
+                /* Reset padding for print */
+            }
+
+            /* Remove margins from page rule when this class is active */
+            body.mobile-pdf-mode-active {
+                margin: 0 !important;
+            }
+
+            font-family: 'Courier New',
+            monospace !important;
+        }
+
+        /* Remove margins from page rule when this class is active */
+        /* Note: @page margins are controlled by browser print dialog largely, but this helps content flow */
+        body.mobile-pdf-mode-active {
+            margin: 0 !important;
+        }
+        }
+
+        /* Watermark Styles */
+        .watermark-container {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .watermark-footer {
+            bottom: 20px;
+            right: 20px;
+            font-size: 10pt;
+            color: rgba(128, 128, 128, 0.5);
+            font-family: sans-serif;
+        }
+
+        .watermark-full {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-evenly;
+            justify-content: space-evenly;
+            background: transparent;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .watermark-tile {
+            transform: rotate(-30deg);
+            font-size: 20pt;
+            color: rgba(128, 128, 128, 0.12);
+            font-family: sans-serif;
+            white-space: nowrap;
+            user-select: none;
+            /* 3 columns roughly */
+            flex: 0 0 33%;
+            height: 15vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ensure watermark prints on every page */
+        @media print {
+            .watermark-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 100vw;
+                z-index: 9999;
+                display: block !important;
+            }
+        }
+
+        /* Ensure watermark prints on every page */
+        @media print {
+            .watermark-container {
+                position: fixed;
+                /* Fixed position repeats on every page in most browsers */
+                display: block !important;
+            }
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -2028,9 +2208,41 @@
 
         <div class="control-divider"></div>
 
+        <div class="control-divider"></div>
+
+        <!-- Advanced Settings (Collapsible) -->
         <!-- Background Color -->
         <div class="control-group">
-            <input type="color" id="bg-color" value="#ffffff" onchange="changeBgColor()" class="color-picker">
+            <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="enable-bg-color" onchange="changeBgColor()">
+                <span data-i18n="enable_bg_color">自定义背景</span>
+            </label>
+            <input type="color" id="bg-color" value="#ffffff" onchange="changeBgColor()" class="color-picker"
+                style="margin-left: 8px; opacity: 0.5;" disabled>
+        </div>
+
+        <div class="control-divider"></div>
+
+        <!-- Watermark -->
+        <div class="control-group">
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="enable-watermark" onchange="updateWatermark()">
+                    <span data-i18n="enable_watermark">PDF Watermark</span>
+                </label>
+
+                <div id="watermark-controls"
+                    style="display: none; flex-direction: column; gap: 8px; padding-left: 20px;">
+                    <input type="text" id="watermark-text" value="Created with Markdown2PDF" oninput="updateWatermark()"
+                        style="width: 100%; padding: 4px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; font-size: 0.9rem;">
+
+                    <select id="watermark-type" onchange="updateWatermark()"
+                        style="width: 100%; padding: 4px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; font-size: 0.9rem;">
+                        <option value="footer" data-i18n="watermark_type_footer">Footer (Bottom Right)</option>
+                        <option value="full" data-i18n="watermark_type_full">Full Page (Diagonal)</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="control-divider"></div>
@@ -2065,11 +2277,13 @@
 
         <!-- Export Actions Group -->
         <div class="control-group actions-group">
-            <select id="export-format" class="control-select">
+            <select id="export-format" class="control-select" onchange="updateExportMode()">
                 <option value="md">.md</option>
                 <option value="html">.html</option>
                 <option value="docx">.docx</option>
+
                 <option value="pdf" selected>.pdf</option>
+                <option value="pdf-mobile" data-i18n="pdf_mobile">.pdf (Mobile Friendly)</option>
             </select>
             <button class="btn btn-primary" onclick="handleExport()" data-i18n="export_button">导出</button>
         </div>
@@ -2304,90 +2518,94 @@ Click the button to generate a ToC!
 
         // Update line numbers display - Optimized for performance
         function updateLineNumbers(errorLines = []) {
-            const input = document.getElementById('markdown-input');
-            const lineNumbersContainer = document.getElementById('line-numbers');
-            const lines = input.value.split('\n');
-            const totalLines = lines.length;
+            requestAnimationFrame(() => {
+                const input = document.getElementById('markdown-input');
+                if (!input) return;
+                const lineNumbersContainer = document.getElementById('line-numbers');
+                const lines = input.value.split('\n');
+                const totalLines = lines.length;
 
-            // Get existing line number elements
-            const existingElements = lineNumbersContainer.children;
-            const existingCount = existingElements.length;
 
-            // 1. Add new elements if needed
-            if (totalLines > existingCount) {
-                const fragment = document.createDocumentFragment();
-                for (let i = existingCount + 1; i <= totalLines; i++) {
-                    const lineNumber = document.createElement('span');
-                    lineNumber.className = 'line-number';
-                    lineNumber.textContent = i;
-                    fragment.appendChild(lineNumber);
+                // Get existing line number elements
+                const existingElements = lineNumbersContainer.children;
+                const existingCount = existingElements.length;
+
+                // 1. Add new elements if needed
+                if (totalLines > existingCount) {
+                    const fragment = document.createDocumentFragment();
+                    for (let i = existingCount + 1; i <= totalLines; i++) {
+                        const lineNumber = document.createElement('span');
+                        lineNumber.className = 'line-number';
+                        lineNumber.textContent = i;
+                        fragment.appendChild(lineNumber);
+                    }
+                    lineNumbersContainer.appendChild(fragment);
                 }
-                lineNumbersContainer.appendChild(fragment);
-            }
 
-            // 2. Remove excess elements if needed
-            else if (totalLines < existingCount) {
-                for (let i = existingCount - 1; i >= totalLines; i--) {
-                    lineNumbersContainer.removeChild(existingElements[i]);
+                // 2. Remove excess elements if needed
+                else if (totalLines < existingCount) {
+                    for (let i = existingCount - 1; i >= totalLines; i--) {
+                        lineNumbersContainer.removeChild(existingElements[i]);
+                    }
                 }
-            }
 
-            // 3. Update error states
-            // We only need to touch elements that have errors or had errors
-            // First, clear all error states (this is fast if we track them, but for now we'll just loop)
-            // Optimization: only loop if we have errors or had errors previously
-            // For simplicity and correctness, we'll loop through all, but only touch DOM if class changes
+                // 3. Update error states
+                // We only need to touch elements that have errors or had errors
+                // First, clear all error states (this is fast if we track them, but for now we'll just loop)
+                // Optimization: only loop if we have errors or had errors previously
+                // For simplicity and correctness, we'll loop through all, but only touch DOM if class changes
 
-            const errorSet = new Set(errorLines);
+                const errorSet = new Set(errorLines);
 
-            for (let i = 0; i < totalLines; i++) {
-                const el = existingElements[i];
-                const lineNum = i + 1;
-                const hasError = errorSet.has(lineNum);
-                const isErrorClass = el.classList.contains('line-error');
+                for (let i = 0; i < totalLines; i++) {
+                    const el = existingElements[i];
+                    const lineNum = i + 1;
+                    const hasError = errorSet.has(lineNum);
+                    const isErrorClass = el.classList.contains('line-error');
 
-                if (hasError !== isErrorClass) {
-                    if (hasError) {
-                        el.classList.add('line-error');
+                    if (hasError !== isErrorClass) {
+                        if (hasError) {
+                            el.classList.add('line-error');
 
-                        // Add tooltip
-                        let tooltip = el.querySelector('.line-number-error-tooltip');
-                        if (!tooltip) {
-                            tooltip = document.createElement('div');
-                            tooltip.className = 'line-number-error-tooltip';
-                            el.appendChild(tooltip);
+                            // Add tooltip
+                            let tooltip = el.querySelector('.line-number-error-tooltip');
+                            if (!tooltip) {
+                                tooltip = document.createElement('div');
+                                tooltip.className = 'line-number-error-tooltip';
+                                el.appendChild(tooltip);
 
-                            // Add listeners only once
-                            el.addEventListener('mouseenter', function () {
-                                updateTooltipPosition(tooltip, el);
-                            });
-                            el.addEventListener('click', function () {
-                                updateTooltipPosition(tooltip, el);
-                            });
-                        }
-
-                        // Update tooltip text
-                        const errors = syntaxErrorsMap[lineNum] || [];
-                        const errorMessages = errors.map(e => {
-                            let msg = `行 ${i}: ${e.message}`;
-                            if (e.fix) {
-                                msg += `\n修复: ${e.fix}`;
+                                // Add listeners only once
+                                el.addEventListener('mouseenter', function () {
+                                    updateTooltipPosition(tooltip, el);
+                                });
+                                el.addEventListener('click', function () {
+                                    updateTooltipPosition(tooltip, el);
+                                });
                             }
-                            return msg;
-                        }).join('\n\n');
-                        tooltip.textContent = errorMessages;
 
-                    } else {
-                        el.classList.remove('line-error');
-                        // We keep the tooltip element but it won't be shown due to CSS
-                        // or we could remove it to save memory
-                        const tooltip = el.querySelector('.line-number-error-tooltip');
-                        if (tooltip) {
-                            el.removeChild(tooltip);
+                            // Update tooltip text
+                            const errors = syntaxErrorsMap[lineNum] || [];
+                            const errorMessages = errors.map(e => {
+                                let msg = `行 ${i}: ${e.message}`;
+                                if (e.fix) {
+                                    msg += `\n修复: ${e.fix}`;
+                                }
+                                return msg;
+                            }).join('\n\n');
+                            tooltip.textContent = errorMessages;
+
+                        } else {
+                            el.classList.remove('line-error');
+                            // We keep the tooltip element but it won't be shown due to CSS
+                            // or we could remove it to save memory
+                            const tooltip = el.querySelector('.line-number-error-tooltip');
+                            if (tooltip) {
+                                el.removeChild(tooltip);
+                            }
                         }
                     }
                 }
-            }
+            });
         }
 
         // Update tooltip position
@@ -3071,6 +3289,8 @@ Click the button to generate a ToC!
                                     hljs.highlightElement(el);
                                 }
 
+
+
                                 console.log('Highlighted element:', el.className); // Debug log
                             } catch (e) {
                                 console.error('Highlight error:', e, el);
@@ -3185,11 +3405,80 @@ Click the button to generate a ToC!
         }
 
         function changeBgColor() {
+            const enabled = document.getElementById('enable-bg-color').checked;
             const color = document.getElementById('bg-color').value;
-            output.style.backgroundColor = color;
+            const colorPicker = document.getElementById('bg-color');
+
+            // Update picker state
+            colorPicker.disabled = !enabled;
+            colorPicker.style.opacity = enabled ? '1' : '0.5';
+
+            if (enabled) {
+                output.style.backgroundColor = color;
+            } else {
+                output.style.backgroundColor = ''; // Clear inline style to strictly follow theme
+            }
         }
 
+        // Update Watermark using Library
+        function updateWatermark() {
+            const enabled = document.getElementById('enable-watermark').checked;
+            const controls = document.getElementById('watermark-controls');
+            const text = document.getElementById('watermark-text').value;
+            const type = document.getElementById('watermark-type').value;
+
+            // Toggle controls
+            controls.style.display = enabled ? 'flex' : 'none';
+
+            // Remove existing watermark (library usually appends to body or specific container with fixed pos)
+            // watermark-dom usually manages its own instance, but we might need to clear it.
+            // If the library attaches to body, we might need a way to remove it.
+            // Assuming watermark-dom exposes a global 'watermark'.
+
+            // Standard cleanup if possible, or just overwrite.
+            const existingNodes = document.querySelectorAll('.watermark_div'); // Specific to typical libs
+            existingNodes.forEach(node => node.remove());
+
+            // Also remove our custom one if it exists
+            const custom = document.getElementById('watermark');
+            if (custom) custom.remove();
+
+            if (enabled && text && typeof watermark !== 'undefined') {
+                if (type === 'full') {
+                    watermark.load({
+                        watermark_txt: text,
+                        watermark_x: 20,
+                        watermark_y: 20,
+                        watermark_rows: 0, // auto
+                        watermark_cols: 0, // auto
+                        watermark_x_space: 100,
+                        watermark_y_space: 50,
+                        watermark_color: 'rgba(128, 128, 128, 0.15)',
+                        watermark_fontsize: '24px',
+                        watermark_angle: 45
+                    });
+                } else {
+                    // Footer only - Custom implementation is better for single footer, 
+                    // but user asked for Library.
+                    // Libraries usually do full page tiling.
+                    // We'll stick to our custom Footer code for "Footer" mode as libraries are bad at single placement,
+                    // but use Library for "Full Page".
+
+                    const output = document.getElementById('preview-output');
+                    const wm = document.createElement('div');
+                    wm.id = 'watermark';
+                    wm.className = 'watermark-container watermark-footer';
+                    wm.textContent = text;
+                    output.appendChild(wm);
+                }
+            } else if (enabled && text) {
+                // Fallback if library fails
+                console.warn('Watermark library not loaded');
+            }
+        }
         // Toggle input area visibility
+
+
         function toggleInputVisibility() {
             const showInput = document.getElementById('show-input').checked;
             const editorContainer = document.querySelector('.editor-container');
@@ -3431,6 +3720,14 @@ Click the button to generate a ToC!
         function removeExistingToc(content) {
             if (!content) return content;
 
+            // 1. Try to find ToC by Markers (Robust Method)
+            const markerPattern = /<!-- TOC_START -->[\s\S]*?<!-- TOC_END -->\n*/;
+            if (markerPattern.test(content)) {
+                return content.replace(markerPattern, '');
+            }
+
+            // 2. Fallback: heuristic detection (Legacy/Safe Mode)
+
             // Get current language and ToC title
             const currentLang = localStorage.getItem('lang') || 'zh';
             const tocTitle = (typeof translations !== 'undefined' && translations[currentLang] && translations[currentLang]['toc_title_in_doc'])
@@ -3440,83 +3737,61 @@ Click the button to generate a ToC!
             // Escape special regex characters in tocTitle
             const escapedTitle = tocTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-            // Pattern to match: ## Table of Contents (or ## 生成目录) at the start of a line
-            // Can be at the beginning of content or after newline
-            const tocHeaderPattern = new RegExp(`(^|\\n)##\\s+${escapedTitle}\\s*$`, 'm');
+            // Find header: ## Table of Contents
+            const tocHeaderPattern = new RegExp(`(^|\\n)##\\s+${escapedTitle}\\s*(\\n|$)`);
             const match = content.match(tocHeaderPattern);
 
             if (!match) {
                 return content; // No ToC found
             }
 
-            const tocHeaderIndex = match.index + (match[1] ? match[1].length : 0);
+            const headerIndex = match.index + (match[1] ? match[1].length : 0);
+            const afterHeader = content.substring(headerIndex + match[0].length);
 
-            // Find the end of ToC section
-            // ToC ends with two consecutive newlines (empty line) followed by content
-            // Or ends before the next ## header (if it exists)
-            let tocEndIndex = -1;
+            // Find end of ToC:
+            // It ends when we hit something that is NOT a list item or a blank line
+            // List item regex: starts with optional space, dash/star/plus or number dot, then space and link
+            const listLinePattern = /^\s*([-*+]|\d+\.)\s+\[/;
 
-            // Look for double newline after the header
-            const afterHeader = content.substring(tocHeaderIndex);
-            const doubleNewlineIndex = afterHeader.indexOf('\n\n\n');
-            const singleDoubleNewlineIndex = afterHeader.indexOf('\n\n');
+            const lines = afterHeader.split('\n');
+            let lineCountToRemove = 0;
 
-            // Find the next ## header (if any)
-            const nextHeaderMatch = afterHeader.match(/\n##\s+/);
-            const nextHeaderIndex = nextHeaderMatch ? nextHeaderMatch.index : -1;
-
-            // Determine the end position
-            if (doubleNewlineIndex !== -1) {
-                // Found triple newline (header + empty line + content)
-                tocEndIndex = tocHeaderIndex + doubleNewlineIndex + 3;
-            } else if (singleDoubleNewlineIndex !== -1) {
-                // Check if there's content after the double newline
-                const afterDoubleNewline = afterHeader.substring(singleDoubleNewlineIndex + 2);
-                if (afterDoubleNewline.trim().length > 0) {
-                    // There's content after, so this is the end
-                    tocEndIndex = tocHeaderIndex + singleDoubleNewlineIndex + 2;
+            // We assume the header line itself is part of ToC and should be removed
+            // Now check subsequent lines
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.trim() === '') {
+                    // Blank lines are part of ToC block
+                    lineCountToRemove++;
+                    continue;
                 }
-            }
-
-            // If we found a next header and it's before our calculated end, use that
-            if (nextHeaderIndex !== -1 && (tocEndIndex === -1 || tocHeaderIndex + nextHeaderIndex < tocEndIndex)) {
-                tocEndIndex = tocHeaderIndex + nextHeaderIndex + 1; // +1 to include the \n before ##
-            }
-
-            // If we still haven't found the end, look for the pattern: list items followed by empty line
-            if (tocEndIndex === -1) {
-                // Look for the last list item (starts with - or spaces followed by -)
-                const listPattern = /(\n(?:  )*- \[.*?\]\(#.*?\))+/g;
-                let lastMatch = null;
-                let matchResult;
-                while ((matchResult = listPattern.exec(afterHeader)) !== null) {
-                    lastMatch = matchResult;
+                if (listLinePattern.test(line)) {
+                    // List item is part of ToC
+                    lineCountToRemove++;
+                    continue;
                 }
-
-                if (lastMatch) {
-                    const afterList = afterHeader.substring(lastMatch.index + lastMatch[0].length);
-                    // Look for double newline after the list
-                    const emptyLineIndex = afterList.indexOf('\n\n');
-                    if (emptyLineIndex !== -1) {
-                        tocEndIndex = tocHeaderIndex + lastMatch.index + lastMatch[0].length + emptyLineIndex + 2;
-                    } else {
-                        // No empty line, use end of list
-                        tocEndIndex = tocHeaderIndex + lastMatch.index + lastMatch[0].length;
-                    }
-                }
+                // Found something that is not blank and not a list item -> End of ToC
+                break;
             }
 
-            // If we still can't find the end, remove from header to end of content
-            if (tocEndIndex === -1) {
-                // Fallback: remove everything from header to end
-                return content.substring(0, tocHeaderIndex).replace(/\n+$/, '');
-            }
+            // Reconstruct content
+            // content before header
+            const before = content.substring(0, headerIndex);
+            // content after header + removed lines
+            // We need to calculate the index. 
+            // afterHeader starts after match[0]. 
+            // We processed 'lineCountToRemove' lines from 'lines' array.
+            // join them back to get length?
+            const removedPart = lines.slice(0, lineCountToRemove).join('\n');
+            // Total length to remove from afterHeader start
+            // +1 for the newline after last processed line if we didn't reach end
+            const endOffset = removedPart.length + (lineCountToRemove > 0 ? 1 : 0);
 
-            // Remove the ToC section
-            const beforeToc = content.substring(0, tocHeaderIndex).replace(/\n+$/, '');
-            const afterToc = content.substring(tocEndIndex).replace(/^\s+/, '');
+            // Actually, simplified:
+            // just join remaining lines
+            const remainingLines = lines.slice(lineCountToRemove).join('\n');
 
-            return (beforeToc + '\n\n' + afterToc).replace(/\n{3,}/g, '\n\n');
+            return (before + '\n\n' + remainingLines).replace(/\n{3,}/g, '\n\n');
         }
 
         // Update ToC in document (auto-insert/update)
@@ -3635,7 +3910,9 @@ Click the button to generate a ToC!
             const tocTitle = (typeof translations !== 'undefined' && translations[currentLang] && translations[currentLang]['toc_title_in_doc'])
                 ? translations[currentLang]['toc_title_in_doc']
                 : (currentLang === 'zh' ? '生成目录' : 'Table of Contents');
-            const menus = [`## ${tocTitle}`, ""];
+
+            // Add markers for robust detection
+            const menus = [`<!-- TOC_START -->`, `## ${tocTitle}`, ""];
             let isCodeBlock = false;
             let topLevel = NaN;
             let previous = null;
@@ -3707,7 +3984,7 @@ Click the button to generate a ToC!
                 }
             }
 
-            return menus.join("\n") + "\n\n";
+            return menus.join("\n") + "\n\n<!-- TOC_END -->\n\n";
         }
 
 
@@ -3749,6 +4026,105 @@ Click the button to generate a ToC!
         }
 
 
+        // Helper to prepare content for export (Convert SVG/MathJax to Images)
+        async function prepareContentForExport(sourceElement) {
+            // 1. Clone the content
+            const clone = sourceElement.cloneNode(true);
+
+            // We need to work with the visible DOM for canvas sizing, 
+            // but we want to modify the clone. 
+            // Strategy: Render mapped items from original DOM to canvas, then replace in Clone.
+
+            // A. Handle SVGs (Mermaid)
+            const originalSvgs = sourceElement.querySelectorAll('svg');
+            const cloneSvgs = clone.querySelectorAll('svg');
+
+            for (let i = 0; i < originalSvgs.length; i++) {
+                const originalSvg = originalSvgs[i];
+                const cloneSvg = cloneSvgs[i];
+                if (!originalSvg || !cloneSvg) continue;
+
+                try {
+                    const rect = originalSvg.getBoundingClientRect();
+                    if (rect.width === 0 || rect.height === 0) continue;
+
+                    const serializer = new XMLSerializer();
+                    const svgStr = serializer.serializeToString(originalSvg);
+                    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(svgBlob);
+
+                    const img = new Image();
+                    img.src = url;
+
+                    await new Promise((resolve) => {
+                        img.onload = () => resolve();
+                        img.onerror = () => resolve(); // Skip if fail
+                    });
+
+                    const canvas = document.createElement('canvas');
+                    // High DPI
+                    const scale = 2;
+                    canvas.width = rect.width * scale;
+                    canvas.height = rect.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+
+                    const imgTag = document.createElement('img');
+                    imgTag.src = canvas.toDataURL('image/png');
+                    imgTag.style.maxWidth = '100%';
+                    imgTag.style.width = originalSvg.style.width || '100%';
+
+                    if (cloneSvg.parentNode) {
+                        cloneSvg.parentNode.replaceChild(imgTag, cloneSvg);
+                    }
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    console.error("SVG conversion failed", e);
+                }
+            }
+
+            // B. Handle MathJax (CHTML usually)
+            // html2canvas struggles with CHTML. We can try to rely on html2pdf's internal canvas 
+            // but often it misses fonts. 
+            // Best bet: If html2pdf is failing, we might need to rely on the fact that 
+            // MathJax v3 output is complex.
+            // Let's try to identify MathJax containers and rasterize them using html2canvas individually?
+            // Or simpler: Just rely on clean CSS for PDF.
+            // User reported "Garbled" -> likely encoding or font issue.
+            // Let's try converting MathJax to SVG output in settings? No, that requires reload.
+            // Rasterizing MathJax nodes:
+            if (window.html2canvas) {
+                const mathNodes = sourceElement.querySelectorAll('.MathJax');
+                const cloneMathNodes = clone.querySelectorAll('.MathJax');
+
+                for (let i = 0; i < mathNodes.length; i++) {
+                    const node = mathNodes[i];
+                    const cloneNode = cloneMathNodes[i];
+                    if (!node || !cloneNode) continue;
+
+                    try {
+                        const canvas = await html2canvas(node, {
+                            scale: 2,
+                            backgroundColor: null
+                        });
+                        const imgTag = document.createElement('img');
+                        imgTag.src = canvas.toDataURL('image/png');
+                        imgTag.style.display = 'inline-block';
+                        imgTag.style.maxHeight = '100%';
+
+                        if (cloneNode.parentNode) {
+                            cloneNode.parentNode.replaceChild(imgTag, cloneNode);
+                        }
+                    } catch (e) {
+                        console.error("MathJax conversion failed", e);
+                    }
+                }
+            }
+
+            return clone;
+        }
+
         // Download as Markdown
         function downloadMarkdown() {
             const input = document.getElementById('markdown-input');
@@ -3757,7 +4133,7 @@ Click the button to generate a ToC!
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = getFilenameFromFirstHeading('.md');
+            a.download = getDocTitle() + '.md';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -4007,11 +4383,160 @@ ${output.innerHTML}
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = getFilenameFromFirstHeading('.html');
+            a.download = getDocTitle() + '.html';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // Download PDF using html2pdf + pdf-lib (Byte-level Watermark)
+        async function downloadPDFWithLib() {
+            const output = document.getElementById('preview-output');
+            const watermarkText = document.getElementById('watermark-text').value;
+            const watermarkType = document.getElementById('watermark-type').value;
+
+            // 1. Prepare Content (Pre-render complex items)
+            // Note: html2pdf processes the element from DOM. 
+            // If we use 'clone', we must temporarily append it to DOM or use html2pdf's source handling carefully.
+            // html2pdf can take a string or element.
+            // Best approach: Temporarily replace output content or append clone hidden?
+            // Actually, html2pdf needs the element to be rendered to calculate layout.
+            // Swapping content in visible DOM causes flash.
+            // Overlay approach: Create a temporary container off-screen but visible?
+
+            // Simplified: We'll modify a clone, but since html2pdf needs layout, 
+            // we might just use the original output for layout, OR
+            // we rely on the fact that we just converted things to images which render fine in offscreen/clone if styles are matched.
+
+            // Let's try: Generate content-rich clone, append to body (hidden visibility), PDF it, remove it.
+            const clone = await prepareContentForExport(output);
+
+            // Apply current styles to clone wrapper to ensure font consistency
+            const wrapper = document.createElement('div');
+            wrapper.className = 'markdown-body'; // standard class
+            // Copy styles
+            wrapper.style.fontFamily = output.style.fontFamily;
+            wrapper.style.backgroundColor = output.style.backgroundColor || '#fff';
+            wrapper.style.color = window.getComputedStyle(output).color;
+            wrapper.style.padding = '40px';
+            wrapper.style.width = '210mm'; // A4 width approx
+            wrapper.style.position = 'absolute';
+            wrapper.style.left = '-9999px';
+            // wrapper.style.visibility = 'hidden'; // html2canvas sometimes ignores hidden
+            wrapper.appendChild(clone);
+            document.body.appendChild(wrapper);
+
+            const opt = {
+                margin: [10, 10, 10, 10], // mm
+                filename: getDocTitle() + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                // Generate PDF as ArrayBuffer
+                const worker = html2pdf().set(opt).from(clone).toPdf();
+                const pdfDoc = await worker.get('pdf'); // jsPDF object
+                const pdfBytes = await pdfDoc.output('arraybuffer');
+
+                // 2. Modify PDF with pdf-lib
+                const { PDFDocument, rgb, degrees } = PDFLib;
+                const pdf = await PDFDocument.load(pdfBytes);
+                const pages = pdf.getPages();
+
+                // Draw text on each page
+                for (const page of pages) {
+                    const { width, height } = page.getSize();
+
+                    if (watermarkType === 'full') {
+                        // Tiled Pattern - Tuned for less overlap
+                        // 2x2 or 2x3 grid is usually enough for A4
+                        const cols = 2;
+                        const rows = 3;
+                        const xGap = width / cols;
+                        const yGap = height / rows;
+
+                        for (let i = 0; i < cols; i++) {
+                            for (let j = 0; j < rows; j++) {
+                                // Offset odd rows for aesthetic
+                                const xOffset = (j % 2 === 0) ? 0 : xGap / 2;
+
+                                page.drawText(watermarkText, {
+                                    x: (i * xGap) + xOffset + 40,
+                                    y: (j * yGap) + 80,
+                                    size: 20, // Reduced from 24
+                                    color: rgb(0.6, 0.6, 0.6),
+                                    opacity: 0.15, // Reduced opacity
+                                    rotate: degrees(45),
+                                });
+                            }
+                        }
+                    } else {
+                        // Footer
+                        page.drawText(watermarkText, {
+                            x: width - 200,
+                            y: 20,
+                            size: 10,
+                            color: rgb(0.5, 0.5, 0.5),
+                            opacity: 0.5,
+                        });
+                    }
+                }
+
+                // 3. Save and Download
+                const modifiedPdfBytes = await pdf.save();
+                const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+
+                // Preview in new tab (User requested "preview")
+                const previewWindow = window.open(url, '_blank');
+                if (!previewWindow) {
+                    // Fallback to download if popup blocked
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = getDocTitle() + '.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+
+                // Small delay to revoke
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+            } catch (err) {
+                console.error("PDF Generation Failed:", err);
+                alert("PDF Generation Failed. Falling back to Browser Print.");
+                window.print();
+            } finally {
+                // Cleanup DOM
+                document.body.removeChild(wrapper);
+            }
+        }
+
+        // Helper to get document title for Exports
+        function getDocTitle() {
+            const autoTitleEnabled = document.getElementById('export-auto-title').checked;
+            if (autoTitleEnabled) {
+                const firstHeading = getFirstActualHeading();
+                if (firstHeading) {
+                    return firstHeading.textContent.trim();
+                }
+            }
+            return originalPageTitle; // Default: "Markdown to PDF" or similar
+        }
+
+        // Update output behavior
+        function updateExportMode() {
+            const format = document.getElementById('export-format').value;
+            const output = document.getElementById('preview-output');
+
+            if (format === 'pdf-mobile') {
+                output.classList.add('mobile-pdf-mode');
+            } else {
+                output.classList.remove('mobile-pdf-mode');
+            }
         }
 
         // Handle Export based on selected format
@@ -4024,199 +4549,214 @@ ${output.innerHTML}
                 downloadHTML();
             } else if (format === 'docx') {
                 downloadWord();
-            } else if (format === 'pdf') {
-                // Ensure document title is correct for PDF filename before printing
+            } else if (format === 'pdf' || format === 'pdf-mobile') {
                 const autoTitleEnabled = document.getElementById('export-auto-title').checked;
-                if (autoTitleEnabled) {
-                    const firstHeading = getFirstActualHeading();
-                    if (firstHeading) {
-                        document.title = firstHeading.textContent.trim();
-                    }
-                } else {
-                    document.title = originalPageTitle;
+                const watermarkEnabled = document.getElementById('enable-watermark').checked;
+
+                // Use Byte-level processing if Watermark is enabled (User Request)
+                // Otherwise use native Print for best quality
+                if (watermarkEnabled && format === 'pdf') {
+                    downloadPDFWithLib();
+                    return;
                 }
 
-                // Before printing, ensure all styles from preview are preserved
-                const output = document.getElementById('preview-output');
-                if (output) {
-                    // Get computed styles from preview
-                    const computedStyle = window.getComputedStyle(output);
-                    const fontFamily = output.style.fontFamily || computedStyle.fontFamily;
-                    const backgroundColor = output.style.backgroundColor || computedStyle.backgroundColor;
-                    const color = computedStyle.color;
-                    const lineHeight = computedStyle.lineHeight;
+                document.title = getDocTitle();
 
-                    // Apply styles directly to element for print
-                    if (fontFamily) {
-                        output.style.setProperty('font-family', fontFamily, 'important');
-                    }
-                    if (backgroundColor) {
-                        output.style.setProperty('background-color', backgroundColor, 'important');
-                        // Force color printing
-                        output.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                        output.style.setProperty('print-color-adjust', 'exact', 'important');
-                    }
-                    if (color) {
-                        output.style.setProperty('color', color, 'important');
-                    }
-                    if (lineHeight) {
-                        output.style.setProperty('line-height', lineHeight, 'important');
-                    }
-
-                    // Ensure all child elements also preserve their styles
-                    const allElements = output.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        const elStyle = window.getComputedStyle(el);
-
-                        // Preserve code block backgrounds (pre and .hljs)
-                        if (el.tagName === 'PRE' || el.classList.contains('hljs')) {
-                            const bg = elStyle.backgroundColor;
-                            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-                                el.style.setProperty('background-color', bg, 'important');
-                                el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                                el.style.setProperty('print-color-adjust', 'exact', 'important');
-                            }
-                            // Also preserve border color
-                            const borderColor = elStyle.borderColor;
-                            if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)') {
-                                el.style.setProperty('border-color', borderColor, 'important');
-                            }
-                        }
-
-                        // Preserve ALL highlight.js syntax highlighting colors
-                        // Check if element has any hljs- class
-                        const hasHljsClass = Array.from(el.classList).some(cls => cls.startsWith('hljs-'));
-                        if (hasHljsClass) {
-                            const textColor = elStyle.color;
-                            if (textColor && textColor !== 'rgb(0, 0, 0)' && textColor !== 'rgba(0, 0, 0, 0)') {
-                                el.style.setProperty('color', textColor, 'important');
-                                el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                                el.style.setProperty('print-color-adjust', 'exact', 'important');
-                            }
-                        }
-
-                        // Preserve inline code backgrounds
-                        if (el.tagName === 'CODE' && !el.closest('pre')) {
-                            const bg = elStyle.backgroundColor;
-                            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-                                el.style.setProperty('background-color', bg, 'important');
-                                el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                                el.style.setProperty('print-color-adjust', 'exact', 'important');
-                            }
-                            const textColor = elStyle.color;
-                            if (textColor) {
-                                el.style.setProperty('color', textColor, 'important');
-                            }
-                        }
-                    });
-
-                    // Ensure Mermaid diagrams (all types: flowchart, classDiagram, sequenceDiagram, etc.) are properly sized for print
-                    const mermaidElements = output.querySelectorAll('.mermaid');
-                    mermaidElements.forEach(mermaidEl => {
-                        // Ensure container has proper styling
-                        mermaidEl.style.setProperty('display', 'block', 'important');
-                        mermaidEl.style.setProperty('width', '100%', 'important');
-                        mermaidEl.style.setProperty('max-width', '100%', 'important');
-                        mermaidEl.style.setProperty('margin', '2em 0', 'important');
-                        mermaidEl.style.setProperty('padding', '1em 0', 'important');
-                        mermaidEl.style.setProperty('page-break-inside', 'avoid', 'important');
-                        mermaidEl.style.setProperty('page-break-after', 'auto', 'important');
-                        mermaidEl.style.setProperty('overflow', 'hidden', 'important');
-                        mermaidEl.style.setProperty('box-sizing', 'border-box', 'important');
-
-                        // Limit SVG size within Mermaid containers (works for all diagram types)
-                        const svgElements = mermaidEl.querySelectorAll('svg');
-                        svgElements.forEach(svg => {
-                            // Get actual SVG dimensions
-                            const svgWidthAttr = svg.getAttribute('width');
-                            const svgHeightAttr = svg.getAttribute('height');
-                            const svgViewBox = svg.getAttribute('viewBox');
-
-                            let svgWidth = null;
-                            let svgHeight = null;
-
-                            // Try to get dimensions from attributes first
-                            if (svgWidthAttr && !isNaN(parseFloat(svgWidthAttr))) {
-                                svgWidth = parseFloat(svgWidthAttr);
-                            }
-                            if (svgHeightAttr && !isNaN(parseFloat(svgHeightAttr))) {
-                                svgHeight = parseFloat(svgHeightAttr);
-                            }
-
-                            // If not available, try viewBox
-                            if (!svgWidth || !svgHeight) {
-                                if (svgViewBox) {
-                                    const viewBoxParts = svgViewBox.split(/\s+/);
-                                    if (viewBoxParts.length >= 4) {
-                                        svgWidth = parseFloat(viewBoxParts[2]);
-                                        svgHeight = parseFloat(viewBoxParts[3]);
-                                    }
-                                }
-                            }
-
-                            // If still not available, use computed style
-                            if (!svgWidth || !svgHeight) {
-                                const svgStyle = window.getComputedStyle(svg);
-                                svgWidth = parseFloat(svgStyle.width) || svg.clientWidth;
-                                svgHeight = parseFloat(svgStyle.height) || svg.clientHeight;
-                            }
-
-                            // Maximum dimensions for print (considering page margins)
-                            const maxPrintWidth = 700; // Leave room for page margins
-                            const maxPrintHeight = 500; // Limit height to prevent overlap
-
-                            // Calculate scale if needed
-                            let scale = 1;
-                            if (svgWidth && svgHeight) {
-                                const widthScale = svgWidth > maxPrintWidth ? maxPrintWidth / svgWidth : 1;
-                                const heightScale = svgHeight > maxPrintHeight ? maxPrintHeight / svgHeight : 1;
-                                scale = Math.min(widthScale, heightScale);
-                            }
-
-                            // Apply scaling if needed
-                            if (scale < 1 && svgWidth && svgHeight) {
-                                const newWidth = svgWidth * scale;
-                                const newHeight = svgHeight * scale;
-
-                                // Set explicit dimensions
-                                svg.setAttribute('width', newWidth);
-                                svg.setAttribute('height', newHeight);
-                                svg.style.setProperty('width', newWidth + 'px', 'important');
-                                svg.style.setProperty('height', newHeight + 'px', 'important');
-                            } else {
-                                // Just ensure max constraints
-                                svg.style.setProperty('max-width', '100%', 'important');
-                                svg.style.setProperty('width', '100%', 'important');
-                                svg.style.setProperty('height', 'auto', 'important');
-                            }
-
-                            // Always set max constraints
-                            svg.style.setProperty('max-width', maxPrintWidth + 'px', 'important');
-                            svg.style.setProperty('max-height', maxPrintHeight + 'px', 'important');
-                            svg.style.setProperty('display', 'block', 'important');
-                            svg.style.setProperty('margin', '0 auto', 'important');
-                            svg.style.setProperty('page-break-inside', 'avoid', 'important');
-                            svg.style.setProperty('box-sizing', 'border-box', 'important');
-                            svg.style.setProperty('overflow', 'visible', 'important');
-                        });
-
-                        // Also handle any nested containers or wrappers
-                        const mermaidContainers = mermaidEl.querySelectorAll('div, span');
-                        mermaidContainers.forEach(container => {
-                            if (container.querySelector('svg')) {
-                                container.style.setProperty('max-width', '100%', 'important');
-                                container.style.setProperty('overflow', 'hidden', 'important');
-                            }
-                        });
-                    });
+                if (format === 'pdf-mobile') {
+                    document.body.classList.add('mobile-pdf-mode-active');
                 }
 
-                // Small delay to ensure styles are applied before print dialog
+                window.print();
+
+                // Cleanup after print dialog
+                if (format === 'pdf-mobile') {
+                    // Slight delay to ensure print dialog has picked up styles
+                    setTimeout(() => {
+                        document.body.classList.remove('mobile-pdf-mode-active');
+                    }, 500);
+                }
+
+                // Restore original title
                 setTimeout(() => {
-                    window.print();
-                }, 100);
+                    document.title = originalPageTitle;
+                }, 1000);
             }
+            if (backgroundColor) {
+                output.style.setProperty('background-color', backgroundColor, 'important');
+                // Force color printing
+                output.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                output.style.setProperty('print-color-adjust', 'exact', 'important');
+            }
+            if (color) {
+                output.style.setProperty('color', color, 'important');
+            }
+            if (lineHeight) {
+                output.style.setProperty('line-height', lineHeight, 'important');
+            }
+
+            // Ensure all child elements also preserve their styles
+            const allElements = output.querySelectorAll('*');
+            allElements.forEach(el => {
+                const elStyle = window.getComputedStyle(el);
+
+                // Preserve code block backgrounds (pre and .hljs)
+                if (el.tagName === 'PRE' || el.classList.contains('hljs')) {
+                    const bg = elStyle.backgroundColor;
+                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                        el.style.setProperty('background-color', bg, 'important');
+                        el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        el.style.setProperty('print-color-adjust', 'exact', 'important');
+                    }
+                    // Also preserve border color
+                    const borderColor = elStyle.borderColor;
+                    if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)') {
+                        el.style.setProperty('border-color', borderColor, 'important');
+                    }
+                }
+
+                // Preserve ALL highlight.js syntax highlighting colors
+                // Check if element has any hljs- class
+                const hasHljsClass = Array.from(el.classList).some(cls => cls.startsWith('hljs-'));
+                if (hasHljsClass) {
+                    const textColor = elStyle.color;
+                    if (textColor && textColor !== 'rgb(0, 0, 0)' && textColor !== 'rgba(0, 0, 0, 0)') {
+                        el.style.setProperty('color', textColor, 'important');
+                        el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        el.style.setProperty('print-color-adjust', 'exact', 'important');
+                    }
+                }
+
+                // Preserve inline code backgrounds
+                if (el.tagName === 'CODE' && !el.closest('pre')) {
+                    const bg = elStyle.backgroundColor;
+                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                        el.style.setProperty('background-color', bg, 'important');
+                        el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        el.style.setProperty('print-color-adjust', 'exact', 'important');
+                    }
+                    const textColor = elStyle.color;
+                    if (textColor) {
+                        el.style.setProperty('color', textColor, 'important');
+                    }
+                }
+            });
+
+            // Ensure Mermaid diagrams (all types: flowchart, classDiagram, sequenceDiagram, etc.) are properly sized for print
+            const mermaidElements = output.querySelectorAll('.mermaid');
+            mermaidElements.forEach(mermaidEl => {
+                // Ensure container has proper styling
+                mermaidEl.style.setProperty('display', 'block', 'important');
+                mermaidEl.style.setProperty('width', '100%', 'important');
+                mermaidEl.style.setProperty('max-width', '100%', 'important');
+                mermaidEl.style.setProperty('margin', '2em 0', 'important');
+                mermaidEl.style.setProperty('padding', '1em 0', 'important');
+                mermaidEl.style.setProperty('page-break-inside', 'avoid', 'important');
+                mermaidEl.style.setProperty('page-break-after', 'auto', 'important');
+                mermaidEl.style.setProperty('overflow', 'hidden', 'important');
+                mermaidEl.style.setProperty('box-sizing', 'border-box', 'important');
+
+                // Limit SVG size within Mermaid containers (works for all diagram types)
+                const svgElements = mermaidEl.querySelectorAll('svg');
+                svgElements.forEach(svg => {
+                    // Get actual SVG dimensions
+                    const svgWidthAttr = svg.getAttribute('width');
+                    const svgHeightAttr = svg.getAttribute('height');
+                    const svgViewBox = svg.getAttribute('viewBox');
+
+                    let svgWidth = null;
+                    let svgHeight = null;
+
+                    // Try to get dimensions from attributes first
+                    if (svgWidthAttr && !isNaN(parseFloat(svgWidthAttr))) {
+                        svgWidth = parseFloat(svgWidthAttr);
+                    }
+                    if (svgHeightAttr && !isNaN(parseFloat(svgHeightAttr))) {
+                        svgHeight = parseFloat(svgHeightAttr);
+                    }
+
+                    // If not available, try viewBox
+                    if (!svgWidth || !svgHeight) {
+                        if (svgViewBox) {
+                            const viewBoxParts = svgViewBox.split(/\s+/);
+                            if (viewBoxParts.length >= 4) {
+                                svgWidth = parseFloat(viewBoxParts[2]);
+                                svgHeight = parseFloat(viewBoxParts[3]);
+                            }
+                        }
+                    }
+
+                    // If still not available, use computed style
+                    if (!svgWidth || !svgHeight) {
+                        const svgStyle = window.getComputedStyle(svg);
+                        svgWidth = parseFloat(svgStyle.width) || svg.clientWidth;
+                        svgHeight = parseFloat(svgStyle.height) || svg.clientHeight;
+                    }
+
+                    // Maximum dimensions for print (considering page margins)
+                    const maxPrintWidth = 700; // Leave room for page margins
+                    const maxPrintHeight = 500; // Limit height to prevent overlap
+
+                    // Calculate scale if needed
+                    let scale = 1;
+                    if (svgWidth && svgHeight) {
+                        const widthScale = svgWidth > maxPrintWidth ? maxPrintWidth / svgWidth : 1;
+                        const heightScale = svgHeight > maxPrintHeight ? maxPrintHeight / svgHeight : 1;
+                        scale = Math.min(widthScale, heightScale);
+                    }
+
+                    // Apply scaling if needed
+                    if (scale < 1 && svgWidth && svgHeight) {
+                        const newWidth = svgWidth * scale;
+                        const newHeight = svgHeight * scale;
+
+                        // Set explicit dimensions
+                        svg.setAttribute('width', newWidth);
+                        svg.setAttribute('height', newHeight);
+                        svg.style.setProperty('width', newWidth + 'px', 'important');
+                        svg.style.setProperty('height', newHeight + 'px', 'important');
+                    } else {
+                        // Just ensure max constraints
+                        svg.style.setProperty('max-width', '100%', 'important');
+                        svg.style.setProperty('width', '100%', 'important');
+                        svg.style.setProperty('height', 'auto', 'important');
+                    }
+
+                    // Always set max constraints
+                    svg.style.setProperty('max-width', maxPrintWidth + 'px', 'important');
+                    svg.style.setProperty('max-height', maxPrintHeight + 'px', 'important');
+                    svg.style.setProperty('display', 'block', 'important');
+                    svg.style.setProperty('margin', '0 auto', 'important');
+                    svg.style.setProperty('page-break-inside', 'avoid', 'important');
+                    svg.style.setProperty('box-sizing', 'border-box', 'important');
+                    svg.style.setProperty('overflow', 'visible', 'important');
+                });
+
+                // Also handle any nested containers or wrappers
+                const mermaidContainers = mermaidEl.querySelectorAll('div, span');
+                mermaidContainers.forEach(container => {
+                    if (container.querySelector('svg')) {
+                        container.style.setProperty('max-width', '100%', 'important');
+                        container.style.setProperty('overflow', 'hidden', 'important');
+                    }
+                });
+            });
+
+            setTimeout(() => {
+                window.print();
+
+                // cleanup
+                if (format === 'pdf-mobile') {
+                    // Delay cleanup to ensure print dialog captures the style
+                    // Note: Browsers block JS during print dialog, so this runs after
+                    // Only remove if it wasn't selected by user in UI
+                    if (document.getElementById('export-format').value !== 'pdf-mobile') {
+                        output.classList.remove('mobile-pdf-mode');
+                    }
+                    document.body.classList.remove('mobile-pdf-mode-active');
+                }
+            }, 100);
         }
+
 
         // Editor Introduction Text
         const editorIntro = `# Markdown Editor
@@ -5231,9 +5771,112 @@ $$ A = \\pi r^2 $$
                 syncPreviewScroll();
             });
 
+            // Sync scroll: Preview -> Editor
+            const output = document.getElementById('preview-output');
+            output.addEventListener('scroll', function () {
+                const syncScroll = getSyncScroll();
+                if (syncScroll && typeof syncScroll.syncReverse === 'function') {
+                    syncScroll.syncReverse();
+                }
+            });
+
+            // Preference Persistence
+            function savePreferences() {
+                try {
+                    const prefs = {
+                        enableLatex: document.getElementById('enable-latex').checked,
+                        enableMermaid: document.getElementById('enable-mermaid').checked,
+                        exportAutoTitle: document.getElementById('export-auto-title').checked,
+                        tocInsert: document.getElementById('toc-insert').checked,
+                        tocLevels: document.getElementById('toc-levels').value,
+                        enableWatermark: document.getElementById('enable-watermark').checked,
+                        watermarkText: document.getElementById('watermark-text').value,
+                        watermarkType: document.getElementById('watermark-type').value,
+                        enableBgColor: document.getElementById('enable-bg-color').checked,
+                        bgColor: document.getElementById('bg-color').value,
+                        exportFormat: document.getElementById('export-format').value
+                    };
+                    localStorage.setItem('markdown2pdf_prefs', JSON.stringify(prefs));
+                } catch (e) {
+                    console.error('Failed to save preferences:', e);
+                }
+            }
+
+            function loadPreferences() {
+                try {
+                    const prefsStr = localStorage.getItem('markdown2pdf_prefs');
+                    if (!prefsStr) return;
+
+                    const prefs = JSON.parse(prefsStr);
+
+                    // Helper to safe-set checkbox
+                    const setCheck = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el && typeof val === 'boolean') el.checked = val;
+                    };
+                    // Helper to safe-set value
+                    const setVal = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el && val !== undefined) el.value = val;
+                    };
+
+                    setCheck('enable-latex', prefs.enableLatex);
+                    setCheck('enable-mermaid', prefs.enableMermaid);
+                    setCheck('export-auto-title', prefs.exportAutoTitle);
+                    setCheck('toc-insert', prefs.tocInsert);
+                    setVal('toc-levels', prefs.tocLevels);
+
+                    setCheck('enable-watermark', prefs.enableWatermark);
+                    setVal('watermark-text', prefs.watermarkText);
+                    setVal('watermark-type', prefs.watermarkType);
+
+                    setCheck('enable-bg-color', prefs.enableBgColor);
+                    setVal('bg-color', prefs.bgColor);
+
+                    setVal('export-format', prefs.exportFormat);
+
+                    // Trigger updates based on loaded values
+                    // Watermark
+                    if (typeof updateWatermark === 'function') updateWatermark();
+                    // Bg Color
+                    if (typeof changeBgColor === 'function') changeBgColor();
+                    // Export Mode (Preview)
+                    if (typeof updateExportMode === 'function') updateExportMode();
+
+                } catch (e) {
+                    console.error('Failed to load preferences:', e);
+                }
+            }
+
+            // Attach listeners for auto-saving
+            function attachPreferenceListeners() {
+                const ids = [
+                    'enable-latex', 'enable-mermaid', 'export-auto-title', 'toc-insert', 'toc-levels',
+                    'enable-watermark', 'watermark-text', 'watermark-type',
+                    'enable-bg-color', 'bg-color', 'export-format'
+                ];
+
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('change', savePreferences);
+                        // For text inputs, also save on input (debounced or just on blur usually, but change covers blur)
+                        if (el.tagName === 'INPUT' && el.type === 'text') {
+                            el.addEventListener('input', () => {
+                                // Debounce save for text input
+                                if (window._saveTimer) clearTimeout(window._saveTimer);
+                                window._saveTimer = setTimeout(savePreferences, 500);
+                            });
+                        }
+                    }
+                });
+            }
+
             // Initial update - use requestIdleCallback to avoid blocking
             // This is especially important for HTTP protocol where navigation rendering might compete
             const performInitialRender = () => {
+                loadPreferences(); // Load prefs first
+                attachPreferenceListeners(); // Then attach listeners
                 updateLineNumbers();
                 updatePreview();
                 changeStyle();
