@@ -1860,16 +1860,12 @@
             body.mobile-pdf-mode-active {
                 margin: 0 !important;
             }
-
-            font-family: 'Courier New',
-            monospace !important;
         }
 
         /* Remove margins from page rule when this class is active */
         /* Note: @page margins are controlled by browser print dialog largely, but this helps content flow */
         body.mobile-pdf-mode-active {
             margin: 0 !important;
-        }
         }
 
         /* Watermark Styles */
@@ -2387,6 +2383,32 @@ Click the button to generate a ToC!
                 headerIds: true,     // Add IDs to headers
                 mangle: false,       // Don't mangle email addresses
                 headerPrefix: ''     // No prefix for header IDs (for better anchor matching)
+            });
+
+            // Add custom extension to handle CJK bold parsing (e.g. **text** adjacent to punctuation)
+            // Fixes: 中文**“...**
+            marked.use({
+                extensions: [{
+                    name: 'strong-cjk',
+                    level: 'inline',
+                    start(src) { return src.match(/\*\*/)?.index; },
+                    tokenizer(src, tokens) {
+                        const rule = /^\*\*([^\s*](?:[^*]|\*(?!\*))*?[^\s*])\*\*(?!\*)/;
+                        const rule1Char = /^\*\*([^\s*])\*\*(?!\*)/;
+                        const match = rule1Char.exec(src) || rule.exec(src);
+                        if (match) {
+                            return {
+                                type: 'strong-cjk',
+                                raw: match[0],
+                                text: match[1],
+                                tokens: this.lexer.inlineTokens(match[1])
+                            };
+                        }
+                    },
+                    renderer(token) {
+                        return `<strong>${this.parser.parseInline(token.tokens)}</strong>`;
+                    }
+                }]
             });
         }
 
