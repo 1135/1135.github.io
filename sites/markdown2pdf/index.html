@@ -3743,7 +3743,7 @@ Click the button to generate a ToC!
             if (!content) return content;
 
             // 1. Try to find ToC by Markers (Robust Method)
-            const markerPattern = /<!-- TOC_START -->[\s\S]*?<!-- TOC_END -->\n*/;
+            const markerPattern = new RegExp('<!-- TOC_START -->[\\s\\S]*?<!-- TOC_END -->\\n*');
             if (markerPattern.test(content)) {
                 return content.replace(markerPattern, '');
             }

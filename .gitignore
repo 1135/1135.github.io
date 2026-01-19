@@ -34,3 +34,4 @@ package-lock.json
 reproduce_issue.js
 *.log
 backup/
+*.md
