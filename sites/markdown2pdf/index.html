@@ -156,14 +156,51 @@
         }
 
         .workspace {
-            display: grid;
-            grid-template-columns: 0.8fr 1.2fr;
-            grid-template-rows: 1fr;
-            gap: 15px;
+            display: flex;
+            gap: 0;
             flex: 1;
             min-height: 0;
             padding: 5px 15px;
             overflow: hidden;
+        }
+
+        .editor-container {
+            width: 50%;
+            min-width: 200px;
+            /* Flex shrinking allowed but keep basis */
+            flex-shrink: 0;
+            margin-right: 5px;
+        }
+
+        .preview-container {
+            flex: 1;
+            min-width: 200px;
+            margin-left: 5px;
+        }
+
+        /* Resizer Handle */
+        .resizer {
+            width: 10px;
+            cursor: col-resize;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .resizer:hover,
+        .resizer.resizing {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .resizer::after {
+            content: "⋮";
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1;
         }
 
         .editor-container.hidden,
@@ -1366,420 +1403,10 @@
             margin: 0;
         }
 
-        @media print {
-
-            /* Hide everything except preview output */
-            body * {
-                visibility: hidden;
-            }
-
-            #preview-output,
-            #preview-output * {
-                visibility: visible;
-            }
-
-            /* Ensure preview output takes full page */
-            #preview-output {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 40px !important;
-                /* Match preview padding */
-                /* Preserve all styles from preview - use computed styles */
-                background: inherit !important;
-                color: inherit !important;
-                font-family: inherit !important;
-                line-height: inherit !important;
-            }
-
-            /* Preserve theme styles in print - use exact styles from preview */
-            .style-default #preview-output {
-                background: white !important;
-                color: black !important;
-                font-family: 'Times New Roman', serif !important;
-            }
-
-            .style-modern #preview-output {
-                background: white !important;
-                color: #333 !important;
-                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
-            }
-
-            /* Force background colors for hacker theme printing if selected */
-            .style-hacker #preview-output {
-                background-color: #0a0a0a !important;
-                color: #00ff41 !important;
-                font-family: 'Courier New', Courier, monospace !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .style-minimal #preview-output {
-                background: #fafafa !important;
-                color: #2c3e50 !important;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-            }
-
-            .style-dark #preview-output {
-                background: #1e1e1e !important;
-                color: #d4d4d4 !important;
-                font-family: 'Consolas', 'Monaco', monospace !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                border-right: none !important;
-                /* Fix potential white border */
-            }
-
-            /* Ensure page background is dark for dark theme */
-            .style-dark #preview-output::before {
-                content: "";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: #1e1e1e !important;
-                z-index: -1;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .style-colorful #preview-output {
-                background: #fff5f5 !important;
-                color: #333 !important;
-                font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            /* Preserve code block styles - don't use inherit, preserve actual styles */
-            #preview-output pre {
-                padding: 1em !important;
-                overflow: visible !important;
-                /* Allow code to wrap in print */
-                page-break-inside: avoid !important;
-                /* Background and border will be set by theme-specific rules below */
-            }
-
-            #preview-output code {
-                padding: 2px 4px !important;
-                border-radius: 3px !important;
-                /* Background and color will be set by theme-specific rules below */
-            }
-
-            /* Preserve highlight.js container styles - use actual computed styles */
-            #preview-output .hljs {
-                padding: 1em !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                /* Background and color will be set by theme-specific rules below */
-            }
-
-            /* Force color printing for ALL highlight.js syntax classes */
-            /* This ensures all syntax highlighting colors are preserved in print */
-            #preview-output .hljs-keyword,
-            #preview-output .hljs-string,
-            #preview-output .hljs-comment,
-            #preview-output .hljs-number,
-            #preview-output .hljs-function,
-            #preview-output .hljs-variable,
-            #preview-output .hljs-title,
-            #preview-output .hljs-built_in,
-            #preview-output .hljs-type,
-            #preview-output .hljs-literal,
-            #preview-output .hljs-attr,
-            #preview-output .hljs-attribute,
-            #preview-output .hljs-meta,
-            #preview-output .hljs-tag,
-            #preview-output .hljs-name,
-            #preview-output .hljs-selector-id,
-            #preview-output .hljs-selector-class,
-            #preview-output .hljs-regexp,
-            #preview-output .hljs-link,
-            #preview-output .hljs-symbol,
-            #preview-output .hljs-params,
-            #preview-output .hljs-property,
-            #preview-output .hljs-class,
-            #preview-output .hljs-subst,
-            #preview-output .hljs-doctag,
-            #preview-output .hljs-section,
-            #preview-output .hljs-emphasis,
-            #preview-output .hljs-strong,
-            #preview-output .hljs-addition,
-            #preview-output .hljs-deletion {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                /* Colors are set by highlight.js CSS and theme overrides - preserve them */
-            }
-
-            /* Theme-specific code block styles for print */
-            /* Default/Academic theme */
-            .style-default #preview-output pre,
-            .style-default #preview-output .hljs {
-                background: #f8f8f8 !important;
-                color: #333 !important;
-                border: 1px solid #e0e0e0 !important;
-            }
-
-            /* Modern/Business theme */
-            .style-modern #preview-output pre,
-            .style-modern #preview-output .hljs {
-                background: #2d3748 !important;
-                color: #e2e8f0 !important;
-                border: 1px solid #4a5568 !important;
-            }
-
-            /* Hacker theme */
-            .style-hacker #preview-output pre,
-            .style-hacker #preview-output .hljs {
-                background: #0d1117 !important;
-                color: #c9d1d9 !important;
-                border: 1px solid #30363d !important;
-            }
-
-            /* Minimal theme */
-            .style-minimal #preview-output pre,
-            .style-minimal #preview-output .hljs {
-                background: #ffffff !important;
-                color: #2c3e50 !important;
-                border: 1px solid #e0e0e0 !important;
-            }
-
-            /* Dark theme */
-            .style-dark #preview-output pre,
-            .style-dark #preview-output .hljs {
-                background: #1e1e1e !important;
-                color: #d4d4d4 !important;
-                border: 1px solid #3e3e42 !important;
-            }
-
-            /* Colorful theme */
-            .style-colorful #preview-output pre,
-            .style-colorful #preview-output .hljs {
-                background: #2d3748 !important;
-                color: #f7fafc !important;
-                border: 2px solid #4299e1 !important;
-            }
-
-            /* Professional theme */
-            .style-professional #preview-output pre,
-            .style-professional #preview-output .hljs {
-                background: #1a202c !important;
-                color: #e2e8f0 !important;
-                border: 1px solid #2d3748 !important;
-            }
-
-            /* Preserve table styles */
-            #preview-output table {
-                border-collapse: collapse !important;
-                width: 100% !important;
-                margin: 1em 0 !important;
-                page-break-inside: avoid !important;
-            }
-
-            #preview-output th,
-            #preview-output td {
-                border: 1px solid #ddd !important;
-                padding: 8px 12px !important;
-            }
-
-            #preview-output th {
-                background: #f4f4f4 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            /* Preserve blockquote styles */
-            #preview-output blockquote {
-                border-left: 4px solid #ddd !important;
-                padding-left: 20px !important;
-                margin: 1em 0 !important;
-                color: #666 !important;
-            }
-
-            /* Preserve heading styles */
-            #preview-output h1,
-            #preview-output h2,
-            #preview-output h3,
-            #preview-output h4,
-            #preview-output h5,
-            #preview-output h6 {
-                margin-top: 1.5em !important;
-                margin-bottom: 0.5em !important;
-                font-weight: bold !important;
-                page-break-after: avoid !important;
-            }
-
-            #preview-output h1 {
-                font-size: 2em !important;
-                border-bottom: 2px solid #eee !important;
-                padding-bottom: 0.3em !important;
-            }
-
-            #preview-output h2 {
-                font-size: 1.5em !important;
-                border-bottom: 1px solid #eee !important;
-                padding-bottom: 0.3em !important;
-            }
-
-            /* Preserve image styles */
-            #preview-output img {
-                max-width: 100% !important;
-                height: auto !important;
-                margin: 1em 0 !important;
-                page-break-inside: avoid !important;
-            }
-
-            /* Preserve link styles */
-            #preview-output a {
-                color: #0066cc !important;
-                text-decoration: none !important;
-            }
-
-            /* Hide link URLs in print - only show link text */
-            #preview-output a[href]::after {
-                content: "" !important;
-                display: none !important;
-            }
-
-            /* Preserve list styles */
-            #preview-output ul,
-            #preview-output ol {
-                margin: 1em 0 !important;
-                padding-left: 2em !important;
-            }
-
-            #preview-output li {
-                margin: 0.5em 0 !important;
-            }
-
-            /* Preserve horizontal rule styles */
-            #preview-output hr {
-                margin: 2em 0 !important;
-                border: none !important;
-                border-top: 1px solid #eee !important;
-            }
-
-            /* Preserve paragraph styles */
-            #preview-output p {
-                margin: 1em 0 !important;
-            }
-
-            /* Ensure Mermaid diagrams are properly sized and don't overlap */
-            #preview-output .mermaid {
-                display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 2em 0 !important;
-                padding: 1em 0 !important;
-                page-break-inside: avoid !important;
-                page-break-after: auto !important;
-                overflow: hidden !important;
-                box-sizing: border-box !important;
-            }
-
-            #preview-output .mermaid svg {
-                max-width: 700px !important;
-                /* Limit width considering page margins */
-                width: 100% !important;
-                height: auto !important;
-                max-height: 500px !important;
-                /* Limit height to prevent overlap with next content */
-                display: block !important;
-                margin: 0 auto !important;
-                page-break-inside: avoid !important;
-                box-sizing: border-box !important;
-                overflow: visible !important;
-            }
-
-            /* Ensure all Mermaid SVG elements don't overflow (for all diagram types) */
-            #preview-output svg {
-                max-width: 700px !important;
-                /* Limit width for any SVG in print */
-                width: 100% !important;
-                height: auto !important;
-                max-height: 500px !important;
-                /* Limit height to prevent overlap */
-                display: block !important;
-                margin: 0 auto !important;
-                page-break-inside: avoid !important;
-                overflow: visible !important;
-                box-sizing: border-box !important;
-            }
-
-            /* Ensure Mermaid containers don't cause overflow */
-            #preview-output .mermaid>div,
-            #preview-output .mermaid>span {
-                max-width: 100% !important;
-                overflow: hidden !important;
-                display: block !important;
-            }
-
-            /* Ensure content after Mermaid diagrams has proper spacing */
-            #preview-output .mermaid+* {
-                margin-top: 2em !important;
-                page-break-before: auto !important;
-            }
-
-            /* Ensure MathJax formulas are visible and properly styled */
-            #preview-output .MathJax,
-            #preview-output .MathJax_SVG,
-            #preview-output .MathJax_Display,
-            #preview-output .MathJax_SVG_Display {
-                display: block !important;
-                page-break-inside: avoid !important;
-                max-width: 100% !important;
-                overflow: visible !important;
-                margin: 1em 0 !important;
-                text-align: center !important;
-            }
-
-            /* Hide MathJax menu and other UI elements */
-            #preview-output .MathJax_Menu,
-            #preview-output .MathJax_MenuFrame,
-            #preview-output .MathJax_MenuButton,
-            #preview-output .MathJax_ContextMenu {
-                display: none !important;
-                visibility: hidden !important;
-            }
-
-            /* Ensure MathJax SVG elements don't have unwanted borders or backgrounds */
-            #preview-output .MathJax svg,
-            #preview-output .MathJax_SVG svg {
-                display: inline-block !important;
-                vertical-align: middle !important;
-                max-width: 100% !important;
-                height: auto !important;
-                border: none !important;
-                background: transparent !important;
-            }
-
-            /* Fix MathJax display math (block formulas) */
-            #preview-output .MathJax_Display,
-            #preview-output .MathJax_SVG_Display {
-                display: block !important;
-                margin: 1.5em auto !important;
-                text-align: center !important;
-                width: auto !important;
-                max-width: 100% !important;
-            }
-
-            /* Hide Chrome's automatic page URL in footer */
-            @page {
-                margin: 0.5in;
-                size: auto;
-            }
-
-            /* Additional attempt to hide page headers/footers */
-            html,
-            body {
-                margin: 0 !important;
-                padding: 0 !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
+        /* Standardized Print Styles are now dynamically injected in handleExport() for performance */
+        @page {
+            margin: 0;
+            size: auto;
         }
 
         @media (max-width: 768px) {
@@ -1850,17 +1477,6 @@
             font-family: 'Courier New', monospace !important;
         }
 
-        @media print {
-            .mobile-pdf-mode {
-                padding: 0 !important;
-                /* Reset padding for print */
-            }
-
-            /* Remove margins from page rule when this class is active */
-            body.mobile-pdf-mode-active {
-                margin: 0 !important;
-            }
-        }
 
         /* Remove margins from page rule when this class is active */
         /* Note: @page margins are controlled by browser print dialog largely, but this helps content flow */
@@ -1914,26 +1530,8 @@
         }
 
         /* Ensure watermark prints on every page */
-        @media print {
-            .watermark-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
-                width: 100vw;
-                z-index: 9999;
-                display: block !important;
-            }
-        }
 
         /* Ensure watermark prints on every page */
-        @media print {
-            .watermark-container {
-                position: fixed;
-                /* Fixed position repeats on every page in most browsers */
-                display: block !important;
-            }
-        }
 
         /* Modal Styles */
         .modal {
@@ -2281,7 +1879,8 @@
                 <option value="pdf" selected>.pdf</option>
                 <option value="pdf-mobile" data-i18n="pdf_mobile">.pdf (Mobile Friendly)</option>
             </select>
-            <button class="btn btn-primary" onclick="handleExport()" data-i18n="export_button">导出</button>
+            <button id="export-btn" class="btn btn-primary" onclick="handleExport()"
+                data-i18n="export_button">导出</button>
         </div>
     </div>
 
@@ -2318,6 +1917,10 @@ Click the button to generate a ToC!
                 </div>
             </div>
         </div>
+
+        <!-- Resizer Handle -->
+        <div class="resizer" id="resizer" title="Drag to resize"></div>
+
         <div class="preview-container">
             <div class="panel-header">
                 <span class="panel-title" data-i18n="panel_preview_title">Preview</span>
@@ -4048,10 +3651,74 @@ Click the button to generate a ToC!
         }
 
 
+        // Helper to preserve computed styles (colors/backgrounds) for print/export
+        function preserveComputedStyles(sourceRoot, targetRoot) {
+            const isClone = sourceRoot !== targetRoot;
+            const sourceElements = sourceRoot.querySelectorAll('*');
+            const targetElements = isClone ? targetRoot.querySelectorAll('*') : sourceElements;
+
+            if (isClone && sourceElements.length !== targetElements.length) {
+                console.warn('Source and target element counts mismatch, styles may drift.');
+            }
+
+            for (let i = 0; i < sourceElements.length; i++) {
+                if (isClone && !targetElements[i]) break;
+
+                const srcEl = sourceElements[i];
+                const tgtEl = targetElements[i];
+
+                const elStyle = window.getComputedStyle(srcEl);
+
+                // Preserve code block backgrounds (pre and .hljs)
+                if (tgtEl.tagName === 'PRE' || tgtEl.classList.contains('hljs')) {
+                    const bg = elStyle.backgroundColor;
+                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                        tgtEl.style.setProperty('background-color', bg, 'important');
+                        tgtEl.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        tgtEl.style.setProperty('print-color-adjust', 'exact', 'important');
+                    }
+                    const borderColor = elStyle.borderColor;
+                    if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)') {
+                        tgtEl.style.setProperty('border-color', borderColor, 'important');
+                    }
+                }
+
+                // Preserve highlight.js colors
+                const hasHljsClass = Array.from(tgtEl.classList).some(cls => cls.startsWith('hljs-'));
+                if (hasHljsClass) {
+                    const textColor = elStyle.color;
+                    if (textColor && textColor !== 'rgb(0, 0, 0)' && textColor !== 'rgba(0, 0, 0, 0)') {
+                        tgtEl.style.setProperty('color', textColor, 'important');
+                        tgtEl.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        tgtEl.style.setProperty('print-color-adjust', 'exact', 'important');
+                    }
+                }
+
+                // Preserve inline code backgrounds
+                if (tgtEl.tagName === 'CODE' && !tgtEl.closest('pre')) {
+                    const bg = elStyle.backgroundColor;
+                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                        tgtEl.style.setProperty('background-color', bg, 'important');
+                        tgtEl.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                        tgtEl.style.setProperty('print-color-adjust', 'exact', 'important');
+                    }
+                    const textColor = elStyle.color;
+                    if (textColor) {
+                        tgtEl.style.setProperty('color', textColor, 'important');
+                    }
+                }
+            }
+        }
+
         // Helper to prepare content for export (Convert SVG/MathJax to Images)
         async function prepareContentForExport(sourceElement) {
             // 1. Clone the content
             const clone = sourceElement.cloneNode(true);
+
+            // 1b. Preserve computed styles immediately after cloning
+            // performance: preserveComputedStyles is very expensive for large docs. 
+            // We disable it here as we trust CSS and specific handling below.
+            // preserveComputedStyles(sourceElement, clone);
 
             // We need to work with the visible DOM for canvas sizing, 
             // but we want to modify the clone. 
@@ -4102,7 +3769,12 @@ Click the button to generate a ToC!
                     }
                     URL.revokeObjectURL(url);
                 } catch (e) {
-                    console.error("SVG conversion failed", e);
+                    // SecurityError on file:// protocol is expected - SVG will be kept as-is
+                    if (e.name === 'SecurityError') {
+                        console.warn('SVG kept as original (file:// protocol restriction)');
+                    } else {
+                        console.warn('SVG conversion skipped:', e.message);
+                    }
                 }
             }
 
@@ -4416,51 +4088,75 @@ ${output.innerHTML}
 
         // Download PDF using html2pdf + pdf-lib (Byte-level Watermark)
         async function downloadPDFWithLib() {
+            const exportBtn = document.getElementById('export-btn');
+            const originalBtnText = exportBtn ? exportBtn.textContent : '';
+
+            // Disable button during export
+            if (exportBtn) {
+                exportBtn.disabled = true;
+                exportBtn.textContent = 'Generating...';
+                exportBtn.style.cursor = 'wait';
+            }
+
             const output = document.getElementById('preview-output');
             const watermarkText = document.getElementById('watermark-text').value;
             const watermarkType = document.getElementById('watermark-type').value;
-
-            // 1. Prepare Content (Pre-render complex items)
-            // Note: html2pdf processes the element from DOM. 
-            // If we use 'clone', we must temporarily append it to DOM or use html2pdf's source handling carefully.
-            // html2pdf can take a string or element.
-            // Best approach: Temporarily replace output content or append clone hidden?
-            // Actually, html2pdf needs the element to be rendered to calculate layout.
-            // Swapping content in visible DOM causes flash.
-            // Overlay approach: Create a temporary container off-screen but visible?
-
-            // Simplified: We'll modify a clone, but since html2pdf needs layout, 
-            // we might just use the original output for layout, OR
-            // we rely on the fact that we just converted things to images which render fine in offscreen/clone if styles are matched.
-
-            // Let's try: Generate content-rich clone, append to body (hidden visibility), PDF it, remove it.
-            const clone = await prepareContentForExport(output);
-
-            // Apply current styles to clone wrapper to ensure font consistency
-            const wrapper = document.createElement('div');
-            wrapper.className = 'markdown-body'; // standard class
-            // Copy styles
-            wrapper.style.fontFamily = output.style.fontFamily;
-            wrapper.style.backgroundColor = output.style.backgroundColor || '#fff';
-            wrapper.style.color = window.getComputedStyle(output).color;
-            wrapper.style.padding = '40px';
-            wrapper.style.width = '210mm'; // A4 width approx
-            wrapper.style.position = 'absolute';
-            wrapper.style.left = '-9999px';
-            // wrapper.style.visibility = 'hidden'; // html2canvas sometimes ignores hidden
-            wrapper.appendChild(clone);
-            document.body.appendChild(wrapper);
-
-            const opt = {
-                margin: [10, 10, 10, 10], // mm
-                filename: getDocTitle() + '.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+            let wrapper = null; // Declare here to access in finally
 
             try {
-                // Generate PDF as ArrayBuffer
+                // 1. Prepare Content (Pre-render complex items)
+                // Note: html2pdf processes the element from DOM. 
+                // If we use 'clone', we must temporarily append it to DOM or use html2pdf's source handling carefully.
+                // html2pdf can take a string or element.
+                // Best approach: Temporarily replace output content or append clone hidden?
+                // Actually, html2pdf needs the element to be rendered to calculate layout.
+                // Swapping content in visible DOM causes flash.
+                // Overlay approach: Create a temporary container off-screen but visible?
+
+                // Simplified: We'll modify a clone, but since html2pdf needs layout, 
+                // we might just use the original output for layout, OR
+                // we rely on the fact that we just converted things to images which render fine in offscreen/clone if styles are matched.
+
+                // Let's try: Generate content-rich clone, append to body (hidden visibility), PDF it, remove it.
+                const clone = await prepareContentForExport(output);
+
+                // Assign ID to clone so CSS selectors like `.style-hacker #preview-output` work
+                clone.id = 'preview-output';
+
+                // Get current theme class from workspace
+                const workspace = document.getElementById('workspace');
+                const themeClass = Array.from(workspace.classList).find(c => c.startsWith('style-')) || '';
+
+                // Apply current styles to clone wrapper to ensure font consistency
+                const wrapper = document.createElement('div');
+                wrapper.className = 'markdown-body ' + themeClass; // Include theme class!
+                // Copy styles
+                const computedStyle = window.getComputedStyle(output);
+                wrapper.style.fontFamily = computedStyle.fontFamily;
+                // Use specific background color from computed style for the PDF wrapper
+                // This fixes the white border issue in the library path by ensuring the container is colored
+                wrapper.style.backgroundColor = computedStyle.backgroundColor || '#fff';
+                wrapper.style.color = computedStyle.color;
+                wrapper.style.padding = '40px';
+                wrapper.style.width = '210mm'; // A4 width approx
+                wrapper.style.position = 'absolute';
+                wrapper.style.left = '-9999px';
+                // wrapper.style.visibility = 'hidden'; // html2canvas sometimes ignores hidden
+                wrapper.appendChild(clone);
+                document.body.appendChild(wrapper);
+                const opt = {
+                    margin: [10, 10, 10, 10], // mm
+                    filename: getDocTitle() + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: computedStyle.backgroundColor || '#ffffff'
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Generate PDF from clone element
                 const worker = html2pdf().set(opt).from(clone).toPdf();
                 const pdfDoc = await worker.get('pdf'); // jsPDF object
                 const pdfBytes = await pdfDoc.output('arraybuffer');
@@ -4475,28 +4171,15 @@ ${output.innerHTML}
                     const { width, height } = page.getSize();
 
                     if (watermarkType === 'full') {
-                        // Tiled Pattern - Tuned for less overlap
-                        // 2x2 or 2x3 grid is usually enough for A4
-                        const cols = 2;
-                        const rows = 3;
-                        const xGap = width / cols;
-                        const yGap = height / rows;
-
-                        for (let i = 0; i < cols; i++) {
-                            for (let j = 0; j < rows; j++) {
-                                // Offset odd rows for aesthetic
-                                const xOffset = (j % 2 === 0) ? 0 : xGap / 2;
-
-                                page.drawText(watermarkText, {
-                                    x: (i * xGap) + xOffset + 40,
-                                    y: (j * yGap) + 80,
-                                    size: 20, // Reduced from 24
-                                    color: rgb(0.6, 0.6, 0.6),
-                                    opacity: 0.15, // Reduced opacity
-                                    rotate: degrees(45),
-                                });
-                            }
-                        }
+                        // Single large diagonal watermark per page
+                        page.drawText(watermarkText, {
+                            x: width / 2 - 100, // More centered
+                            y: height / 2,
+                            size: 36, // Slightly smaller to fit
+                            color: rgb(0.5, 0.5, 0.5),
+                            opacity: 0.08, // Very faint
+                            rotate: degrees(45),
+                        });
                     } else {
                         // Footer
                         page.drawText(watermarkText, {
@@ -4531,11 +4214,28 @@ ${output.innerHTML}
 
             } catch (err) {
                 console.error("PDF Generation Failed:", err);
-                alert("PDF Generation Failed. Falling back to Browser Print.");
-                window.print();
+                alert("PDF Generation Failed. Falling back to Browser Print (without watermark).");
+                // Fallback: Use the normal handleExport flow instead of raw window.print()
+                // This ensures proper UI preparation (hiding elements, applying print CSS)
+                const watermarkCheckbox = document.getElementById('enable-watermark');
+                if (watermarkCheckbox) {
+                    watermarkCheckbox.checked = false; // Temporarily disable to avoid recursion
+                }
+                handleExport(); // Call normal export which handles print properly
+                if (watermarkCheckbox) {
+                    watermarkCheckbox.checked = true; // Restore
+                }
             } finally {
-                // Cleanup DOM
-                document.body.removeChild(wrapper);
+                // Cleanup DOM (only if wrapper was added)
+                if (wrapper && wrapper.parentNode) {
+                    document.body.removeChild(wrapper);
+                }
+                // Re-enable button
+                if (exportBtn) {
+                    exportBtn.disabled = false;
+                    exportBtn.textContent = originalBtnText;
+                    exportBtn.style.cursor = '';
+                }
             }
         }
 
@@ -4564,221 +4264,252 @@ ${output.innerHTML}
         }
 
         // Handle Export based on selected format
+        // Handle Export based on selected format
+        // Handle Export based on selected format
         function handleExport() {
+            const output = document.getElementById('preview-output');
             const format = document.getElementById('export-format').value;
+            const watermarkEnabled = document.getElementById('enable-watermark').checked;
+            const originalPageTitle = document.title;
 
-            if (format === 'md') {
-                downloadMarkdown();
-            } else if (format === 'html') {
-                downloadHTML();
-            } else if (format === 'docx') {
-                downloadWord();
-            } else if (format === 'pdf' || format === 'pdf-mobile') {
-                const autoTitleEnabled = document.getElementById('export-auto-title').checked;
-                const watermarkEnabled = document.getElementById('enable-watermark').checked;
+            // 1. Special Case: PDF with Watermark (uses library)
+            if (watermarkEnabled && format === 'pdf') {
+                downloadPDFWithLib();
+                return;
+            }
 
-                // Use Byte-level processing if Watermark is enabled (User Request)
-                // Otherwise use native Print for best quality
-                if (watermarkEnabled && format === 'pdf') {
-                    downloadPDFWithLib();
-                    return;
+            // PERFORMANCE FIX: Clear background timers to prevent lag
+            if (typeof previewUpdateTimer !== 'undefined' && previewUpdateTimer) {
+                clearTimeout(previewUpdateTimer);
+            }
+
+            // Capture state for restoration
+            const originalStyleAttr = output.getAttribute('style'); // Capture inline styles
+            const originalBodyStyle = document.body.getAttribute('style'); // Capture body styles
+            const originalHtmlStyle = document.documentElement.getAttribute('style'); // Capture html styles
+            const scrollPos = output.scrollTop;
+
+            // PERFORMANCE FIX: Temporarily disable sync scroll during export
+            const syncScroll = getSyncScroll();
+            const originalSyncEnabled = syncScroll ? syncScroll.syncScrollEnabled : false;
+            if (syncScroll) {
+                syncScroll.syncScrollEnabled = false;
+            }
+
+            // Dynamic Print Style Element
+            let printStyleEl = null;
+            // Background Layer Element for print
+            let printBgLayer = null;
+
+            // Helper to clean up changes after export
+            const cleanup = () => {
+                const restoreStyle = (el, original) => {
+                    if (original === null) el.removeAttribute('style');
+                    else el.setAttribute('style', original);
+                };
+
+                // Restore container, body, and html styles
+                restoreStyle(output, originalStyleAttr);
+                restoreStyle(document.body, originalBodyStyle);
+                restoreStyle(document.documentElement, originalHtmlStyle);
+
+                // Restore Sync Scroll
+                if (syncScroll) {
+                    syncScroll.syncScrollEnabled = originalSyncEnabled;
                 }
 
+                // Remove injected print style
+                if (printStyleEl) {
+                    printStyleEl.remove();
+                    printStyleEl = null;
+                }
+
+                // Remove background layer
+                if (printBgLayer) {
+                    printBgLayer.remove();
+                    printBgLayer = null;
+                }
+
+                // Re-render preview to clear inline styles on children (code blocks etc)
+                // We use updatePreview() which regenerates the DOM from markdown
+                if (typeof updatePreview === 'function') {
+                    updatePreview();
+                    // Restore scroll (best effort)
+                    setTimeout(() => { output.scrollTop = scrollPos; }, 0);
+                }
+
+                document.title = originalPageTitle;
+            };
+
+            // 2. Prepare DOM for Export
+            // Get computed styles for PDF/Print consistency
+            const computedStyle = window.getComputedStyle(output);
+            const backgroundColor = computedStyle.backgroundColor;
+            const color = computedStyle.color;
+            const lineHeight = computedStyle.lineHeight;
+            const fontFamily = computedStyle.fontFamily;
+
+            // Apply computed styles to container and body with !important to override print stylesheets
+            if (backgroundColor) {
+                output.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
+                output.style.setProperty('print-color-adjust', 'exact', 'important');
+
+                // INJECT DYNAMIC GLOBAL PRINT STYLE
+                // Deep CSS Reset to force browser pagination
+                printStyleEl = document.createElement('style');
+                printStyleEl.innerHTML = `
+                    @media print {
+                        @page {
+                            margin: 0 !important;
+                            size: auto;
+                        }
+
+                        /* 0. TARGETED PERFORMANCE RESET - Only affect preview content */
+                        #preview-output,
+                        #preview-output * {
+                            transition: none !important;
+                            animation: none !important;
+                            box-shadow: none !important;
+                            text-shadow: none !important;
+                            will-change: auto !important;
+                            backdrop-filter: none !important;
+                            filter: none !important;
+                        }
+
+                        /* 1. Global Reset for Layout Containers - Force Block Flow */
+                        .workspace, 
+                        .preview-container, 
+                        .editor-wrapper, 
+                        .editor-textarea-wrapper {
+                            display: block !important;
+                            width: 100% !important;
+                            height: auto !important;
+                            overflow: visible !important;
+                            flex: none !important;
+                            position: static !important;
+                        }
+
+                        /* 2. Hide Non-Print Elements */
+                        .editor-container, .resizer, .controls, #navigation-container, .unified-footer,
+                        .panel-header, .line-numbers, #resizer {
+                            display: none !important;
+                        }
+
+                        /* 3. Body/HTML Setup - Performance optimized (no print-color-adjust) */
+                        html, body {
+                            width: 100%;
+                            min-height: 100%;
+                            height: auto !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background-color: ${backgroundColor} !important;
+                            overflow: visible !important;
+                        }
+
+                        /* 4. Preview Container */
+                        .preview-container {
+                            background-color: ${backgroundColor} !important;
+                            overflow: visible !important;
+                        }
+
+                        #preview-output,
+                        body #preview-output,
+                        body .style-academic #preview-output,
+                        body .style-business #preview-output,
+                        body .style-professional #preview-output,
+                        body .style-hacker #preview-output,
+                        body .style-colorful #preview-output {
+                            display: block !important;
+                            width: calc(100% + 40mm) !important;
+                            max-width: none !important;
+                            margin: -20mm !important; /* Extend into page margins */
+                            padding: 40mm !important; /* Compensate for negative margin */
+                            background-color: ${backgroundColor} !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            overflow: visible !important;
+                            box-sizing: border-box !important;
+                        }
+
+                        /* 6. Mermaid Diagram Fixes */
+                        .mermaid {
+                             display: block !important;
+                             width: auto !important;
+                             max-width: calc(100% - 40mm) !important; /* More space for Gantt */
+                             margin: 2em auto !important; /* Center horizontally */
+                             page-break-inside: avoid !important;
+                             overflow: visible !important; /* Allow full diagram display */
+                        }
+
+                        .mermaid svg {
+                            display: block !important;
+                            margin: 0 auto !important;
+                        }
+
+                        /* 7. Preserve basic elements */
+                        #preview-output table { border-collapse: collapse !important; width: 100% !important; page-break-inside: avoid !important; }
+                        #preview-output th, #preview-output td { border: 1px solid #ddd !important; padding: 8px 12px !important; }
+                        #preview-output pre { page-break-inside: avoid !important; white-space: pre-wrap !important; word-break: break-all !important; }
+                        #preview-output blockquote { border-left: 4px solid #ddd !important; padding-left: 20px !important; color: #666 !important; }
+                        
+                        /* 8. Watermark Persistence */
+                        .watermark-container {
+                            position: fixed !important;
+                            top: 0; left: 0; width: 100%; height: 100%;
+                            display: block !important;
+                            z-index: 9999 !important;
+                        }
+                    }
+                `;
+                document.head.appendChild(printStyleEl);
+            }
+            if (color) output.style.setProperty('color', color, 'important');
+            if (lineHeight) output.style.setProperty('line-height', lineHeight, 'important');
+            if (fontFamily) output.style.setProperty('font-family', fontFamily, 'important');
+
+            if (fontFamily) output.style.setProperty('font-family', fontFamily, 'important');
+
+            // Apply styles to all children (deep cloning styles)
+            // PERFORMANCE FIX: Disable deep style cloning to prevent UI lag.
+            // Relies on the improved CSS @media print rules instead.
+            // preserveComputedStyles(output, output);
+
+            // Ensure Mermaid diagrams are properly sized
+            // Mermaid sizing is now handled by the CSS Deep Reset in @media print
+            // Legacy JS loop removed to prevent layout thrashing and scroll lag
+
+            // 3. Execute Export
+            if (format === 'md') {
+                downloadMarkdown();
+                cleanup();
+            } else if (format === 'html') {
+                downloadHTML();
+                cleanup();
+            } else if (format === 'docx') {
+                downloadWord();
+                cleanup();
+            } else if (format === 'pdf' || format === 'pdf-mobile') {
                 document.title = getDocTitle();
 
                 if (format === 'pdf-mobile') {
                     document.body.classList.add('mobile-pdf-mode-active');
                 }
 
-                window.print();
+                // Register cleanup for after print
+                const onAfterPrint = () => {
+                    if (format === 'pdf-mobile') document.body.classList.remove('mobile-pdf-mode-active');
+                    cleanup();
+                    window.removeEventListener('afterprint', onAfterPrint);
+                };
+                window.addEventListener('afterprint', onAfterPrint);
 
-                // Cleanup after print dialog
-                if (format === 'pdf-mobile') {
-                    // Slight delay to ensure print dialog has picked up styles
-                    setTimeout(() => {
-                        document.body.classList.remove('mobile-pdf-mode-active');
-                    }, 500);
-                }
-
-                // Restore original title
                 setTimeout(() => {
-                    document.title = originalPageTitle;
-                }, 1000);
+                    window.print();
+                    // Fallback cleanup not strictly needed due to afterprint, 
+                    // but could be added if browser support is concern. 
+                    // For now, strict 'afterprint' reliance is safer than premature cleanup.
+                }, 100);
             }
-            if (backgroundColor) {
-                output.style.setProperty('background-color', backgroundColor, 'important');
-                // Force color printing
-                output.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                output.style.setProperty('print-color-adjust', 'exact', 'important');
-            }
-            if (color) {
-                output.style.setProperty('color', color, 'important');
-            }
-            if (lineHeight) {
-                output.style.setProperty('line-height', lineHeight, 'important');
-            }
-
-            // Ensure all child elements also preserve their styles
-            const allElements = output.querySelectorAll('*');
-            allElements.forEach(el => {
-                const elStyle = window.getComputedStyle(el);
-
-                // Preserve code block backgrounds (pre and .hljs)
-                if (el.tagName === 'PRE' || el.classList.contains('hljs')) {
-                    const bg = elStyle.backgroundColor;
-                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-                        el.style.setProperty('background-color', bg, 'important');
-                        el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                        el.style.setProperty('print-color-adjust', 'exact', 'important');
-                    }
-                    // Also preserve border color
-                    const borderColor = elStyle.borderColor;
-                    if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)') {
-                        el.style.setProperty('border-color', borderColor, 'important');
-                    }
-                }
-
-                // Preserve ALL highlight.js syntax highlighting colors
-                // Check if element has any hljs- class
-                const hasHljsClass = Array.from(el.classList).some(cls => cls.startsWith('hljs-'));
-                if (hasHljsClass) {
-                    const textColor = elStyle.color;
-                    if (textColor && textColor !== 'rgb(0, 0, 0)' && textColor !== 'rgba(0, 0, 0, 0)') {
-                        el.style.setProperty('color', textColor, 'important');
-                        el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                        el.style.setProperty('print-color-adjust', 'exact', 'important');
-                    }
-                }
-
-                // Preserve inline code backgrounds
-                if (el.tagName === 'CODE' && !el.closest('pre')) {
-                    const bg = elStyle.backgroundColor;
-                    if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-                        el.style.setProperty('background-color', bg, 'important');
-                        el.style.setProperty('-webkit-print-color-adjust', 'exact', 'important');
-                        el.style.setProperty('print-color-adjust', 'exact', 'important');
-                    }
-                    const textColor = elStyle.color;
-                    if (textColor) {
-                        el.style.setProperty('color', textColor, 'important');
-                    }
-                }
-            });
-
-            // Ensure Mermaid diagrams (all types: flowchart, classDiagram, sequenceDiagram, etc.) are properly sized for print
-            const mermaidElements = output.querySelectorAll('.mermaid');
-            mermaidElements.forEach(mermaidEl => {
-                // Ensure container has proper styling
-                mermaidEl.style.setProperty('display', 'block', 'important');
-                mermaidEl.style.setProperty('width', '100%', 'important');
-                mermaidEl.style.setProperty('max-width', '100%', 'important');
-                mermaidEl.style.setProperty('margin', '2em 0', 'important');
-                mermaidEl.style.setProperty('padding', '1em 0', 'important');
-                mermaidEl.style.setProperty('page-break-inside', 'avoid', 'important');
-                mermaidEl.style.setProperty('page-break-after', 'auto', 'important');
-                mermaidEl.style.setProperty('overflow', 'hidden', 'important');
-                mermaidEl.style.setProperty('box-sizing', 'border-box', 'important');
-
-                // Limit SVG size within Mermaid containers (works for all diagram types)
-                const svgElements = mermaidEl.querySelectorAll('svg');
-                svgElements.forEach(svg => {
-                    // Get actual SVG dimensions
-                    const svgWidthAttr = svg.getAttribute('width');
-                    const svgHeightAttr = svg.getAttribute('height');
-                    const svgViewBox = svg.getAttribute('viewBox');
-
-                    let svgWidth = null;
-                    let svgHeight = null;
-
-                    // Try to get dimensions from attributes first
-                    if (svgWidthAttr && !isNaN(parseFloat(svgWidthAttr))) {
-                        svgWidth = parseFloat(svgWidthAttr);
-                    }
-                    if (svgHeightAttr && !isNaN(parseFloat(svgHeightAttr))) {
-                        svgHeight = parseFloat(svgHeightAttr);
-                    }
-
-                    // If not available, try viewBox
-                    if (!svgWidth || !svgHeight) {
-                        if (svgViewBox) {
-                            const viewBoxParts = svgViewBox.split(/\s+/);
-                            if (viewBoxParts.length >= 4) {
-                                svgWidth = parseFloat(viewBoxParts[2]);
-                                svgHeight = parseFloat(viewBoxParts[3]);
-                            }
-                        }
-                    }
-
-                    // If still not available, use computed style
-                    if (!svgWidth || !svgHeight) {
-                        const svgStyle = window.getComputedStyle(svg);
-                        svgWidth = parseFloat(svgStyle.width) || svg.clientWidth;
-                        svgHeight = parseFloat(svgStyle.height) || svg.clientHeight;
-                    }
-
-                    // Maximum dimensions for print (considering page margins)
-                    const maxPrintWidth = 700; // Leave room for page margins
-                    const maxPrintHeight = 500; // Limit height to prevent overlap
-
-                    // Calculate scale if needed
-                    let scale = 1;
-                    if (svgWidth && svgHeight) {
-                        const widthScale = svgWidth > maxPrintWidth ? maxPrintWidth / svgWidth : 1;
-                        const heightScale = svgHeight > maxPrintHeight ? maxPrintHeight / svgHeight : 1;
-                        scale = Math.min(widthScale, heightScale);
-                    }
-
-                    // Apply scaling if needed
-                    if (scale < 1 && svgWidth && svgHeight) {
-                        const newWidth = svgWidth * scale;
-                        const newHeight = svgHeight * scale;
-
-                        // Set explicit dimensions
-                        svg.setAttribute('width', newWidth);
-                        svg.setAttribute('height', newHeight);
-                        svg.style.setProperty('width', newWidth + 'px', 'important');
-                        svg.style.setProperty('height', newHeight + 'px', 'important');
-                    } else {
-                        // Just ensure max constraints
-                        svg.style.setProperty('max-width', '100%', 'important');
-                        svg.style.setProperty('width', '100%', 'important');
-                        svg.style.setProperty('height', 'auto', 'important');
-                    }
-
-                    // Always set max constraints
-                    svg.style.setProperty('max-width', maxPrintWidth + 'px', 'important');
-                    svg.style.setProperty('max-height', maxPrintHeight + 'px', 'important');
-                    svg.style.setProperty('display', 'block', 'important');
-                    svg.style.setProperty('margin', '0 auto', 'important');
-                    svg.style.setProperty('page-break-inside', 'avoid', 'important');
-                    svg.style.setProperty('box-sizing', 'border-box', 'important');
-                    svg.style.setProperty('overflow', 'visible', 'important');
-                });
-
-                // Also handle any nested containers or wrappers
-                const mermaidContainers = mermaidEl.querySelectorAll('div, span');
-                mermaidContainers.forEach(container => {
-                    if (container.querySelector('svg')) {
-                        container.style.setProperty('max-width', '100%', 'important');
-                        container.style.setProperty('overflow', 'hidden', 'important');
-                    }
-                });
-            });
-
-            setTimeout(() => {
-                window.print();
-
-                // cleanup
-                if (format === 'pdf-mobile') {
-                    // Delay cleanup to ensure print dialog captures the style
-                    // Note: Browsers block JS during print dialog, so this runs after
-                    // Only remove if it wasn't selected by user in UI
-                    if (document.getElementById('export-format').value !== 'pdf-mobile') {
-                        output.classList.remove('mobile-pdf-mode');
-                    }
-                    document.body.classList.remove('mobile-pdf-mode-active');
-                }
-            }, 100);
         }
 
 
@@ -5756,13 +5487,14 @@ $$ A = \\pi r^2 $$
             // Add input event listener - debounced
             input.addEventListener('input', function () {
                 // Debounce syntax check and line number updates
+                // Debounce syntax check and line number updates
                 if (syntaxCheckTimer) {
                     clearTimeout(syntaxCheckTimer);
                 }
 
                 syntaxCheckTimer = setTimeout(() => {
                     checkSyntaxImmediately();
-                }, 50); // 50ms delay is imperceptible but prevents blocking on every keystroke
+                }, 300); // Increased from 50ms to 300ms to reduce lag
 
                 // Debounce preview update for better performance
                 if (previewUpdateTimer) {
@@ -5770,7 +5502,7 @@ $$ A = \\pi r^2 $$
                 }
                 previewUpdateTimer = setTimeout(() => {
                     updatePreview();
-                }, 150); // 150ms debounce for preview
+                }, 300); // Increased from 150ms to 300ms
 
                 // If ToC insert or Auto title is enabled, update it with debounce
                 if (document.getElementById('toc-insert').checked || document.getElementById('export-auto-title').checked) {
@@ -5979,6 +5711,51 @@ $$ A = \\pi r^2 $$
                 setTimeout(() => {
                     handleHashChange();
                 }, 800); // Wait for preview to render
+            }
+
+            // Resizer Logic
+            const resizer = document.getElementById('resizer');
+            const editorContainer = document.querySelector('.editor-container');
+            const workspaceContainer = document.getElementById('workspace');
+            let isResizing = false;
+
+            if (resizer && editorContainer && workspaceContainer) {
+
+                resizer.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    resizer.classList.add('resizing');
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none'; // Prevent selection
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+
+                    // Calculate % width relative to workspace
+                    const workspaceRect = workspaceContainer.getBoundingClientRect();
+                    const newWidth = e.clientX - workspaceRect.left;
+
+                    // Min/Max constraints (in pixels)
+                    const minWidth = 200;
+                    const maxWidth = workspaceRect.width - 200;
+
+                    if (newWidth >= minWidth && newWidth <= maxWidth) {
+                        const widthPercent = (newWidth / workspaceRect.width) * 100;
+                        editorContainer.style.width = widthPercent + '%';
+                        // Preview container is flex: 1, so it adjusts automatically
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isResizing) {
+                        isResizing = false;
+                        resizer.classList.remove('resizing');
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        // Trigger resize event for charts/editors if needed
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                });
             }
         });
     </script>
