@@ -1188,6 +1188,112 @@
             border-color: #e2e8f0;
         }
 
+        /* Style: Sepia (Eye Comfort) */
+        .style-sepia #preview-output {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            color: #5C4B37;
+            /* Dark coffee */
+            background: #FDF6E3;
+            /* Warm cream/parchment */
+        }
+
+        .style-sepia #preview-output h1,
+        .style-sepia #preview-output h2,
+        .style-sepia #preview-output h3 {
+            color: #4A3728;
+            /* Darker coffee for headers */
+        }
+
+        .style-sepia #preview-output h1 {
+            border-bottom: 2px solid #D4C4A8;
+        }
+
+        .style-sepia #preview-output a {
+            color: #996515;
+            /* Amber/gold */
+        }
+
+        .style-sepia #preview-output a:hover {
+            color: #7A5012;
+        }
+
+        .style-sepia #preview-output blockquote {
+            border-left: 4px solid #D4C4A8;
+            background: #F5EED6;
+            color: #6B5A47;
+        }
+
+        .style-sepia #preview-output code {
+            background: #F5EED6;
+            color: #8B6914;
+            border: 1px solid #E8DFC8;
+        }
+
+        .style-sepia #preview-output pre {
+            background: #3D3426 !important;
+            /* Dark warm for contrast */
+            border-radius: 8px;
+            padding: 1.25em;
+        }
+
+        .style-sepia #preview-output .hljs {
+            background: #3D3426 !important;
+            color: #EDE4D4 !important;
+        }
+
+        .style-sepia #preview-output .hljs-keyword {
+            color: #D4A656 !important;
+        }
+
+        .style-sepia #preview-output .hljs-string {
+            color: #A8C77B !important;
+        }
+
+        .style-sepia #preview-output .hljs-comment {
+            color: #8B8070 !important;
+            font-style: italic;
+        }
+
+        .style-sepia #preview-output .hljs-number {
+            color: #D48B6A !important;
+        }
+
+        .style-sepia #preview-output .hljs-function {
+            color: #C9A86C !important;
+        }
+
+        .style-sepia #preview-output pre code.hljs {
+            background: transparent !important;
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        .style-sepia #preview-output pre code:not(.hljs) {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+        }
+
+        .style-sepia #preview-output table {
+            border: 1px solid #D4C4A8;
+        }
+
+        .style-sepia #preview-output th {
+            background: #E8DFC8;
+            color: #4A3728;
+            font-weight: 600;
+        }
+
+        .style-sepia #preview-output td {
+            border-color: #E8DFC8;
+        }
+
+        .style-sepia #preview-output tr:nth-child(even) {
+            background: #F9F4E8;
+        }
+
         /* Font Classes - Independent from themes */
         .font-yahei #preview-output {
             font-family: 'Microsoft YaHei', '微软雅黑', sans-serif !important;
@@ -1410,20 +1516,185 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                grid-template-rows: auto auto 1fr auto;
+            }
+
             .workspace {
-                grid-template-columns: 1fr;
-                min-height: 0;
+                flex-direction: column;
+                padding: 5px;
+                gap: 10px;
+                overflow-y: auto;
+            }
+
+            .editor-container,
+            .preview-container {
+                width: 100% !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                flex: 0 0 auto;
+                max-height: none;
             }
 
             #markdown-input,
             #preview-output {
-                min-height: 400px;
+                min-height: 300px;
+                max-height: 500px;
+                font-size: 16px;
             }
 
-            /* On mobile, ensure visibility controls work properly */
+            .resizer {
+                display: none;
+            }
+
+            .controls {
+                padding: 8px 5px;
+                gap: 8px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .control-group {
+                flex-shrink: 0;
+                gap: 6px;
+            }
+
+            .control-group-title {
+                font-size: 0.75rem;
+            }
+
+            .control-select,
+            #style-selector,
+            #font-selector {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+                width: auto;
+                max-width: 120px;
+            }
+
+            .checkbox-label {
+                font-size: 0.8rem;
+                gap: 4px;
+            }
+
+            .checkbox-label input[type="checkbox"] {
+                width: 14px;
+                height: 14px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+
+            .control-divider {
+                height: 24px;
+            }
+
+            .color-picker {
+                width: 32px;
+                height: 28px;
+            }
+
+            #toc-levels {
+                width: 45px;
+                padding: 3px;
+                font-size: 0.8rem;
+            }
+
+            .actions-group {
+                margin-left: 0;
+                flex-shrink: 0;
+            }
+
+            #export-format {
+                max-width: 100px;
+            }
+
+            .line-numbers {
+                min-width: 35px;
+                padding: 15px 4px;
+                font-size: 12px;
+            }
+
+            .editor-container,
+            .preview-container {
+                border-radius: 2px;
+            }
+
+            .panel-header {
+                padding: 8px 10px;
+            }
+
+            .panel-title {
+                font-size: 0.8rem;
+            }
+
+            #preview-output {
+                padding: 15px 12px;
+                font-size: 15px;
+                line-height: 1.7;
+            }
+
+            #preview-output h1 {
+                font-size: 1.6em;
+            }
+
+            #preview-output h2 {
+                font-size: 1.35em;
+            }
+
+            #preview-output h3 {
+                font-size: 1.15em;
+            }
+
+            #preview-output pre {
+                padding: 10px;
+                font-size: 13px;
+                overflow-x: auto;
+            }
+
+            #preview-output code {
+                font-size: 0.85em;
+            }
+
+            #preview-output table {
+                font-size: 14px;
+            }
+
+            #preview-output th,
+            #preview-output td {
+                padding: 6px 8px;
+            }
+
             .editor-container.hidden,
             .preview-container.hidden {
                 display: none !important;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            .line-number-error-tooltip {
+                max-width: 250px;
+                min-width: 150px;
+                font-size: 0.7rem;
+            }
+
+            input[type="text"],
+            select {
+                font-size: 0.8rem;
+            }
+
+            #watermark-controls input,
+            #watermark-controls select {
+                padding: 6px;
+                font-size: 0.8rem;
             }
         }
 
@@ -1754,6 +2025,7 @@
                 <option value="style-dark">Dark</option>
                 <option value="style-colorful">Colorful</option>
                 <option value="style-professional">Professional</option>
+                <option value="style-sepia" data-i18n="style_sepia" selected>Sepia (护眼)</option>
             </select>
         </div>
 
@@ -1770,7 +2042,8 @@
                 <option value="'FangSong', '仿宋', serif" data-i18n="font_fangsong">仿宋 (FangSong)</option>
                 <option value="'PingFang SC', '苹方', sans-serif" data-i18n="font_pingfang">苹方 (PingFang SC)</option>
                 <option value="'Noto Sans SC', '思源黑体', sans-serif" data-i18n="font_noto">思源黑体 (Noto Sans SC)</option>
-                <option value="'Noto Serif SC', '思源宋体', serif" data-i18n="font_noto_serif">思源宋体 (Noto Serif SC)</option>
+                <option value="'Noto Serif SC', '思源宋体', serif" data-i18n="font_noto_serif" selected>思源宋体 (Noto Serif SC)
+                </option>
                 <option value="'WenQuanYi Micro Hei', '文泉驿微米黑', sans-serif" data-i18n="font_wenquanyi">文泉驿微米黑
                     (WenQuanYi)</option>
                 <option value="'STHeiti', '华文黑体', sans-serif" data-i18n="font_stheiti">华文黑体 (STHeiti)</option>
@@ -2968,6 +3241,7 @@ Click the button to generate a ToC!
             if (workspace.className.includes('style-dark')) return 'dark';
             if (workspace.className.includes('style-colorful')) return 'colorful';
             if (workspace.className.includes('style-professional')) return 'professional';
+            if (workspace.className.includes('style-sepia')) return 'sepia';
             return 'default';
         }
 
@@ -4418,7 +4692,8 @@ ${output.innerHTML}
                         body .style-business #preview-output,
                         body .style-professional #preview-output,
                         body .style-hacker #preview-output,
-                        body .style-colorful #preview-output {
+                        body .style-colorful #preview-output,
+                        body .style-sepia #preview-output {
                             display: block !important;
                             width: calc(100% + 40mm) !important;
                             max-width: none !important;

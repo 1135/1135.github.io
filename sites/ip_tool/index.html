@@ -221,6 +221,123 @@
             border-top: 1px solid var(--border-color) !important;
             z-index: 10;
         }
+
+        /* Mobile Responsive Optimization */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 10px;
+            }
+
+            .input-section {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .input-section h1 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .ip-input {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+                margin-bottom: 15px;
+            }
+
+            .input-section p {
+                font-size: 0.8rem;
+                margin-bottom: 12px;
+            }
+
+            .examples {
+                gap: 8px;
+            }
+
+            .btn-sm {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+            }
+
+            .info-row {
+                font-size: 0.8rem;
+                margin-bottom: 8px;
+            }
+
+            .binary-row {
+                font-size: 0.75rem;
+                margin-top: 12px;
+            }
+
+            .tag {
+                font-size: 0.75rem;
+                padding: 2px 6px;
+            }
+
+            .ssrf-section {
+                margin-top: 30px;
+                padding-top: 30px;
+            }
+
+            .output-block {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .output-block h3 {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+            .hint-section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .hint-section strong {
+                font-size: 0.85rem;
+            }
+
+            .hint-code {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .copy-btn {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+
+            #ssrf-ip-input,
+            #ssrf-port-input,
+            #ssrf-path-input {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            .input-section > div {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .input-section > div > div {
+                min-width: 100%;
+                flex: 1 1 100%;
+            }
+        }
     </style>
 </head>
 

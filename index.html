@@ -101,6 +101,64 @@
             background: var(--surface-color) !important;
             border-top: 1px solid var(--border-color) !important;
         }
+
+        /* Mobile Responsive Optimization */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 2rem 1rem;
+            }
+
+            .category-title {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+                margin-bottom: 2.5rem;
+            }
+
+            .tool-card {
+                padding: 1.25rem;
+            }
+
+            .tool-card h3 {
+                font-size: 1.1rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .tool-card p {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+                line-height: 1.5;
+            }
+
+            .tool-link {
+                font-size: 0.9rem;
+            }
+
+            .welcome-toast {
+                top: 70px;
+                right: 10px;
+                left: 10px;
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                text-align: center;
+            }
+
+            .hint-lightbulb {
+                width: 40px;
+                height: 40px;
+            }
+
+            #back-to-top {
+                width: 45px;
+                height: 45px;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
     </style>
 </head>
 

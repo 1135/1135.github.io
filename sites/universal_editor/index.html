@@ -11,8 +11,7 @@
         body {
             display: grid;
             grid-template-rows: auto 1fr auto;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
             margin: 0;
             padding: 0;
         }
@@ -211,6 +210,104 @@
         @media (max-width: 1024px) {
             .editor-wrapper {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile Responsive Optimization */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px 10px 0 10px;
+            }
+
+            .tool-header {
+                padding: 20px 15px;
+                margin-bottom: 8px;
+            }
+
+            .tool-header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+
+            .tool-header p {
+                font-size: 0.8rem;
+            }
+
+            .controls {
+                padding: 8px 12px;
+                margin-bottom: 12px;
+                gap: 10px;
+            }
+
+            .control-group {
+                gap: 8px;
+                font-size: 0.85rem;
+            }
+
+            .control-group select,
+            .control-group input {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+
+            .control-group .btn {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+
+            .control-group label {
+                font-size: 0.8rem;
+            }
+
+            #dedup-stats {
+                font-size: 0.75rem;
+            }
+
+            .editor-wrapper {
+                gap: 12px;
+                margin-bottom: 15px;
+            }
+
+            .editor-header,
+            .stats-header {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+
+            .format-indicator {
+                padding: 3px 10px;
+                font-size: 0.75rem;
+            }
+
+            #editor {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .stats-content {
+                padding: 15px;
+            }
+
+            .stat-item {
+                padding: 8px 0;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .stat-value {
+                font-size: 0.9rem;
+            }
+
+            .validation-messages {
+                padding: 12px 15px;
+                max-height: 120px;
+            }
+
+            .validation-message {
+                padding: 6px;
+                font-size: 0.8rem;
             }
         }
     </style>

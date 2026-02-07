@@ -229,6 +229,70 @@
             background: var(--surface-color) !important;
             border-top: 1px solid var(--border-color) !important;
         }
+
+        /* Mobile Responsive Optimization */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .tool-header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .tool-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .tool-header p {
+                font-size: 0.9rem;
+            }
+
+            .controls {
+                padding: 12px 10px;
+                gap: 10px;
+            }
+
+            .control-group {
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .control-label {
+                font-size: 0.85rem;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .panel-header {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+
+            .input-area {
+                min-height: 200px;
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .diff-output {
+                font-size: 13px;
+            }
+
+            .diff-line {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .btn {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 
